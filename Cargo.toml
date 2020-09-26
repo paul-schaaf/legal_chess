@@ -3,6 +3,9 @@ name = "legal_chess"
 version = "0.1.0"
 authors = ["Paul Schaaf <paul.schaaf@maibornwolff.de>"]
 edition = "2018"
+repository = "https://github.com/paul-schaaf/legal_chess"
+license = "MIT"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
