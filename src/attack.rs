@@ -1,10 +1,10 @@
 use crate::color;
 use crate::pieces::{piece};
 
-fn get_attacked_squares<'a>(
-    board: &'a Vec<Vec<Option<Box<dyn piece::Piece>>>>,
+fn get_attacked_squares(
+    board: Vec<Vec<Option<Box<dyn piece::Piece>>>>,
     color: color::Color,
-) -> Vec<Vec<Option<Vec<&'a Box<dyn piece::Piece<'a>>>>>> {
+) -> Vec<Vec<Option<Vec<Box<dyn piece::Piece>>>>> {
     if board.len() != 8 || board.iter().any(|x| x.len() != 8) { 
         panic!("Invalid board dimensions");
     }
@@ -21,12 +21,12 @@ mod tests {
     #[test]
     #[should_panic(expected = "Invalid board dimensions")]
     fn invalid_file_size() {
-        get_attacked_squares(&vec!(), color::Color::BLACK);
+        get_attacked_squares(vec!(), color::Color::BLACK);
     }
 
     #[test]
     #[should_panic(expected = "Invalid board dimensions")]
     fn invalid_rank_size() {
-        get_attacked_squares(&vec!(vec!(),vec!(),vec!(),vec!(),vec!(),vec!(),vec!()), color::Color::BLACK);
+        get_attacked_squares(vec!(vec!(),vec!(),vec!(),vec!(),vec!(),vec!(),vec!()), color::Color::BLACK);
     }
 }
