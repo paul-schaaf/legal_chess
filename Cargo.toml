@@ -1,11 +1,13 @@
 [package]
 name = "legal_chess"
 version = "0.1.0"
-authors = ["Paul Schaaf <paul.schaaf@maibornwolff.de>"]
+authors = ["Paul Schaaf"]
 edition = "2018"
 repository = "https://github.com/paul-schaaf/legal_chess"
 license = "MIT"
 readme = "README.md"
+description = "library that generates legal chess moves given a board"
+homepage = "https://github.com/paul-schaaf/legal_chess"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
