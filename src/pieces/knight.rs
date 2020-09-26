@@ -59,4 +59,71 @@ mod tests {
         assert_eq!(&position::Position(2, 2), k.position());
         assert_eq!(&color::Color::WHITE, k.color());
     }
+
+    #[test]
+    fn all_positions(){
+        let k = Knight{
+            position: position::Position(6,6),
+            color: color::Color::WHITE,
+        };
+
+        let expected = vec![
+            position::Position(5, 4),
+            position::Position(4, 5),
+            position::Position(5, 8),
+            position::Position(8, 5),
+            position::Position(4, 7),
+            position::Position(7 ,4),
+            position::Position(8, 7),
+            position::Position(7 ,8),
+        ];
+        let actual = k.attacks(&vec![]);
+
+        for square in expected {
+            assert!(actual.contains(&square));
+        }
+    }
+
+
+    #[test]
+    fn in_file_g(){
+        let k = Knight{
+            position: position::Position(7,6),
+            color: color::Color::WHITE,
+        };
+
+        let expected = vec![
+            position::Position(6, 4),
+            position::Position(5, 5),
+            position::Position(6, 8),
+            position::Position(5, 7),
+            position::Position(8 ,4),
+            position::Position(8 ,8),
+        ];
+        let actual = k.attacks(&vec![]);
+
+        for square in expected {
+            assert!(actual.contains(&square));
+        }
+    }
+
+    #[test]
+    fn in_file_h(){
+        let k = Knight{
+            position: position::Position(8,6),
+            color: color::Color::WHITE,
+        };
+
+        let expected = vec![
+            position::Position(7, 4),
+            position::Position(6, 5),
+            position::Position(7, 8),
+            position::Position(6, 7),
+        ];
+        let actual = k.attacks(&vec![]);
+
+        for square in expected {
+            assert!(actual.contains(&square));
+        }
+    }
 }
