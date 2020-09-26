@@ -22,10 +22,8 @@ pub fn get_attacked_squares(
         file.iter().for_each(|square| match square {
             None => (),
             Some(piece) => {
-                println!("Found a piece!");
                 let attacked_positions = piece.attacks(board);
                 attacked_positions.iter().for_each(|position| {
-                    println!("Found an attacked position");
                     let square = attacked_board[position.0 as usize][position.1 as usize].take();
                     let new_square = match square {
                         None => Some(vec![piece]),
