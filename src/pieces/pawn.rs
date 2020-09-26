@@ -2,12 +2,18 @@ use super::piece;
 use super::position;
 use crate::color;
 
+#[derive(Debug, PartialEq)]
 pub struct Pawn {
+    pub id: u8,
     pub position: position::Position,
     pub color: color::Color,
 }
 
 impl piece::Piece for Pawn {
+    fn get_id(&self) -> u8 {
+        return self.id;
+    }
+
     fn attacks(&self, _board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>) -> Vec<position::Position> {
         let position = self.position();
         if *self.color() == color::Color::WHITE {
@@ -60,6 +66,7 @@ mod tests {
     #[test]
     fn attrs() {
         let p = Pawn {
+            id: 1,
             position: position::Position(2, 2),
             color: color::Color::WHITE,
         };
@@ -72,6 +79,7 @@ mod tests {
     fn white_pawn_attacks_middle() {
         let expected = vec![position::Position(6, 3), position::Position(4, 3)];
         let p = Pawn {
+            id: 1,
             position: position::Position(5, 2),
             color: color::Color::WHITE,
         };
@@ -87,6 +95,7 @@ mod tests {
     fn white_pawn_attacks_file_one() {
         let expected = vec![position::Position(2, 3)];
         let p = Pawn {
+            id: 1,
             position: position::Position(1, 2),
             color: color::Color::WHITE,
         };
@@ -97,6 +106,7 @@ mod tests {
     fn white_pawn_attacks_file_eight() {
         let expected = vec![position::Position(7, 3)];
         let p = Pawn {
+            id: 1,
             position: position::Position(8, 2),
             color: color::Color::WHITE,
         };
@@ -108,6 +118,7 @@ mod tests {
     fn black_pawn_attacks_middle() {
         let expected = vec![position::Position(6, 6), position::Position(4, 6)];
         let p = Pawn {
+            id: 1,
             position: position::Position(5, 7),
             color: color::Color::BLACK,
         };
@@ -123,6 +134,7 @@ mod tests {
     fn black_pawn_attacks_file_one() {
         let expected = vec![position::Position(2, 6)];
         let p = Pawn {
+            id: 1,
             position: position::Position(1, 7),
             color: color::Color::BLACK,
         };
@@ -133,6 +145,7 @@ mod tests {
     fn black_pawn_attacks_file_eight() {
         let expected = vec![position::Position(7, 6)];
         let p = Pawn {
+            id: 1,
             position: position::Position(8, 7),
             color: color::Color::BLACK,
         };

@@ -1,12 +1,18 @@
 use super::{piece,position};
 use crate::color;
 
+#[derive(Debug)]
 pub struct Knight {
+    pub id: u8,
     pub position: position::Position,
     pub color: color::Color,
 }
 
 impl piece::Piece for Knight {
+    fn get_id(&self) -> u8 {
+        return self.id;
+    }
+
     fn attacks(
         &self,
         board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>,
@@ -53,6 +59,7 @@ mod tests {
     #[test]
     fn attrs() {
         let k = Knight {
+            id: 1,
             position: position::Position(2, 2),
             color: color::Color::WHITE,
         };
@@ -63,6 +70,7 @@ mod tests {
     #[test]
     fn all_positions(){
         let k = Knight{
+            id: 1,
             position: position::Position(6,6),
             color: color::Color::WHITE,
         };
@@ -88,6 +96,7 @@ mod tests {
     #[test]
     fn in_file_g(){
         let k = Knight{
+            id: 1,
             position: position::Position(7,6),
             color: color::Color::WHITE,
         };
@@ -110,6 +119,7 @@ mod tests {
     #[test]
     fn in_file_h(){
         let k = Knight{
+            id: 1,
             position: position::Position(8,6),
             color: color::Color::WHITE,
         };
