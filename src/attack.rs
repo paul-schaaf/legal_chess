@@ -3,7 +3,7 @@ use crate::pieces::{pawn, piece, position};
 use std::collections;
 
 fn get_attacked_squares<'a>(
-    board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>,
+    board: &'a Vec<Vec<Option<Box<dyn piece::Piece>>>>,
     color: color::Color,
 ) -> Vec<Vec<Option<Vec<&'a Box<dyn piece::Piece>>>>> {
     if board.len() != 8 || board.iter().any(|x| x.len() != 8) { 
