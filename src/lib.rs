@@ -1,7 +1,7 @@
 pub mod attack;
 mod chessmove;
-mod color;
-mod pieces;
+pub mod color;
+pub mod pieces;
 
 fn legal_moves(board: [[&str; 8]; 8]) -> Vec<chessmove::ChessMove> {
     vec![chessmove::ChessMove {
