@@ -8,7 +8,10 @@ pub struct Pawn {
 }
 
 impl<'a> piece::Piece<'a> for Pawn {
-    fn attacks (&self, _board: &'a Vec<Vec<Option<Box<dyn piece::Piece>>>>) -> Vec<position::Position> {
+    fn attacks(
+        &self,
+        _board: &'a Vec<Vec<Option<Box<dyn piece::Piece>>>>,
+    ) -> Vec<position::Position> {
         let position = self.position();
         if *self.color() == color::Color::WHITE {
             if position.1 == 8 {
@@ -76,7 +79,7 @@ mod tests {
             color: color::Color::WHITE,
         };
 
-        let actual = p.attacks([[""; 8]; 8]);
+        let actual = p.attacks(&vec![]);
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -90,7 +93,7 @@ mod tests {
             position: position::Position(1, 2),
             color: color::Color::WHITE,
         };
-        assert_eq!(expected, p.attacks([[""; 8]; 8]));
+        assert_eq!(expected, p.attacks(&vec!()));
     }
 
     #[test]
@@ -100,7 +103,7 @@ mod tests {
             position: position::Position(8, 2),
             color: color::Color::WHITE,
         };
-        assert_eq!(expected, p.attacks([[""; 8]; 8]));
+        assert_eq!(expected, p.attacks(&vec!()));
     }
 
     // comparing with assert_eq is not possible because it cares about order
@@ -112,7 +115,7 @@ mod tests {
             color: color::Color::BLACK,
         };
 
-        let actual = p.attacks([[""; 8]; 8]);
+        let actual = p.attacks(&vec![]);
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -126,7 +129,7 @@ mod tests {
             position: position::Position(1, 7),
             color: color::Color::BLACK,
         };
-        assert_eq!(expected, p.attacks([[""; 8]; 8]));
+        assert_eq!(expected, p.attacks(&vec!()));
     }
 
     #[test]
@@ -136,6 +139,6 @@ mod tests {
             position: position::Position(8, 7),
             color: color::Color::BLACK,
         };
-        assert_eq!(expected, p.attacks([[""; 8]; 8]));
+        assert_eq!(expected, p.attacks(&vec!()));
     }
 }
