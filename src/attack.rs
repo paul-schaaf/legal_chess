@@ -1,6 +1,5 @@
 use crate::color;
-use crate::pieces::{pawn, piece, position};
-use std::collections;
+use crate::pieces::{piece};
 
 fn get_attacked_squares<'a>(
     board: &'a Vec<Vec<Option<Box<dyn piece::Piece>>>>,
@@ -9,6 +8,7 @@ fn get_attacked_squares<'a>(
     if board.len() != 8 || board.iter().any(|x| x.len() != 8) { 
         panic!("Invalid board dimensions");
     }
+    
 
     vec![]
 }
