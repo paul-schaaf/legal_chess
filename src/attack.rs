@@ -5,7 +5,7 @@ fn get_attacked_squares(
     board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>,
     color: color::Color,
 ) -> Vec<Vec<Option<Vec<&Box<dyn piece::Piece>>>>> {
-    if board.len() != 8 || board.iter().any(|x| x.len() != 8) { 
+    if board.len() != 8 || board.iter().any(|x| x.len() != 8) {
         panic!("Invalid board dimensions");
     }
 
@@ -28,11 +28,14 @@ fn get_attacked_squares(
                     println!("Found an attacked position");
                     let square = attacked_board[position.0 as usize][position.1 as usize].take();
                     let new_square = match square {
-                        None => Some(vec!(piece)),
-                        Some(mut v) => {v.push(piece); Some(v)}
+                        None => Some(vec![piece]),
+                        Some(mut v) => {
+                            v.push(piece);
+                            Some(v)
+                        }
                     };
                     attacked_board[position.0 as usize - 1][position.1 as usize - 1] = new_square;
-                })  
+                })
             }
         })
     });
@@ -42,8 +45,8 @@ fn get_attacked_squares(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::pieces::{pawn, position};
+    use super::*;
 
     #[test]
     #[should_panic(expected = "Invalid board dimensions")]
@@ -90,8 +93,8 @@ mod tests {
         let pawn_id = 1;
         let pawn = pawn::Pawn {
             id: pawn_id,
-            position: position::Position(1,2),
-            color: color::Color::WHITE
+            position: position::Position(1, 2),
+            color: color::Color::WHITE,
         };
 
         empty_board[0][1] = Some(Box::new(pawn));
@@ -99,7 +102,7 @@ mod tests {
         let attacked_board = get_attacked_squares(&empty_board, color::Color::BLACK);
         assert_eq!(8, attacked_board.len());
         assert!(attacked_board.iter().all(|file| file.len() == 8));
-        
+
         let actual = match &attacked_board[1][2] {
             None => panic!(),
             Some(v) => {
@@ -109,6 +112,5 @@ mod tests {
         };
 
         assert_eq!(pawn_id, actual.get_id());
-        
     }
 }

@@ -1,4 +1,4 @@
-use super::{piece,position};
+use super::{piece, position};
 use crate::color;
 
 #[derive(Debug)]
@@ -13,18 +13,23 @@ impl piece::Piece for Knight {
         return self.id;
     }
 
-    fn attacks(
-        &self,
-        board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>,
-    ) -> Vec<position::Position> {
-
-        let positions: [[i8;2];8] = [[1,2],[1,-2],[-1,2],[-1,-2],[2,1],[2, -1],[-2,1],[-2,-1]];
+    fn attacks(&self, _board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>) -> Vec<position::Position> {
+        let positions: [[i8; 2]; 8] = [
+            [1, 2],
+            [1, -2],
+            [-1, 2],
+            [-1, -2],
+            [2, 1],
+            [2, -1],
+            [-2, 1],
+            [-2, -1],
+        ];
 
         let mut attacks = Vec::new();
 
         for i in 0..8 {
-            let file = positions[i][0]+ self.position.0 as i8;
-            let rank =  positions[i][1] + self.position.1 as i8;
+            let file = positions[i][0] + self.position.0 as i8;
+            let rank = positions[i][1] + self.position.1 as i8;
 
             if file >= 1 && file <= 8 && rank >= 1 && rank <= 8 {
                 attacks.push(position::Position(file as u8, rank as u8))
@@ -32,7 +37,6 @@ impl piece::Piece for Knight {
         }
 
         attacks
-
     }
 
     fn position(&self) -> &position::Position {
@@ -41,13 +45,6 @@ impl piece::Piece for Knight {
 
     fn color(&self) -> &color::Color {
         &self.color
-    }
-
-}
-
-impl Knight{
-    fn is_valid_position(&self, pos: &position::Position) -> bool{
-        pos.0 >= 1 && pos.0 <= 8 && pos.1 >= 1 && pos.1 <= 8
     }
 }
 
@@ -68,10 +65,10 @@ mod tests {
     }
 
     #[test]
-    fn all_positions(){
-        let k = Knight{
+    fn all_positions() {
+        let k = Knight {
             id: 1,
-            position: position::Position(6,6),
+            position: position::Position(6, 6),
             color: color::Color::WHITE,
         };
 
@@ -81,9 +78,9 @@ mod tests {
             position::Position(5, 8),
             position::Position(8, 5),
             position::Position(4, 7),
-            position::Position(7 ,4),
+            position::Position(7, 4),
             position::Position(8, 7),
-            position::Position(7 ,8),
+            position::Position(7, 8),
         ];
         let actual = k.attacks(&vec![]);
 
@@ -92,12 +89,11 @@ mod tests {
         }
     }
 
-
     #[test]
-    fn in_file_g(){
-        let k = Knight{
+    fn in_file_g() {
+        let k = Knight {
             id: 1,
-            position: position::Position(7,6),
+            position: position::Position(7, 6),
             color: color::Color::WHITE,
         };
 
@@ -106,8 +102,8 @@ mod tests {
             position::Position(5, 5),
             position::Position(6, 8),
             position::Position(5, 7),
-            position::Position(8 ,4),
-            position::Position(8 ,8),
+            position::Position(8, 4),
+            position::Position(8, 8),
         ];
         let actual = k.attacks(&vec![]);
 
@@ -117,10 +113,10 @@ mod tests {
     }
 
     #[test]
-    fn in_file_h(){
-        let k = Knight{
+    fn in_file_h() {
+        let k = Knight {
             id: 1,
-            position: position::Position(8,6),
+            position: position::Position(8, 6),
             color: color::Color::WHITE,
         };
 
