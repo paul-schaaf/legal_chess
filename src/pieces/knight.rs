@@ -1,5 +1,5 @@
 use super::{piece, position};
-use crate::color;
+use crate::{board, color};
 
 #[derive(Debug)]
 pub struct Knight {
@@ -13,7 +13,7 @@ impl piece::Piece for Knight {
         return self.id;
     }
 
-    fn attacks(&self, _board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>) -> Vec<position::Position> {
+    fn attacks(&self, _board: &board::Board) -> Vec<position::Position> {
         let positions: [[i8; 2]; 8] = [
             [1, 2],
             [1, -2],
@@ -82,7 +82,7 @@ mod tests {
             position::Position(8, 7),
             position::Position(7, 8),
         ];
-        let actual = k.attacks(&vec![]);
+        let actual = k.attacks(&board::Board::empty());
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -105,7 +105,7 @@ mod tests {
             position::Position(8, 4),
             position::Position(8, 8),
         ];
-        let actual = k.attacks(&vec![]);
+        let actual = k.attacks(&board::Board::empty());
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -126,7 +126,7 @@ mod tests {
             position::Position(7, 8),
             position::Position(6, 7),
         ];
-        let actual = k.attacks(&vec![]);
+        let actual = k.attacks(&board::Board::empty());
 
         for square in expected {
             assert!(actual.contains(&square));

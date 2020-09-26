@@ -1,14 +1,11 @@
+use crate::board;
 use crate::color;
 use crate::pieces::piece;
 
 pub fn get_attacked_squares(
-    board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>,
+    board: &board::Board,
     color: color::Color,
 ) -> Vec<Vec<Option<Vec<&Box<dyn piece::Piece>>>>> {
-    if board.len() != 8 || board.iter().any(|x| x.len() != 8) {
-        panic!("Invalid board dimensions");
-    }
-
     let mut attacked_board: Vec<Vec<Option<Vec<&Box<dyn piece::Piece>>>>> = vec![];
 
     for i in 0..8 {
@@ -47,55 +44,19 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic(expected = "Invalid board dimensions")]
-    fn invalid_input_board_file_size() {
-        get_attacked_squares(&vec![], color::Color::BLACK);
-    }
-
-    #[test]
-    #[should_panic(expected = "Invalid board dimensions")]
-    fn invalid_input_board_rank_size() {
-        get_attacked_squares(
-            &vec![vec![], vec![], vec![], vec![], vec![], vec![], vec![]],
-            color::Color::BLACK,
-        );
-    }
-
-    #[test]
-    fn valid_attacked_board_size() {
-        let mut empty_board: Vec<Vec<Option<Box<dyn piece::Piece>>>> = vec![];
-        for _ in 0..8 {
-            let mut empty_file: Vec<Option<Box<dyn piece::Piece>>> = vec![];
-            for _ in 0..8 {
-                empty_file.push(None);
-            }
-            empty_board.push(empty_file);
-        }
-
-        let attacked_board = get_attacked_squares(&empty_board, color::Color::BLACK);
-        assert_eq!(8, attacked_board.len());
-        assert!(attacked_board.iter().all(|file| file.len() == 8));
-    }
-
-    #[test]
     fn correct_attacked_board() {
-        let mut empty_board: Vec<Vec<Option<Box<dyn piece::Piece>>>> = vec![];
-        for _ in 0..8 {
-            let mut empty_file: Vec<Option<Box<dyn piece::Piece>>> = vec![];
-            for _ in 0..8 {
-                empty_file.push(None);
-            }
-            empty_board.push(empty_file);
-        }
+        let mut empty_board = board::Board::empty();
+
+        let position = position::Position(1, 2);
 
         let pawn_id = 1;
         let pawn = pawn::Pawn {
             id: pawn_id,
-            position: position::Position(1, 2),
+            position,
             color: color::Color::WHITE,
         };
 
-        empty_board[0][1] = Some(Box::new(pawn));
+        empty_board.set_square(Some(Box::new(pawn)), position);
 
         let attacked_board = get_attacked_squares(&empty_board, color::Color::BLACK);
         assert_eq!(8, attacked_board.len());

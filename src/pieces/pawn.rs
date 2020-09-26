@@ -1,6 +1,6 @@
 use super::piece;
 use super::position;
-use crate::color;
+use crate::{board, color};
 
 #[derive(Debug, PartialEq)]
 pub struct Pawn {
@@ -14,7 +14,7 @@ impl piece::Piece for Pawn {
         return self.id;
     }
 
-    fn attacks(&self, _board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>) -> Vec<position::Position> {
+    fn attacks(&self, _board: &board::Board) -> Vec<position::Position> {
         let position = self.position();
         if *self.color() == color::Color::WHITE {
             if position.1 == 8 {
@@ -84,7 +84,7 @@ mod tests {
             color: color::Color::WHITE,
         };
 
-        let actual = p.attacks(&vec![]);
+        let actual = p.attacks(&board::Board::empty());
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -99,7 +99,7 @@ mod tests {
             position: position::Position(1, 2),
             color: color::Color::WHITE,
         };
-        assert_eq!(expected, p.attacks(&vec!()));
+        assert_eq!(expected, p.attacks(&board::Board::empty()));
     }
 
     #[test]
@@ -110,7 +110,7 @@ mod tests {
             position: position::Position(8, 2),
             color: color::Color::WHITE,
         };
-        assert_eq!(expected, p.attacks(&vec!()));
+        assert_eq!(expected, p.attacks(&board::Board::empty()));
     }
 
     // comparing with assert_eq is not possible because it cares about order
@@ -123,7 +123,7 @@ mod tests {
             color: color::Color::BLACK,
         };
 
-        let actual = p.attacks(&vec![]);
+        let actual = p.attacks(&board::Board::empty());
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -138,7 +138,7 @@ mod tests {
             position: position::Position(1, 7),
             color: color::Color::BLACK,
         };
-        assert_eq!(expected, p.attacks(&vec!()));
+        assert_eq!(expected, p.attacks(&board::Board::empty()));
     }
 
     #[test]
@@ -149,6 +149,6 @@ mod tests {
             position: position::Position(8, 7),
             color: color::Color::BLACK,
         };
-        assert_eq!(expected, p.attacks(&vec!()));
+        assert_eq!(expected, p.attacks(&board::Board::empty()));
     }
 }

@@ -1,11 +1,11 @@
 use super::{piece, position};
-use crate::color;
+use crate::{board, color};
 use std::fmt;
 
 pub trait Piece: fmt::Debug {
     fn position(&self) -> &position::Position;
 
-    fn attacks(&self, board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>) -> Vec<position::Position>;
+    fn attacks(&self, board: &board::Board) -> Vec<position::Position>;
 
     fn color(&self) -> &color::Color;
 
