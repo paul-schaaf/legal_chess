@@ -5,7 +5,7 @@ use std::collections;
 fn get_attacked_squares<'a>(
     board: &'a Vec<Vec<Option<Box<dyn piece::Piece>>>>,
     color: color::Color,
-) -> Vec<Vec<Option<Vec<&'a Box<dyn piece::Piece>>>>> {
+) -> Vec<Vec<Option<Vec<&'a Box<dyn piece::Piece<'a>>>>>> {
     if board.len() != 8 || board.iter().any(|x| x.len() != 8) { 
         panic!("Invalid board dimensions");
     }
