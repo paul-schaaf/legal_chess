@@ -1,7 +1,7 @@
 use crate::color;
 use crate::pieces::piece;
 
-fn get_attacked_squares(
+pub fn get_attacked_squares(
     board: &Vec<Vec<Option<Box<dyn piece::Piece>>>>,
     color: color::Color,
 ) -> Vec<Vec<Option<Vec<&Box<dyn piece::Piece>>>>> {
