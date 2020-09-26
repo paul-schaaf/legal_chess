@@ -1,4 +1,4 @@
-mod attack;
+pub mod attack;
 mod chessmove;
 mod color;
 mod pieces;
