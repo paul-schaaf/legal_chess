@@ -1,10 +1,10 @@
-use super::position;
+use super::{position, piece};
 use crate::color;
 
-pub trait Piece {
+pub trait Piece<'a > {
     fn position(&self) -> &position::Position;
 
-    fn attacks(&self, board: [[&str; 8]; 8]) -> Vec<position::Position>;
+    fn attacks(&self, board: &'a Vec<Vec<Option<Box<dyn piece::Piece>>>>) -> Vec<position::Position>;
 
     fn color(&self) -> &color::Color;
 }

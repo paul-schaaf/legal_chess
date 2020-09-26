@@ -7,8 +7,8 @@ pub struct Pawn {
     pub color: color::Color,
 }
 
-impl piece::Piece for Pawn {
-    fn attacks(&self, _board: [[&str; 8]; 8]) -> Vec<position::Position> {
+impl<'a> piece::Piece<'a> for Pawn {
+    fn attacks (&self, _board: &'a Vec<Vec<Option<Box<dyn piece::Piece>>>>) -> Vec<position::Position> {
         let position = self.position();
         if *self.color() == color::Color::WHITE {
             if position.1 == 8 {
