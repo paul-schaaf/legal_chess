@@ -1,4 +1,4 @@
-use super::{piece, position};
+use super::{piece, position, sliding_attacks};
 use crate::{board, color};
 
 #[derive(Debug)]
@@ -22,37 +22,7 @@ impl piece::Piece for Rook {
     }
 
     fn attacks(&self, board: &board::Board) -> Vec<position::Position> {
-        let moves_and_bounds = [((1, 0), 8), ((-1, 0), 1), ((0, 1), 8), ((0, -1), 1)];
-
-        let mut attacked_positions = vec![];
-
-        for entry in &moves_and_bounds {
-            let mut current_file = self.position.0 as i8;
-            let mut current_rank = self.position.1 as i8;
-            if (entry.0).1 == 0 {
-                while current_file != (entry.1) {
-                    current_file += (entry.0).0;
-                    let attacked_position =
-                        position::Position(current_file as u8, current_rank as u8);
-                    attacked_positions.push(attacked_position);
-                    if let Some(_) = board.get_square(attacked_position) {
-                        break;
-                    }
-                }
-            } else {
-                while current_rank != (entry.1) {
-                    current_rank += (entry.0).1;
-                    let attacked_position =
-                        position::Position(current_file as u8, current_rank as u8);
-                    attacked_positions.push(attacked_position);
-                    if let Some(_) = board.get_square(attacked_position) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        attacked_positions
+        sliding_attacks::straight_attacks(self.position, board)
     }
 }
 
