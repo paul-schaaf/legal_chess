@@ -10,4 +10,16 @@ pub trait Piece: fmt::Debug {
     fn color(&self) -> &color::Color;
 
     fn get_id(&self) -> u8;
+
+    fn piece(&self) -> PieceEnum;
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum PieceEnum {
+    PAWN,
+    ROOK,
+    BISHOP,
+    KNIGHT,
+    QUEEN,
+    KING,
 }

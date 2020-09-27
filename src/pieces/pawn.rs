@@ -14,6 +14,10 @@ impl piece::Piece for Pawn {
         return self.id;
     }
 
+    fn piece(&self) -> piece::PieceEnum {
+        piece::PieceEnum::PAWN
+    }
+
     fn attacks(&self, _board: &board::Board) -> Vec<position::Position> {
         let position = self.position();
         if *self.color() == color::Color::WHITE {

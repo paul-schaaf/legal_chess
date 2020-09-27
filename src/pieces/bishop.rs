@@ -24,6 +24,10 @@ impl piece::Piece for Bishop {
     fn attacks(&self, board: &board::Board) -> Vec<position::Position> {
         sliding_attacks::diagonal_attacks(self.position, board)
     }
+
+    fn piece(&self) -> piece::PieceEnum {
+        piece::PieceEnum::BISHOP
+    }
 }
 
 #[cfg(test)]

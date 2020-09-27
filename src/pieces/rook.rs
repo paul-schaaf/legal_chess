@@ -3,9 +3,9 @@ use crate::{board, color};
 
 #[derive(Debug)]
 pub struct Rook {
-    id: u8,
-    color: color::Color,
-    position: position::Position,
+    pub id: u8,
+    pub color: color::Color,
+    pub position: position::Position,
 }
 
 impl piece::Piece for Rook {
@@ -19,6 +19,10 @@ impl piece::Piece for Rook {
 
     fn position(&self) -> &position::Position {
         &self.position
+    }
+
+    fn piece(&self) -> piece::PieceEnum {
+        piece::PieceEnum::ROOK
     }
 
     fn attacks(&self, board: &board::Board) -> Vec<position::Position> {

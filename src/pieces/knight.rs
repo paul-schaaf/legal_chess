@@ -13,6 +13,10 @@ impl piece::Piece for Knight {
         return self.id;
     }
 
+    fn piece(&self) -> piece::PieceEnum {
+        piece::PieceEnum::KNIGHT
+    }
+
     fn attacks(&self, _board: &board::Board) -> Vec<position::Position> {
         let positions: [[i8; 2]; 8] = [
             [1, 2],
