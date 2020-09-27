@@ -81,6 +81,7 @@ mod tests {
         }
     }
 
+    #[test]
     fn king_middle() {
         let king = King {
             id: 1,
