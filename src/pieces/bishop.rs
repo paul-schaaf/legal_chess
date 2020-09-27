@@ -51,27 +51,27 @@ impl piece::Piece for Bishop {
 
 #[cfg(test)]
 mod tests {
+    use super::super::{knight, pawn};
     use super::*;
-    use super::super::pawn;
     use std::iter;
 
     #[test]
     fn bishop_bottom_left_empty_board() {
         let mut empty_board = board::Board::empty();
 
-        let position = position::Position(1,1);
+        let position = position::Position(1, 1);
 
         let bishop = Bishop {
             id: 1,
             color: color::Color::WHITE,
-            position
+            position,
         };
 
         empty_board.set_square(Some(Box::new(bishop)), position);
 
         let bishop = match empty_board.get_square(position) {
             None => panic!(),
-            Some(b) => b
+            Some(b) => b,
         };
 
         let attacked_positions = bishop.attacks(&empty_board);
@@ -84,7 +84,8 @@ mod tests {
             } else {
                 None
             }
-        }).collect::<Vec<_>>();
+        })
+        .collect::<Vec<_>>();
         assert_eq!(expected_attacked_positions, attacked_positions);
     }
 
@@ -92,28 +93,28 @@ mod tests {
     fn bishop_bottom_left_middle_obstacle() {
         let mut empty_board = board::Board::empty();
 
-        let bishop_position = position::Position(1,1);
+        let bishop_position = position::Position(1, 1);
 
         let bishop = Bishop {
             id: 1,
             color: color::Color::WHITE,
-            position: bishop_position
+            position: bishop_position,
         };
 
-        let pawn_position = position::Position(5,5);
+        let pawn_position = position::Position(5, 5);
 
         let pawn = pawn::Pawn {
             id: 1,
             color: color::Color::WHITE,
-            position: pawn_position
+            position: pawn_position,
         };
 
         empty_board.set_square(Some(Box::new(bishop)), bishop_position);
-        empty_board.set_square(Some(Box::new(pawn)), position::Position(5,5));
+        empty_board.set_square(Some(Box::new(pawn)), pawn_position);
 
         let bishop = match empty_board.get_square(bishop_position) {
             None => panic!(),
-            Some(b) => b
+            Some(b) => b,
         };
 
         let attacked_positions = bishop.attacks(&empty_board);
@@ -126,7 +127,56 @@ mod tests {
             } else {
                 None
             }
-        }).collect::<Vec<_>>();
+        })
+        .collect::<Vec<_>>();
+        assert_eq!(expected_attacked_positions, attacked_positions);
+    }
+
+    #[test]
+    fn bishop_top_middle_with_obstacles() {
+        let mut empty_board = board::Board::empty();
+
+        let bishop_position = position::Position(4, 8);
+
+        let bishop = Bishop {
+            id: 1,
+            color: color::Color::WHITE,
+            position: bishop_position,
+        };
+
+        let knight_position = position::Position(2, 6);
+
+        let knight = knight::Knight {
+            id: 2,
+            color: color::Color::WHITE,
+            position: knight_position,
+        };
+
+        let pawn_position = position::Position(7, 5);
+
+        let pawn = pawn::Pawn {
+            id: 3,
+            color: color::Color::BLACK,
+            position: pawn_position,
+        };
+
+        empty_board.set_square(Some(Box::new(bishop)), bishop_position);
+        empty_board.set_square(Some(Box::new(knight)), knight_position);
+        empty_board.set_square(Some(Box::new(pawn)), pawn_position);
+
+        let bishop = match empty_board.get_square(bishop_position) {
+            None => panic!(),
+            Some(b) => b,
+        };
+
+        let attacked_positions = bishop.attacks(&empty_board);
+        let mut expected_attacked_positions = vec![];
+        expected_attacked_positions.push(position::Position(5, 7));
+        expected_attacked_positions.push(position::Position(6, 6));
+        expected_attacked_positions.push(position::Position(7, 5));
+        expected_attacked_positions.push(position::Position(3, 7));
+        expected_attacked_positions.push(position::Position(2, 6));
+
         assert_eq!(expected_attacked_positions, attacked_positions);
     }
 }
