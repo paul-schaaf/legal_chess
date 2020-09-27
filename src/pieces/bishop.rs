@@ -86,6 +86,7 @@ mod tests {
             }
         })
         .collect::<Vec<_>>();
+
         assert_eq!(expected_attacked_positions, attacked_positions);
     }
 
