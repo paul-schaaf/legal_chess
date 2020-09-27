@@ -19,18 +19,22 @@ pub fn get_attacked_squares(
         file.iter().for_each(|square| match square {
             None => (),
             Some(piece) => {
-                let attacked_positions = piece.attacks(board);
-                attacked_positions.iter().for_each(|position| {
-                    let square = attacked_board[position.0 as usize][position.1 as usize].take();
-                    let new_square = match square {
-                        None => Some(vec![piece]),
-                        Some(mut v) => {
-                            v.push(piece);
-                            Some(v)
-                        }
-                    };
-                    attacked_board[position.0 as usize - 1][position.1 as usize - 1] = new_square;
-                })
+                if *piece.color() == color {
+                    let attacked_positions = piece.attacks(board);
+                    attacked_positions.iter().for_each(|position| {
+                        let square =
+                            attacked_board[position.0 as usize][position.1 as usize].take();
+                        let new_square = match square {
+                            None => Some(vec![piece]),
+                            Some(mut v) => {
+                                v.push(piece);
+                                Some(v)
+                            }
+                        };
+                        attacked_board[position.0 as usize - 1][position.1 as usize - 1] =
+                            new_square;
+                    })
+                }
             }
         })
     });
@@ -58,12 +62,12 @@ mod tests {
 
         empty_board.set_square(Some(Box::new(pawn)), position);
 
-        let attacked_board = get_attacked_squares(&empty_board, color::Color::BLACK);
+        let attacked_board = get_attacked_squares(&empty_board, color::Color::WHITE);
         assert_eq!(8, attacked_board.len());
         assert!(attacked_board.iter().all(|file| file.len() == 8));
 
         let actual = match &attacked_board[1][2] {
-            None => panic!(),
+            None => panic!("Expected vector of attacking pieces, was: None"),
             Some(v) => {
                 assert_eq!(1, v.len());
                 v[0]
