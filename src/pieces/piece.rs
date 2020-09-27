@@ -1,4 +1,4 @@
-use super::{piece, position};
+use super::position;
 use crate::{board, color};
 use std::fmt;
 

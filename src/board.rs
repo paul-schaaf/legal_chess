@@ -22,6 +22,10 @@ impl Board {
         self.board.iter()
     }
 
+    pub fn get_square(&self, position: position::Position) -> &Option<Box<dyn piece::Piece>> {
+        &self.board[position.0 as usize - 1][position.1 as usize - 1]
+    }
+
     pub fn set_square(
         &mut self,
         square: Option<Box<dyn piece::Piece>>,
