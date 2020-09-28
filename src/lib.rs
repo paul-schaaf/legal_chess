@@ -1,5 +1,5 @@
 pub mod attack;
-mod board;
+pub mod board;
 mod chessmove;
 pub mod color;
 pub mod pieces;
