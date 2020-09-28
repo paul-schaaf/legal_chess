@@ -1,4 +1,4 @@
-use super::{piece, position};
+use super::{piece, piece::Piece, position};
 use crate::{board, color};
 
 #[derive(Debug)]
@@ -59,13 +59,99 @@ impl piece::Piece for King {
     }
 }
 
+impl King {
+    pub fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+        let position = self.position;
+        let mut positions_to_move_to = vec![];
+
+        if position.0 != 1 {
+            self.move_if_empty_or_enemy(
+                &mut positions_to_move_to,
+                board,
+                position::Position(position.0 - 1, position.1),
+            );
+            if position.1 != 8 {
+                self.move_if_empty_or_enemy(
+                    &mut positions_to_move_to,
+                    board,
+                    position::Position(position.0 - 1, position.1 + 1),
+                );
+            }
+            if position.1 != 1 {
+                self.move_if_empty_or_enemy(
+                    &mut positions_to_move_to,
+                    board,
+                    position::Position(position.0 - 1, position.1 - 1),
+                );
+            }
+        }
+
+        if position.0 != 8 {
+            self.move_if_empty_or_enemy(
+                &mut positions_to_move_to,
+                board,
+                position::Position(position.0 + 1, position.1),
+            );
+            if position.1 != 8 {
+                self.move_if_empty_or_enemy(
+                    &mut positions_to_move_to,
+                    board,
+                    position::Position(position.0 + 1, position.1 + 1),
+                );
+            }
+            if position.1 != 1 {
+                self.move_if_empty_or_enemy(
+                    &mut positions_to_move_to,
+                    board,
+                    position::Position(position.0 + 1, position.1 - 1),
+                );
+            }
+        }
+
+        if position.1 != 1 {
+            self.move_if_empty_or_enemy(
+                &mut positions_to_move_to,
+                board,
+                position::Position(position.0, position.1 - 1),
+            );
+        }
+
+        if position.1 != 8 {
+            self.move_if_empty_or_enemy(
+                &mut positions_to_move_to,
+                board,
+                position::Position(position.0, position.1 + 1),
+            );
+        }
+
+        positions_to_move_to
+    }
+
+    fn move_if_empty_or_enemy(
+        &self,
+        positions: &mut Vec<position::Position>,
+        board: &board::Board,
+        position: position::Position,
+    ) {
+        match board.get_square(position) {
+            None => positions.push(position),
+            Some(p) => {
+                if *p.color() != *self.color() {
+                    positions.push(position);
+                }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use super::super::pawn;
     use super::piece::Piece;
     use super::*;
 
     #[test]
-    fn king_bottom_left() {
+    fn king_bottom_left_attacks() {
         let king = King {
             id: 1,
             color: color::Color::WHITE,
@@ -86,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    fn king_middle() {
+    fn king_middle_attacks() {
         let king = King {
             id: 1,
             color: color::Color::WHITE,
@@ -107,6 +193,64 @@ mod tests {
         assert_eq!(8, attacked_positions.len());
         for position in expected {
             assert!(attacked_positions.contains(&position));
+        }
+    }
+
+    #[test]
+    fn king_bottom_left_moves_black_pawn() {
+        let king = King {
+            id: 1,
+            color: color::Color::WHITE,
+            position: position::Position(1, 1),
+        };
+        let mut board = board::Board::empty();
+
+        let black_pawn = pawn::Pawn {
+            id: 2,
+            color: color::Color::BLACK,
+            position: position::Position(2, 2),
+        };
+
+        board.set_square(Some(Box::new(black_pawn)), position::Position(2, 2));
+
+        let possible_moves = king.moves(&board);
+
+        let expected = vec![
+            position::Position(1, 2),
+            position::Position(2, 1),
+            position::Position(2, 2),
+        ];
+
+        assert_eq!(3, possible_moves.len());
+        for position in expected {
+            assert!(possible_moves.contains(&position));
+        }
+    }
+
+    #[test]
+    fn king_bottom_left_moves_white_pawn() {
+        let king = King {
+            id: 1,
+            color: color::Color::WHITE,
+            position: position::Position(1, 1),
+        };
+        let mut board = board::Board::empty();
+
+        let white_pawn = pawn::Pawn {
+            id: 2,
+            color: color::Color::WHITE,
+            position: position::Position(2, 2),
+        };
+
+        board.set_square(Some(Box::new(white_pawn)), position::Position(2, 2));
+
+        let possible_moves = king.moves(&board);
+
+        let expected = vec![position::Position(1, 2), position::Position(2, 1)];
+
+        assert_eq!(2, possible_moves.len());
+        for position in expected {
+            assert!(possible_moves.contains(&position));
         }
     }
 }
