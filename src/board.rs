@@ -119,6 +119,56 @@ impl Board {
     ) {
         self.board[position.0 as usize - 1][position.1 as usize - 1] = square;
     }
+
+    pub fn to_string_board(&self) -> [[&str; 8]; 8] {
+        let mut string_board = [["-"; 8]; 8];
+        for file in 0..8 {
+            for rank in 0..8 {
+                match &self.board[file][rank] {
+                    None => string_board[file][rank] = "-",
+                    Some(piece) => match (*piece.color(), piece.piece()) {
+                        (color::Color::WHITE, piece::PieceEnum::PAWN) => {
+                            string_board[file][rank] = "P"
+                        }
+                        (color::Color::BLACK, piece::PieceEnum::PAWN) => {
+                            string_board[file][rank] = "p"
+                        }
+                        (color::Color::WHITE, piece::PieceEnum::ROOK) => {
+                            string_board[file][rank] = "R"
+                        }
+                        (color::Color::BLACK, piece::PieceEnum::ROOK) => {
+                            string_board[file][rank] = "r"
+                        }
+                        (color::Color::WHITE, piece::PieceEnum::KNIGHT) => {
+                            string_board[file][rank] = "N"
+                        }
+                        (color::Color::BLACK, piece::PieceEnum::KNIGHT) => {
+                            string_board[file][rank] = "n"
+                        }
+                        (color::Color::WHITE, piece::PieceEnum::BISHOP) => {
+                            string_board[file][rank] = "B"
+                        }
+                        (color::Color::BLACK, piece::PieceEnum::BISHOP) => {
+                            string_board[file][rank] = "b"
+                        }
+                        (color::Color::WHITE, piece::PieceEnum::QUEEN) => {
+                            string_board[file][rank] = "Q"
+                        }
+                        (color::Color::BLACK, piece::PieceEnum::QUEEN) => {
+                            string_board[file][rank] = "q"
+                        }
+                        (color::Color::WHITE, piece::PieceEnum::KING) => {
+                            string_board[file][rank] = "K"
+                        }
+                        (color::Color::BLACK, piece::PieceEnum::KING) => {
+                            string_board[file][rank] = "k"
+                        }
+                    },
+                }
+            }
+        }
+        string_board
+    }
 }
 
 #[cfg(test)]
