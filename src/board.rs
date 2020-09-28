@@ -1,4 +1,4 @@
-use super::pieces::{king, pawn, piece, position, queen, rook};
+use super::pieces::{bishop, king, knight, pawn, piece, position, queen, rook};
 use crate::color;
 use std::slice;
 
@@ -69,7 +69,7 @@ impl Board {
             let knight_positions = [(2, 1), (7, 1)];
 
             for knight in &knight_positions {
-                board[knight.0 - 1][knight.1 - 1 + modifier] = Some(Box::new(rook::Rook {
+                board[knight.0 - 1][knight.1 - 1 + modifier] = Some(Box::new(knight::Knight {
                     id: id_count,
                     color,
                     position: position::Position(knight.0 as u8, knight.1 as u8 + modifier as u8),
@@ -80,7 +80,7 @@ impl Board {
             let bishop_positions = [(3, 1), (6, 1)];
 
             for bishop in &bishop_positions {
-                board[bishop.0 - 1][bishop.1 - 1 + modifier] = Some(Box::new(rook::Rook {
+                board[bishop.0 - 1][bishop.1 - 1 + modifier] = Some(Box::new(bishop::Bishop {
                     id: id_count,
                     color,
                     position: position::Position(bishop.0 as u8, bishop.1 as u8 + modifier as u8),
@@ -138,7 +138,11 @@ mod tests {
         }
 
         for k in 0..2 {
-            let (modifier, color) = if k == 0 {(0, color::Color::WHITE)} else {(5, color::Color::BLACK)};
+            let (modifier, color) = if k == 0 {
+                (0, color::Color::WHITE)
+            } else {
+                (5, color::Color::BLACK)
+            };
             for i in 0..8 {
                 match initial_board.get_square(position::Position(i + 1, 2 + modifier)) {
                     Some(piece) => {
@@ -150,5 +154,64 @@ mod tests {
             }
         }
 
+        for k in 0..2 {
+            let (modifier, color) = if k == 0 {
+                (0, color::Color::WHITE)
+            } else {
+                (7, color::Color::BLACK)
+            };
+
+            let rook_positions = [(1, 1), (8, 1)];
+
+            for rook in &rook_positions {
+                match initial_board.get_square(position::Position(rook.0, rook.1 + modifier)) {
+                    Some(piece) => {
+                        assert_eq!(piece::PieceEnum::ROOK, piece.piece());
+                        assert_eq!(color, *piece.color());
+                    }
+                    _ => panic!("Should've been a rook"),
+                }
+            }
+
+            let knight_positions = [(2, 1), (7, 1)];
+
+            for knight in &knight_positions {
+                match initial_board.get_square(position::Position(knight.0, knight.1 + modifier)) {
+                    Some(piece) => {
+                        assert_eq!(piece::PieceEnum::KNIGHT, piece.piece());
+                        assert_eq!(color, *piece.color());
+                    }
+                    _ => panic!("Should've been a knight"),
+                }
+            }
+
+            let bishop_positions = [(3, 1), (6, 1)];
+
+            for bishop in &bishop_positions {
+                match initial_board.get_square(position::Position(bishop.0, bishop.1 + modifier)) {
+                    Some(piece) => {
+                        assert_eq!(piece::PieceEnum::BISHOP, piece.piece());
+                        assert_eq!(color, *piece.color());
+                    }
+                    _ => panic!("Should've been a bishop"),
+                }
+            }
+
+            match initial_board.get_square(position::Position(4, 1 + modifier)) {
+                Some(piece) => {
+                    assert_eq!(piece::PieceEnum::QUEEN, piece.piece());
+                    assert_eq!(color, *piece.color());
+                }
+                _ => panic!("Should've been a queen"),
+            }
+
+            match initial_board.get_square(position::Position(5, 1 + modifier)) {
+                Some(piece) => {
+                    assert_eq!(piece::PieceEnum::KING, piece.piece());
+                    assert_eq!(color, *piece.color());
+                }
+                _ => panic!("Should've been a king"),
+            }
+        }
     }
 }
