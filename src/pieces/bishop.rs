@@ -28,6 +28,10 @@ impl piece::Piece for Bishop {
     fn piece(&self) -> piece::PieceEnum {
         piece::PieceEnum::BISHOP
     }
+
+    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+        vec![]
+    }
 }
 
 #[cfg(test)]

@@ -53,6 +53,10 @@ impl piece::Piece for Pawn {
         }
     }
 
+    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+        vec![]
+    }
+
     fn position(&self) -> &position::Position {
         &(self.position)
     }

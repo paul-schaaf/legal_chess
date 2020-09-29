@@ -25,6 +25,10 @@ impl piece::Piece for Queen {
         piece::PieceEnum::QUEEN
     }
 
+    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+        vec![]
+    }
+
     fn attacks(&self, board: &board::Board) -> Vec<position::Position> {
         let mut straight_attacks = sliding_attacks::straight_attacks(self.position, board);
         let mut diagonal_attacks = sliding_attacks::diagonal_attacks(self.position, board);

@@ -57,10 +57,8 @@ impl piece::Piece for King {
 
         attacked_positions
     }
-}
 
-impl King {
-    pub fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
         let position = self.position;
         let mut positions_to_move_to = vec![];
 
@@ -126,7 +124,9 @@ impl King {
 
         positions_to_move_to
     }
+}
 
+impl King {
     fn move_if_empty_or_enemy(
         &self,
         positions: &mut Vec<position::Position>,

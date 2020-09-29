@@ -12,6 +12,8 @@ pub trait Piece: fmt::Debug {
     fn get_id(&self) -> u8;
 
     fn piece(&self) -> PieceEnum;
+
+    fn moves(&self, board: &board::Board) -> Vec<position::Position>;
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]

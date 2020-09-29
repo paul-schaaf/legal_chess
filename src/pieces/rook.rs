@@ -28,6 +28,10 @@ impl piece::Piece for Rook {
     fn attacks(&self, board: &board::Board) -> Vec<position::Position> {
         sliding_attacks::straight_attacks(self.position, board)
     }
+
+    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+        vec![]
+    }
 }
 
 #[cfg(test)]

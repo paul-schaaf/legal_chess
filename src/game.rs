@@ -1,6 +1,6 @@
-use super::pieces::position;
 use super::pieces::to_piece::ToPiece;
-use super::{board, chessmove, color};
+use super::pieces::{piece, position};
+use super::{attack, board, chessmove, color};
 
 pub struct Game {
     board: board::Board,
@@ -10,6 +10,8 @@ pub struct Game {
     castling_rights_black: (bool, bool),
     half_moves: u16,
     full_moves: u16,
+    white_king: position::Position,
+    black_king: position::Position,
 }
 
 impl Game {
@@ -22,6 +24,8 @@ impl Game {
             castling_rights_black: (true, true),
             half_moves: 0,
             full_moves: 1,
+            white_king: position::Position(5, 1),
+            black_king: position::Position(5, 8),
         }
     }
 
@@ -29,11 +33,23 @@ impl Game {
         let mut board = board::Board::empty();
         let mut file = 1;
         let mut rank = 1;
+        let mut white_king = position::Position(0, 0);
+        let mut black_king = position::Position(0, 0);
+
         for i in 0..64 {
-            board.set_square(
-                game_arr[i].to_piece(i as u8, position::Position(file, rank)),
-                position::Position(file, rank),
-            );
+            let square = game_arr[i].to_piece(i as u8, position::Position(file, rank));
+            if let Some(p) = &square {
+                match (p.color(), p.piece()) {
+                    (color::Color::WHITE, piece::PieceEnum::KING) => {
+                        white_king = position::Position(file, rank)
+                    }
+                    (color::Color::BLACK, piece::PieceEnum::KING) => {
+                        black_king = position::Position(file, rank)
+                    }
+                    (_, _) => (),
+                }
+            }
+            board.set_square(square, position::Position(file, rank));
             if rank == 8 {
                 rank = 1;
                 file += 1;
@@ -93,6 +109,8 @@ impl Game {
             },
             half_moves,
             full_moves,
+            white_king,
+            black_king,
         }
     }
 
@@ -123,10 +141,63 @@ impl Game {
     pub fn full_moves(&self) -> u16 {
         self.full_moves
     }
+
+    pub fn current_king_position(&self) -> position::Position {
+        match self.side_to_move() {
+            color::Color::WHITE => self.white_king,
+            color::Color::BLACK => self.black_king,
+        }
+    }
+
+    pub fn legal_moves(&self) -> Vec<chessmove::ChessMove> {
+        let other_side = match self.side_to_move() {
+            color::Color::WHITE => color::Color::BLACK,
+            color::Color::BLACK => color::Color::WHITE,
+        };
+        let attacked_board = attack::get_attacked_squares(self.board(), other_side);
+        let king_position = self.current_king_position();
+        let attacked_king_square =
+            &attacked_board[king_position.0 as usize - 1][king_position.1 as usize - 1];
+        match attacked_king_square {
+            Some(v) => {
+                let king = match self.board().get_square(king_position) {
+                    Some(king) => king,
+                    _ => panic!(),
+                };
+                if v.len() > 1 {
+                    self.king_moves(king, &attacked_board)
+                } else {
+                    self.king_moves(king, &attacked_board)
+                }
+            }
+            None => vec![],
+        }
+    }
+
+    fn king_moves(
+        &self,
+        king: &Box<dyn piece::Piece>,
+        attacked_board: &std::vec::Vec<
+            std::vec::Vec<std::option::Option<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>>,
+        >,
+    ) -> Vec<chessmove::ChessMove> {
+        let moves = king.moves(self.board());
+        moves
+            .iter()
+            .filter(|mv| attacked_board[mv.0 as usize - 1][mv.1 as usize - 1].is_none())
+            .map(|mv| chessmove::ChessMove {
+                source_file: king.position().0,
+                source_rank: king.position().1,
+                target_file: mv.0,
+                target_rank: mv.1,
+            })
+            .collect::<Vec<_>>()
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::super::pieces::{king, knight, queen, rook, bishop};
     use super::*;
 
     const INITIAL_GAME_ARR: [&str; 75] = [
@@ -183,5 +254,123 @@ mod tests {
         let actual_game = Game::from_game_arr(&INITIAL_GAME_ARR);
 
         assert_eq!(1, actual_game.full_moves());
+    }
+
+    #[test]
+    fn two_attackers_king_can_capture() {
+        let mut game = Game::new();
+        game.board = board::Board::empty();
+        game.white_king = position::Position(1, 1);
+
+        let white_king_pos = position::Position(1, 1);
+        let white_king = king::King {
+            id: 1,
+            color: color::Color::WHITE,
+            position: white_king_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(white_king)), white_king_pos);
+
+        let black_rook_pos = position::Position(8, 1);
+        let black_rook = rook::Rook {
+            id: 2,
+            color: color::Color::BLACK,
+            position: black_rook_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(black_rook)), black_rook_pos);
+
+        let black_queen_pos = position::Position(2, 2);
+        let black_queen = queen::Queen {
+            id: 3,
+            color: color::Color::BLACK,
+            position: black_queen_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(black_queen)), black_queen_pos);
+
+        let moves = game.legal_moves();
+        assert_eq!(1, moves.len());
+        assert_eq!(
+            chessmove::ChessMove {
+                source_file: 1,
+                source_rank: 1,
+                target_file: 2,
+                target_rank: 2
+            },
+            moves[0]
+        );
+    }
+
+    #[test]
+    fn two_attackers_king_cannot_capture() {
+        let mut game = Game::new();
+        game.board = board::Board::empty();
+        game.white_king = position::Position(1, 1);
+
+        let white_king_pos = position::Position(1, 1);
+        let white_king = king::King {
+            id: 1,
+            color: color::Color::WHITE,
+            position: white_king_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(white_king)), white_king_pos);
+
+        let black_rook_pos = position::Position(8, 1);
+        let black_rook = rook::Rook {
+            id: 2,
+            color: color::Color::BLACK,
+            position: black_rook_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(black_rook)), black_rook_pos);
+
+        let black_queen_pos = position::Position(2, 2);
+        let black_queen = queen::Queen {
+            id: 3,
+            color: color::Color::BLACK,
+            position: black_queen_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(black_queen)), black_queen_pos);
+
+        let black_knight_pos = position::Position(4, 3);
+        let black_knight = knight::Knight {
+            id: 4,
+            color: color::Color::BLACK,
+            position: black_knight_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(black_knight)), black_knight_pos);
+
+        let moves = game.legal_moves();
+        assert_eq!(0, moves.len());
+    }
+
+    #[test]
+    fn scholars_mate() {
+        let mut game = Game::new();
+
+        let white_queen_pos = position::Position(6, 7);
+        let white_queen = queen::Queen {
+            id: 100,
+            color: color::Color::WHITE,
+            position: white_queen_pos
+        };
+        game.board.set_square(Some(Box::new(white_queen)), white_queen_pos);
+
+        let white_bishop_pos = position::Position(3, 4);
+        let white_bishop = bishop::Bishop {
+            id: 100,
+            color: color::Color::WHITE,
+            position: white_bishop_pos
+        };
+        game.board.set_square(Some(Box::new(white_bishop)), white_bishop_pos);
+
+        game.side_to_move = color::Color::BLACK;
+
+        let moves = game.legal_moves();
+        assert_eq!(0, moves.len());
     }
 }

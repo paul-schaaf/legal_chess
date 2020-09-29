@@ -13,6 +13,10 @@ impl piece::Piece for Knight {
         return self.id;
     }
 
+    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+        vec![]
+    }
+
     fn piece(&self) -> piece::PieceEnum {
         piece::PieceEnum::KNIGHT
     }
