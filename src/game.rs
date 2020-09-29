@@ -197,7 +197,7 @@ impl Game {
 
 #[cfg(test)]
 mod tests {
-    use super::super::pieces::{king, knight, queen, rook, bishop};
+    use super::super::pieces::{bishop, king, knight, queen, rook};
     use super::*;
 
     const INITIAL_GAME_ARR: [&str; 75] = [
@@ -356,17 +356,19 @@ mod tests {
         let white_queen = queen::Queen {
             id: 100,
             color: color::Color::WHITE,
-            position: white_queen_pos
+            position: white_queen_pos,
         };
-        game.board.set_square(Some(Box::new(white_queen)), white_queen_pos);
+        game.board
+            .set_square(Some(Box::new(white_queen)), white_queen_pos);
 
         let white_bishop_pos = position::Position(3, 4);
         let white_bishop = bishop::Bishop {
             id: 100,
             color: color::Color::WHITE,
-            position: white_bishop_pos
+            position: white_bishop_pos,
         };
-        game.board.set_square(Some(Box::new(white_bishop)), white_bishop_pos);
+        game.board
+            .set_square(Some(Box::new(white_bishop)), white_bishop_pos);
 
         game.side_to_move = color::Color::BLACK;
 
