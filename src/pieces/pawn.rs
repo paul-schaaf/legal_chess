@@ -54,7 +54,64 @@ impl piece::Piece for Pawn {
     }
 
     fn moves(&self, board: &board::Board) -> Vec<position::Position> {
-        vec![]
+        let position = self.position();
+        let mut moves = vec![];
+
+        let attacked_squares = self.attacks(board);
+        let mut attack_moves = attacked_squares
+            .into_iter()
+            .filter(|pos| match board.get_square(*pos) {
+                None => false,
+                Some(piece) => *piece.color() != *self.color(),
+            })
+            .collect::<Vec<_>>();
+        moves.append(&mut attack_moves);
+
+        match self.color() {
+            color::Color::WHITE => {
+                if position.1 == 2 {
+                    if board
+                        .get_square(position::Position(position.0, 3))
+                        .is_none()
+                        && board
+                            .get_square(position::Position(position.0, 4))
+                            .is_none()
+                    {
+                        moves.push(position::Position(position.0, 4));
+                    }
+                }
+                if position.1 != 8 {
+                    if board
+                        .get_square(position::Position(position.0, position.1 + 1))
+                        .is_none()
+                    {
+                        moves.push(position::Position(position.0, position.1 + 1));
+                    }
+                }
+            }
+            color::Color::BLACK => {
+                if position.1 == 7 {
+                    if board
+                        .get_square(position::Position(position.0, 6))
+                        .is_none()
+                        && board
+                            .get_square(position::Position(position.0, 5))
+                            .is_none()
+                    {
+                        moves.push(position::Position(position.0, 5));
+                    }
+                }
+                if position.1 != 1 {
+                    if board
+                        .get_square(position::Position(position.0, position.1 - 1))
+                        .is_none()
+                    {
+                        moves.push(position::Position(position.0, position.1 - 1));
+                    }
+                }
+            }
+        }
+        moves
     }
 
     fn position(&self) -> &position::Position {
@@ -68,6 +125,7 @@ impl piece::Piece for Pawn {
 
 #[cfg(test)]
 mod tests {
+    use super::super::pawn;
     use super::*;
     use piece::Piece;
 
@@ -159,4 +217,79 @@ mod tests {
         };
         assert_eq!(expected, p.attacks(&board::Board::empty()));
     }
+
+    #[test]
+    fn white_pawn_moves() {
+        let mut board = board::Board::initial();
+
+        let black_pawn_pos = position::Position(5, 3);
+        let black_pawn = pawn::Pawn {
+            id: 1,
+            color: color::Color::BLACK,
+            position: black_pawn_pos,
+        };
+
+        board.set_square(Some(Box::new(black_pawn)), black_pawn_pos);
+
+        let white_pawn = pawn::Pawn {
+            id: 2,
+            color: color::Color::WHITE,
+            position: position::Position(4, 2),
+        };
+
+        let expected_moves = vec![
+            position::Position(4, 3),
+            position::Position(4, 4),
+            position::Position(5, 3),
+        ];
+        let moves = white_pawn.moves(&board);
+        println!("{:?}", moves);
+        assert_eq!(3, moves.len());
+        for mv in expected_moves {
+            assert!(moves.contains(&mv));
+        }
+    }
+
+    #[test]
+    fn white_pawn_blocked() {
+        let mut board = board::Board::initial();
+        let white_pawn = pawn::Pawn {
+            id: 1,
+            color: color::Color::WHITE,
+            position: position::Position(4, 2),
+        };
+        let white_pawn_2_pos = position::Position(4, 3);
+        let white_pawn_2 = pawn::Pawn {
+            id: 2,
+            color: color::Color::WHITE,
+            position: white_pawn_2_pos,
+        };
+        board.set_square(Some(Box::new(white_pawn_2)), white_pawn_2_pos);
+
+        let moves = white_pawn.moves(&board);
+        assert_eq!(0, moves.len());
+    }
+
+    #[test]
+    fn white_pawn_blocked_2() {
+        let mut board = board::Board::initial();
+        let white_pawn = pawn::Pawn {
+            id: 1,
+            color: color::Color::WHITE,
+            position: position::Position(4, 2),
+        };
+        let white_pawn_2_pos = position::Position(4, 4);
+        let white_pawn_2 = pawn::Pawn {
+            id: 2,
+            color: color::Color::WHITE,
+            position: white_pawn_2_pos,
+        };
+        board.set_square(Some(Box::new(white_pawn_2)), white_pawn_2_pos);
+
+        let moves = white_pawn.moves(&board);
+        assert_eq!(1, moves.len());
+        assert_eq!(position::Position(4,3), moves[0]);
+    }
+
+    //TODO Tests for black pawn
 }
