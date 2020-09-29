@@ -14,7 +14,7 @@ impl piece::Piece for Knight {
     }
 
     fn moves(&self, board: &board::Board) -> Vec<position::Position> {
-        vec![]
+        self.attacks(board)
     }
 
     fn piece(&self) -> piece::PieceEnum {
