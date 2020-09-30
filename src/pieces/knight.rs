@@ -14,7 +14,36 @@ impl piece::Piece for Knight {
     }
 
     fn moves(&self, board: &board::Board) -> Vec<position::Position> {
-        self.attacks(board)
+        let positions: [[i8; 2]; 8] = [
+            [1, 2],
+            [1, -2],
+            [-1, 2],
+            [-1, -2],
+            [2, 1],
+            [2, -1],
+            [-2, 1],
+            [-2, -1],
+        ];
+
+        let mut attacks = Vec::new();
+
+        for i in 0..8 {
+            let file = positions[i][0] + self.position.0 as i8;
+            let rank = positions[i][1] + self.position.1 as i8;
+
+            if file >= 1 && file <= 8 && rank >= 1 && rank <= 8 {
+                match board.get_square(position::Position(file as u8, rank as u8)) {
+                    Some(piece) => {
+                        if *piece.color() != self.color {
+                            attacks.push(position::Position(file as u8, rank as u8))
+                        }
+                    }
+                    None => attacks.push(position::Position(file as u8, rank as u8)),
+                }
+            }
+        }
+
+        attacks
     }
 
     fn piece(&self) -> piece::PieceEnum {
