@@ -169,6 +169,23 @@ impl Board {
         }
         string_board
     }
+
+    pub fn pieces_of_color(&self, color: color::Color) -> Vec<&Box<dyn piece::Piece>> {
+        let mut pieces = vec![];
+        for file in self.board.iter() {
+            for square in file.iter() {
+                match square {
+                    Some(piece) => {
+                        if *piece.color() == color {
+                            pieces.push(piece);
+                        }
+                    }
+                    None => (),
+                }
+            }
+        }
+        pieces
+    }
 }
 
 #[cfg(test)]

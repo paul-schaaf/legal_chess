@@ -170,7 +170,24 @@ impl Game {
                     self.king_moves(king, &attacked_board)
                 }
             }
-            None => vec![],
+            None => {
+                let mut moves: Vec<chessmove::ChessMove> = vec![];
+                for piece in self.board.pieces_of_color(*self.side_to_move()) {
+                    moves.append(
+                        &mut (piece
+                            .moves(&self.board)
+                            .iter()
+                            .map(|pos| chessmove::ChessMove {
+                                source_file: piece.position().0,
+                                source_rank: piece.position().1,
+                                target_file: pos.0,
+                                target_rank: pos.1,
+                            })
+                            .collect::<Vec<_>>()),
+                    );
+                }
+                moves
+            }
         }
     }
 
@@ -374,5 +391,13 @@ mod tests {
 
         let moves = game.legal_moves();
         assert_eq!(0, moves.len());
+    }
+
+    #[test]
+    fn initial_game_setup_legal_moves() {
+        let game = Game::new();
+
+        let moves = game.legal_moves();
+        assert_eq!(20, moves.len());
     }
 }
