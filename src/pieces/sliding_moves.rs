@@ -2,10 +2,7 @@ use super::position;
 use crate::board;
 use crate::pieces::piece;
 
-pub fn straight_sliding(
-    piece: &dyn piece::Piece,
-    board: &board::Board,
-) -> Vec<position::Position> {
+pub fn straight_sliding(piece: &dyn piece::Piece, board: &board::Board) -> Vec<position::Position> {
     let moves_and_bounds = [((1, 0), 8), ((-1, 0), 1), ((0, 1), 8), ((0, -1), 1)];
 
     let mut moves = vec![];
@@ -43,10 +40,7 @@ pub fn straight_sliding(
     moves
 }
 
-pub fn diagonal_sliding(
-    piece: &dyn piece::Piece,
-    board: &board::Board,
-) -> Vec<position::Position> {
+pub fn diagonal_sliding(piece: &dyn piece::Piece, board: &board::Board) -> Vec<position::Position> {
     let moves_and_bounds = [
         ((1, 1), (8, 8)),
         ((1, -1), (8, 1)),
