@@ -1,4 +1,4 @@
-use super::{piece, position, sliding_attacks};
+use super::{piece, position, sliding_attacks, sliding_moves};
 use crate::{board, color};
 
 #[derive(Debug)]
@@ -30,7 +30,7 @@ impl piece::Piece for Rook {
     }
 
     fn moves(&self, board: &board::Board) -> Vec<position::Position> {
-        vec![]
+        sliding_moves::straight_sliding(self, board)
     }
 }
 
@@ -152,4 +152,6 @@ mod tests {
 
         assert_eq!(expected_attacked_positions, attacked_positions);
     }
+
+    // TODO: tests for rook moves
 }
