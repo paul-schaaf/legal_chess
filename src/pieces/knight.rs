@@ -10,7 +10,7 @@ pub struct Knight {
 
 impl piece::Piece for Knight {
     fn get_id(&self) -> u8 {
-        return self.id;
+        self.id
     }
 
     fn moves(&self, board: &board::Board) -> Vec<position::Position> {
@@ -27,9 +27,9 @@ impl piece::Piece for Knight {
 
         let mut attacks = Vec::new();
 
-        for i in 0..8 {
-            let file = positions[i][0] + self.position.0 as i8;
-            let rank = positions[i][1] + self.position.1 as i8;
+        for position in &positions {
+            let file = position[0] + self.position.0 as i8;
+            let rank = position[1] + self.position.1 as i8;
 
             if file >= 1 && file <= 8 && rank >= 1 && rank <= 8 {
                 match board.get_square(position::Position(file as u8, rank as u8)) {
@@ -64,9 +64,9 @@ impl piece::Piece for Knight {
 
         let mut attacks = Vec::new();
 
-        for i in 0..8 {
-            let file = positions[i][0] + self.position.0 as i8;
-            let rank = positions[i][1] + self.position.1 as i8;
+        for position in &positions {
+            let file = position[0] + self.position.0 as i8;
+            let rank = position[1] + self.position.1 as i8;
 
             if file >= 1 && file <= 8 && rank >= 1 && rank <= 8 {
                 attacks.push(position::Position(file as u8, rank as u8))

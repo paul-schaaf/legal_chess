@@ -11,7 +11,7 @@ pub struct Pawn {
 
 impl piece::Piece for Pawn {
     fn get_id(&self) -> u8 {
-        return self.id;
+        self.id
     }
 
     fn piece(&self) -> piece::PieceEnum {
@@ -69,45 +69,43 @@ impl piece::Piece for Pawn {
 
         match self.color() {
             color::Color::WHITE => {
-                if position.1 == 2 {
-                    if board
+                if position.1 == 2
+                    && board
                         .get_square(position::Position(position.0, 3))
                         .is_none()
-                        && board
-                            .get_square(position::Position(position.0, 4))
-                            .is_none()
-                    {
-                        moves.push(position::Position(position.0, 4));
-                    }
+                    && board
+                        .get_square(position::Position(position.0, 4))
+                        .is_none()
+                {
+                    moves.push(position::Position(position.0, 4));
                 }
-                if position.1 != 8 {
-                    if board
+
+                if position.1 != 8
+                    && board
                         .get_square(position::Position(position.0, position.1 + 1))
                         .is_none()
-                    {
-                        moves.push(position::Position(position.0, position.1 + 1));
-                    }
+                {
+                    moves.push(position::Position(position.0, position.1 + 1));
                 }
             }
             color::Color::BLACK => {
-                if position.1 == 7 {
-                    if board
+                if position.1 == 7
+                    && board
                         .get_square(position::Position(position.0, 6))
                         .is_none()
-                        && board
-                            .get_square(position::Position(position.0, 5))
-                            .is_none()
-                    {
-                        moves.push(position::Position(position.0, 5));
-                    }
+                    && board
+                        .get_square(position::Position(position.0, 5))
+                        .is_none()
+                {
+                    moves.push(position::Position(position.0, 5));
                 }
-                if position.1 != 1 {
-                    if board
+
+                if position.1 != 1
+                    && board
                         .get_square(position::Position(position.0, position.1 - 1))
                         .is_none()
-                    {
-                        moves.push(position::Position(position.0, position.1 - 1));
-                    }
+                {
+                    moves.push(position::Position(position.0, position.1 - 1));
                 }
             }
         }

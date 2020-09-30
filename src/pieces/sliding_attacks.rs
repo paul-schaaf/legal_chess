@@ -17,7 +17,7 @@ pub fn straight_attacks(
                 current_file += (entry.0).0;
                 let attacked_position = position::Position(current_file as u8, current_rank as u8);
                 attacked_positions.push(attacked_position);
-                if let Some(_) = board.get_square(attacked_position) {
+                if board.get_square(attacked_position).is_some() {
                     break;
                 }
             }
@@ -26,7 +26,7 @@ pub fn straight_attacks(
                 current_rank += (entry.0).1;
                 let attacked_position = position::Position(current_file as u8, current_rank as u8);
                 attacked_positions.push(attacked_position);
-                if let Some(_) = board.get_square(attacked_position) {
+                if board.get_square(attacked_position).is_some() {
                     break;
                 }
             }
@@ -57,7 +57,7 @@ pub fn diagonal_attacks(
             current_rank += (entry.0).1;
             let attacked_position = position::Position(current_file as u8, current_rank as u8);
             attacked_positions.push(attacked_position);
-            if let Some(_) = board.get_square(attacked_position) {
+            if board.get_square(attacked_position).is_some() {
                 break;
             }
         }

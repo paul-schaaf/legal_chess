@@ -36,8 +36,8 @@ impl Game {
         let mut white_king = position::Position(0, 0);
         let mut black_king = position::Position(0, 0);
 
-        for i in 0..64 {
-            let square = game_arr[i].to_piece(i as u8, position::Position(file, rank));
+        for (i, string_piece) in game_arr.iter().enumerate().take(64) {
+            let square = string_piece.to_piece(i as u8, position::Position(file, rank));
             if let Some(p) = &square {
                 match (p.color(), p.piece()) {
                     (color::Color::WHITE, piece::PieceEnum::KING) => {

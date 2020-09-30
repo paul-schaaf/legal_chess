@@ -88,13 +88,13 @@ impl Board {
                 id_count += 1;
             }
 
-            board[3][0 + modifier] = Some(Box::new(queen::Queen {
+            board[3][modifier] = Some(Box::new(queen::Queen {
                 id: id_count,
                 color,
                 position: position::Position(4, 1 + modifier as u8),
             }));
 
-            board[4][0 + modifier] = Some(Box::new(king::King {
+            board[4][modifier] = Some(Box::new(king::King {
                 id: id_count,
                 color,
                 position: position::Position(5, 1 + modifier as u8),
@@ -122,47 +122,23 @@ impl Board {
 
     pub fn to_string_board(&self) -> [[&str; 8]; 8] {
         let mut string_board = [["-"; 8]; 8];
-        for file in 0..8 {
-            for rank in 0..8 {
-                match &self.board[file][rank] {
-                    None => string_board[file][rank] = "-",
+        for (file_index, file) in string_board.iter_mut().enumerate() {
+            for (rank_index, rank) in file.iter_mut().enumerate().take(8) {
+                match &self.board[file_index][rank_index] {
+                    None => *rank = "-",
                     Some(piece) => match (*piece.color(), piece.piece()) {
-                        (color::Color::WHITE, piece::PieceEnum::PAWN) => {
-                            string_board[file][rank] = "P"
-                        }
-                        (color::Color::BLACK, piece::PieceEnum::PAWN) => {
-                            string_board[file][rank] = "p"
-                        }
-                        (color::Color::WHITE, piece::PieceEnum::ROOK) => {
-                            string_board[file][rank] = "R"
-                        }
-                        (color::Color::BLACK, piece::PieceEnum::ROOK) => {
-                            string_board[file][rank] = "r"
-                        }
-                        (color::Color::WHITE, piece::PieceEnum::KNIGHT) => {
-                            string_board[file][rank] = "N"
-                        }
-                        (color::Color::BLACK, piece::PieceEnum::KNIGHT) => {
-                            string_board[file][rank] = "n"
-                        }
-                        (color::Color::WHITE, piece::PieceEnum::BISHOP) => {
-                            string_board[file][rank] = "B"
-                        }
-                        (color::Color::BLACK, piece::PieceEnum::BISHOP) => {
-                            string_board[file][rank] = "b"
-                        }
-                        (color::Color::WHITE, piece::PieceEnum::QUEEN) => {
-                            string_board[file][rank] = "Q"
-                        }
-                        (color::Color::BLACK, piece::PieceEnum::QUEEN) => {
-                            string_board[file][rank] = "q"
-                        }
-                        (color::Color::WHITE, piece::PieceEnum::KING) => {
-                            string_board[file][rank] = "K"
-                        }
-                        (color::Color::BLACK, piece::PieceEnum::KING) => {
-                            string_board[file][rank] = "k"
-                        }
+                        (color::Color::WHITE, piece::PieceEnum::PAWN) => *rank = "P",
+                        (color::Color::BLACK, piece::PieceEnum::PAWN) => *rank = "p",
+                        (color::Color::WHITE, piece::PieceEnum::ROOK) => *rank = "R",
+                        (color::Color::BLACK, piece::PieceEnum::ROOK) => *rank = "r",
+                        (color::Color::WHITE, piece::PieceEnum::KNIGHT) => *rank = "N",
+                        (color::Color::BLACK, piece::PieceEnum::KNIGHT) => *rank = "n",
+                        (color::Color::WHITE, piece::PieceEnum::BISHOP) => *rank = "B",
+                        (color::Color::BLACK, piece::PieceEnum::BISHOP) => *rank = "b",
+                        (color::Color::WHITE, piece::PieceEnum::QUEEN) => *rank = "Q",
+                        (color::Color::BLACK, piece::PieceEnum::QUEEN) => *rank = "q",
+                        (color::Color::WHITE, piece::PieceEnum::KING) => *rank = "K",
+                        (color::Color::BLACK, piece::PieceEnum::KING) => *rank = "k",
                     },
                 }
             }
