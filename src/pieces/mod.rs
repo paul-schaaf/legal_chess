@@ -7,4 +7,5 @@ pub mod position;
 pub mod queen;
 pub mod rook;
 mod sliding_attacks;
+mod sliding_moves;
 pub mod to_piece;
