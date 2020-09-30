@@ -243,7 +243,6 @@ mod tests {
             position::Position(5, 3),
         ];
         let moves = white_pawn.moves(&board);
-        println!("{:?}", moves);
         assert_eq!(3, moves.len());
         for mv in expected_moves {
             assert!(moves.contains(&mv));
@@ -288,8 +287,78 @@ mod tests {
 
         let moves = white_pawn.moves(&board);
         assert_eq!(1, moves.len());
-        assert_eq!(position::Position(4,3), moves[0]);
+        assert_eq!(position::Position(4, 3), moves[0]);
     }
 
-    //TODO Tests for black pawn
+    #[test]
+    fn black_pawn_moves() {
+        let mut board = board::Board::initial();
+
+        let white_pawn_pos = position::Position(6, 6);
+        let white_pawn = pawn::Pawn {
+            id: 1,
+            color: color::Color::WHITE,
+            position: white_pawn_pos,
+        };
+
+        board.set_square(Some(Box::new(white_pawn)), white_pawn_pos);
+
+        let black_pawn = pawn::Pawn {
+            id: 2,
+            color: color::Color::BLACK,
+            position: position::Position(5, 7),
+        };
+
+        let expected_moves = vec![
+            position::Position(5, 6),
+            position::Position(5, 5),
+            position::Position(6, 6),
+        ];
+        let moves = black_pawn.moves(&board);
+        assert_eq!(3, moves.len());
+        for mv in expected_moves {
+            assert!(moves.contains(&mv));
+        }
+    }
+
+    #[test]
+    fn black_pawn_blocked() {
+        let mut board = board::Board::initial();
+        let black_pawn = pawn::Pawn {
+            id: 1,
+            color: color::Color::BLACK,
+            position: position::Position(5, 7),
+        };
+        let black_pawn_2_pos = position::Position(5, 6);
+        let black_pawn_2 = pawn::Pawn {
+            id: 2,
+            color: color::Color::BLACK,
+            position: black_pawn_2_pos,
+        };
+        board.set_square(Some(Box::new(black_pawn_2)), black_pawn_2_pos);
+
+        let moves = black_pawn.moves(&board);
+        assert_eq!(0, moves.len());
+    }
+
+    #[test]
+    fn black_pawn_blocked_2() {
+        let mut board = board::Board::initial();
+        let black_pawn = pawn::Pawn {
+            id: 1,
+            color: color::Color::BLACK,
+            position: position::Position(5, 7),
+        };
+        let black_pawn_2_pos = position::Position(5, 5);
+        let black_pawn_2 = pawn::Pawn {
+            id: 2,
+            color: color::Color::BLACK,
+            position: black_pawn_2_pos,
+        };
+        board.set_square(Some(Box::new(black_pawn_2)), black_pawn_2_pos);
+
+        let moves = black_pawn.moves(&board);
+        assert_eq!(1, moves.len());
+        assert_eq!(position::Position(5, 6), moves[0]);
+    }
 }
