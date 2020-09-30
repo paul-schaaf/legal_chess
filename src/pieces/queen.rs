@@ -26,15 +26,15 @@ impl piece::Piece for Queen {
     }
 
     fn moves(&self, board: &board::Board) -> Vec<position::Position> {
-        let mut straight_moves = sliding_attacks::straight_attacks(self.position, board);
-        let mut diagonal_moves = sliding_attacks::diagonal_attacks(self.position, board);
+        let mut straight_moves = sliding_moves::straight_sliding(self, board);
+        let mut diagonal_moves = sliding_moves::diagonal_sliding(self, board);
         straight_moves.append(&mut diagonal_moves);
         straight_moves
     }
 
     fn attacks(&self, board: &board::Board) -> Vec<position::Position> {
-        let mut straight_attacks = sliding_moves::straight_sliding(self, board);
-        let mut diagonal_attacks = sliding_moves::diagonal_sliding(self, board);
+        let mut straight_attacks = sliding_attacks::straight_attacks(self.position, board);
+        let mut diagonal_attacks = sliding_attacks::diagonal_attacks(self.position, board);
         straight_attacks.append(&mut diagonal_attacks);
         straight_attacks
     }
