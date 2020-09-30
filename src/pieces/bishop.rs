@@ -1,4 +1,4 @@
-use super::{piece, position, sliding_attacks};
+use super::{piece, position, sliding_attacks, sliding_moves};
 use crate::{board, color};
 
 #[derive(Debug)]
@@ -30,7 +30,7 @@ impl piece::Piece for Bishop {
     }
 
     fn moves(&self, board: &board::Board) -> Vec<position::Position> {
-        vec![]
+        sliding_moves::diagonal_sliding(self, board)
     }
 }
 
@@ -76,7 +76,7 @@ mod tests {
     }
 
     #[test]
-    fn bishop_bottom_left_middle_obstacle() {
+    fn bishop_bottom_left_middle_obstacle_attacks() {
         let mut empty_board = board::Board::empty();
 
         let bishop_position = position::Position(1, 1);
@@ -119,7 +119,7 @@ mod tests {
     }
 
     #[test]
-    fn bishop_top_middle_with_obstacles() {
+    fn bishop_top_middle_with_obstacles_attacks() {
         let mut empty_board = board::Board::empty();
 
         let bishop_position = position::Position(4, 8);
@@ -164,5 +164,50 @@ mod tests {
         expected_attacked_positions.push(position::Position(2, 6));
 
         assert_eq!(expected_attacked_positions, attacked_positions);
+    }
+
+    #[test]
+    fn bishop_bottom_left_moves() {
+        let mut empty_board = board::Board::empty();
+
+        let position = position::Position(1, 1);
+
+        let bishop = Bishop {
+            id: 1,
+            color: color::Color::WHITE,
+            position,
+        };
+
+        empty_board.set_square(Some(Box::new(bishop)), position);
+
+        let bishop = match empty_board.get_square(position) {
+            None => panic!(),
+            Some(b) => b,
+        };
+
+        let attacked_positions = bishop.moves(&empty_board);
+
+        let mut count = 1;
+        let expected_attacked_positions = iter::from_fn(|| {
+            count += 1;
+            if count < 9 {
+                Some(position::Position(count, count))
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+
+        assert_eq!(expected_attacked_positions, attacked_positions);
+    }
+
+    #[test]
+    fn bishop_middle_moves() {
+        // TODO
+    }
+
+    #[test]
+    fn bishop_middle_obstacle_moves() {
+        // TODO
     }
 }
