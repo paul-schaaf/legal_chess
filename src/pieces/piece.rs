@@ -22,7 +22,11 @@ enum Direction {
 pub trait Piece: fmt::Debug {
     fn position(&self) -> &position::Position;
 
-    fn attacks(&self, board: &board::Board) -> Vec<position::Position>;
+    fn attacks(
+        &self,
+        board: &board::Board,
+        enemy_king_pos: position::Position,
+    ) -> Vec<position::Position>;
 
     fn color(&self) -> &color::Color;
 

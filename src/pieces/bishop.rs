@@ -21,8 +21,12 @@ impl piece::Piece for Bishop {
         &self.position
     }
 
-    fn attacks(&self, board: &board::Board) -> Vec<position::Position> {
-        sliding_attacks::diagonal_attacks(self.position, board)
+    fn attacks(
+        &self,
+        board: &board::Board,
+        enemy_king_pos: position::Position,
+    ) -> Vec<position::Position> {
+        sliding_attacks::diagonal_attacks(self.position, board, enemy_king_pos)
     }
 
     fn piece(&self) -> piece::PieceEnum {
@@ -59,7 +63,7 @@ mod tests {
             Some(b) => b,
         };
 
-        let attacked_positions = bishop.attacks(&empty_board);
+        let attacked_positions = bishop.attacks(&empty_board, position::Position(0, 0));
 
         let mut count = 1;
         let expected_attacked_positions = iter::from_fn(|| {
@@ -103,7 +107,7 @@ mod tests {
             Some(b) => b,
         };
 
-        let attacked_positions = bishop.attacks(&empty_board);
+        let attacked_positions = bishop.attacks(&empty_board, position::Position(0, 0));
 
         let mut count = 1;
         let expected_attacked_positions = iter::from_fn(|| {
@@ -155,7 +159,7 @@ mod tests {
             Some(b) => b,
         };
 
-        let attacked_positions = bishop.attacks(&empty_board);
+        let attacked_positions = bishop.attacks(&empty_board, position::Position(0, 0));
         let mut expected_attacked_positions = vec![];
         expected_attacked_positions.push(position::Position(5, 7));
         expected_attacked_positions.push(position::Position(6, 6));

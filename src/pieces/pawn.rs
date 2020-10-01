@@ -18,7 +18,11 @@ impl piece::Piece for Pawn {
         piece::PieceEnum::PAWN
     }
 
-    fn attacks(&self, _board: &board::Board) -> Vec<position::Position> {
+    fn attacks(
+        &self,
+        _board: &board::Board,
+        _enemy_king_pos: position::Position,
+    ) -> Vec<position::Position> {
         let position = self.position();
         if *self.color() == color::Color::WHITE {
             if position.1 == 8 {
@@ -57,7 +61,7 @@ impl piece::Piece for Pawn {
         let position = self.position();
         let mut moves = vec![];
 
-        let attacked_squares = self.attacks(board);
+        let attacked_squares = self.attacks(board, position::Position(0, 0));
         let mut attack_moves = attacked_squares
             .into_iter()
             .filter(|pos| match board.get_square(*pos) {
@@ -148,7 +152,7 @@ mod tests {
             color: color::Color::WHITE,
         };
 
-        let actual = p.attacks(&board::Board::empty());
+        let actual = p.attacks(&board::Board::empty(), position::Position(0, 0));
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -163,7 +167,10 @@ mod tests {
             position: position::Position(1, 2),
             color: color::Color::WHITE,
         };
-        assert_eq!(expected, p.attacks(&board::Board::empty()));
+        assert_eq!(
+            expected,
+            p.attacks(&board::Board::empty(), position::Position(0, 0))
+        );
     }
 
     #[test]
@@ -174,7 +181,10 @@ mod tests {
             position: position::Position(8, 2),
             color: color::Color::WHITE,
         };
-        assert_eq!(expected, p.attacks(&board::Board::empty()));
+        assert_eq!(
+            expected,
+            p.attacks(&board::Board::empty(), position::Position(0, 0))
+        );
     }
 
     // comparing with assert_eq is not possible because it cares about order
@@ -187,7 +197,7 @@ mod tests {
             color: color::Color::BLACK,
         };
 
-        let actual = p.attacks(&board::Board::empty());
+        let actual = p.attacks(&board::Board::empty(), position::Position(0, 0));
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -202,7 +212,10 @@ mod tests {
             position: position::Position(1, 7),
             color: color::Color::BLACK,
         };
-        assert_eq!(expected, p.attacks(&board::Board::empty()));
+        assert_eq!(
+            expected,
+            p.attacks(&board::Board::empty(), position::Position(0, 0))
+        );
     }
 
     #[test]
@@ -213,7 +226,10 @@ mod tests {
             position: position::Position(8, 7),
             color: color::Color::BLACK,
         };
-        assert_eq!(expected, p.attacks(&board::Board::empty()));
+        assert_eq!(
+            expected,
+            p.attacks(&board::Board::empty(), position::Position(0, 0))
+        );
     }
 
     #[test]

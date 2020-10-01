@@ -32,9 +32,15 @@ impl piece::Piece for Queen {
         straight_moves
     }
 
-    fn attacks(&self, board: &board::Board) -> Vec<position::Position> {
-        let mut straight_attacks = sliding_attacks::straight_attacks(self.position, board);
-        let mut diagonal_attacks = sliding_attacks::diagonal_attacks(self.position, board);
+    fn attacks(
+        &self,
+        board: &board::Board,
+        enemy_king_pos: position::Position,
+    ) -> Vec<position::Position> {
+        let mut straight_attacks =
+            sliding_attacks::straight_attacks(self.position, board, enemy_king_pos);
+        let mut diagonal_attacks =
+            sliding_attacks::diagonal_attacks(self.position, board, enemy_king_pos);
         straight_attacks.append(&mut diagonal_attacks);
         straight_attacks
     }
@@ -64,7 +70,7 @@ mod tests {
             Some(b) => b,
         };
 
-        let attacked_positions = queen.attacks(&empty_board);
+        let attacked_positions = queen.attacks(&empty_board, position::Position(0, 0));
 
         let mut count_file = 1;
         let expected_attacked_positions = iter::from_fn(|| {

@@ -4,6 +4,7 @@ use crate::board;
 pub fn straight_attacks(
     position: position::Position,
     board: &board::Board,
+    enemy_king_pos: position::Position,
 ) -> Vec<position::Position> {
     let moves_and_bounds = [((1, 0), 8), ((-1, 0), 1), ((0, 1), 8), ((0, -1), 1)];
 
@@ -17,7 +18,9 @@ pub fn straight_attacks(
                 current_file += (entry.0).0;
                 let attacked_position = position::Position(current_file as u8, current_rank as u8);
                 attacked_positions.push(attacked_position);
-                if board.get_square(attacked_position).is_some() {
+                if board.get_square(attacked_position).is_some()
+                    && attacked_position != enemy_king_pos
+                {
                     break;
                 }
             }
@@ -26,7 +29,9 @@ pub fn straight_attacks(
                 current_rank += (entry.0).1;
                 let attacked_position = position::Position(current_file as u8, current_rank as u8);
                 attacked_positions.push(attacked_position);
-                if board.get_square(attacked_position).is_some() {
+                if board.get_square(attacked_position).is_some()
+                    && attacked_position != enemy_king_pos
+                {
                     break;
                 }
             }
@@ -39,6 +44,7 @@ pub fn straight_attacks(
 pub fn diagonal_attacks(
     position: position::Position,
     board: &board::Board,
+    enemy_king_pos: position::Position,
 ) -> Vec<position::Position> {
     let moves_and_bounds = [
         ((1, 1), (8, 8)),
@@ -57,7 +63,8 @@ pub fn diagonal_attacks(
             current_rank += (entry.0).1;
             let attacked_position = position::Position(current_file as u8, current_rank as u8);
             attacked_positions.push(attacked_position);
-            if board.get_square(attacked_position).is_some() {
+            if board.get_square(attacked_position).is_some() && attacked_position != enemy_king_pos
+            {
                 break;
             }
         }

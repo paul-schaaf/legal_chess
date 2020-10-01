@@ -25,7 +25,11 @@ impl piece::Piece for King {
         piece::PieceEnum::KING
     }
 
-    fn attacks(&self, _board: &board::Board) -> Vec<position::Position> {
+    fn attacks(
+        &self,
+        _board: &board::Board,
+        _enemy_king_pos: position::Position,
+    ) -> Vec<position::Position> {
         let position = self.position;
         let mut attacked_positions = vec![];
 
@@ -157,7 +161,7 @@ mod tests {
             color: color::Color::WHITE,
             position: position::Position(1, 1),
         };
-        let attacked_positions = king.attacks(&board::Board::empty());
+        let attacked_positions = king.attacks(&board::Board::empty(), position::Position(0, 0));
 
         let expected = vec![
             position::Position(1, 2),
@@ -178,7 +182,7 @@ mod tests {
             color: color::Color::WHITE,
             position: position::Position(5, 4),
         };
-        let attacked_positions = king.attacks(&board::Board::empty());
+        let attacked_positions = king.attacks(&board::Board::empty(), position::Position(0, 0));
         let expected = vec![
             position::Position(5, 5),
             position::Position(6, 5),

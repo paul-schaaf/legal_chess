@@ -1,10 +1,11 @@
 use crate::board;
 use crate::color;
-use crate::pieces::piece;
+use crate::pieces::{piece, position};
 
 pub fn get_attacked_squares(
     board: &board::Board,
     color: color::Color,
+    enemy_king_pos: position::Position,
 ) -> Vec<Vec<Option<Vec<&Box<dyn piece::Piece>>>>> {
     let mut attacked_board: Vec<Vec<Option<Vec<&Box<dyn piece::Piece>>>>> = vec![];
 
@@ -20,7 +21,7 @@ pub fn get_attacked_squares(
             None => (),
             Some(piece) => {
                 if *piece.color() == color {
-                    let attacked_positions = piece.attacks(board);
+                    let attacked_positions = piece.attacks(board, enemy_king_pos);
                     attacked_positions.iter().for_each(|position| {
                         let square =
                             attacked_board[position.0 as usize - 1][position.1 as usize - 1].take();
@@ -62,7 +63,8 @@ mod tests {
 
         empty_board.set_square(Some(Box::new(pawn)), position);
 
-        let attacked_board = get_attacked_squares(&empty_board, color::Color::WHITE);
+        let attacked_board =
+            get_attacked_squares(&empty_board, color::Color::WHITE, position::Position(0, 0));
         assert_eq!(8, attacked_board.len());
         assert!(attacked_board.iter().all(|file| file.len() == 8));
 
@@ -89,7 +91,7 @@ mod tests {
 
     fn initial_board_attacks(color: color::Color) {
         let board = board::Board::initial();
-        let attacked_squares = get_attacked_squares(&board, color);
+        let attacked_squares = get_attacked_squares(&board, color, position::Position(0, 0));
 
         for i in 0..8 {
             match (&attacked_squares[i][3], &attacked_squares[i][4]) {

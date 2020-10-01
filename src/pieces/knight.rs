@@ -50,7 +50,11 @@ impl piece::Piece for Knight {
         piece::PieceEnum::KNIGHT
     }
 
-    fn attacks(&self, _board: &board::Board) -> Vec<position::Position> {
+    fn attacks(
+        &self,
+        _board: &board::Board,
+        _enemy_king_pos: position::Position,
+    ) -> Vec<position::Position> {
         let positions: [[i8; 2]; 8] = [
             [1, 2],
             [1, -2],
@@ -119,7 +123,7 @@ mod tests {
             position::Position(8, 7),
             position::Position(7, 8),
         ];
-        let actual = k.attacks(&board::Board::empty());
+        let actual = k.attacks(&board::Board::empty(), position::Position(0, 0));
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -142,7 +146,7 @@ mod tests {
             position::Position(8, 4),
             position::Position(8, 8),
         ];
-        let actual = k.attacks(&board::Board::empty());
+        let actual = k.attacks(&board::Board::empty(), position::Position(0, 0));
 
         for square in expected {
             assert!(actual.contains(&square));
@@ -163,7 +167,7 @@ mod tests {
             position::Position(7, 8),
             position::Position(6, 7),
         ];
-        let actual = k.attacks(&board::Board::empty());
+        let actual = k.attacks(&board::Board::empty(), position::Position(0, 0));
 
         for square in expected {
             assert!(actual.contains(&square));

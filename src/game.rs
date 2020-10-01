@@ -154,10 +154,12 @@ impl Game {
             color::Color::WHITE => color::Color::BLACK,
             color::Color::BLACK => color::Color::WHITE,
         };
-        let attacked_board = attack::get_attacked_squares(self.board(), other_side);
+        let attacked_board =
+            attack::get_attacked_squares(self.board(), other_side, self.current_king_position());
         let king_position = self.current_king_position();
         let attacked_king_square =
             &attacked_board[king_position.0 as usize - 1][king_position.1 as usize - 1];
+
         match attacked_king_square {
             Some(v) => {
                 let king = match self.board().get_square(king_position) {
@@ -199,6 +201,7 @@ impl Game {
         >,
     ) -> Vec<chessmove::ChessMove> {
         let moves = king.moves(self.board(), *king.position());
+
         moves
             .iter()
             .filter(|mv| attacked_board[mv.0 as usize - 1][mv.1 as usize - 1].is_none())
@@ -399,5 +402,33 @@ mod tests {
 
         let moves = game.legal_moves();
         assert_eq!(20, moves.len());
+    }
+
+    #[test]
+    fn king_attacked_by_slider_cannot_move_back() {
+        let mut game = Game::new();
+        game.board = board::Board::empty();
+
+        let black_queen_pos = position::Position(1, 8);
+        let black_queen = queen::Queen {
+            id: 1,
+            color: color::Color::BLACK,
+            position: black_queen_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(black_queen)), black_queen_pos);
+
+        let white_king_pos = position::Position(1, 2);
+        let white_king = king::King {
+            id: 2,
+            color: color::Color::WHITE,
+            position: white_king_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(white_king)), white_king_pos);
+        game.white_king = position::Position(1, 2);
+
+        let moves = game.legal_moves();
+        assert_eq!(3, moves.len());
     }
 }
