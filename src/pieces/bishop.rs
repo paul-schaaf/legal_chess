@@ -29,7 +29,7 @@ impl piece::Piece for Bishop {
         piece::PieceEnum::BISHOP
     }
 
-    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position> {
         sliding_moves::diagonal_sliding(self, board)
     }
 }
@@ -185,7 +185,7 @@ mod tests {
             Some(b) => b,
         };
 
-        let attacked_positions = bishop.moves(&empty_board);
+        let attacked_positions = bishop.moves_ignoring_pins(&empty_board);
 
         let mut count = 1;
         let expected_attacked_positions = iter::from_fn(|| {

@@ -30,13 +30,28 @@ pub trait Piece: fmt::Debug {
 
     fn piece(&self) -> PieceEnum;
 
-    fn moves(&self, board: &board::Board) -> Vec<position::Position>;
+    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position>;
 
-    fn moves_if_pinned(
+    fn moves(&self, board: &board::Board, king: position::Position) -> Vec<position::Position> {
+        let moves_ignoring_pins = self.moves_ignoring_pins(board);
+        match self.valid_moves_during_pin(board, king) {
+            None => moves_ignoring_pins,
+            Some(valid_moves_during_pin) => moves_ignoring_pins
+                .into_iter()
+                .filter(|mv| valid_moves_during_pin.contains(mv))
+                .collect::<Vec<_>>(),
+        }
+    }
+
+    fn valid_moves_during_pin(
         &self,
         board: &board::Board,
         king: position::Position,
     ) -> Option<Vec<position::Position>> {
+        if *self.position() == king {
+            return None;
+        }
+
         let (mover, direction) = match get_relative_king_position(self.position(), king) {
             None => return None,
             Some(RelativeKingPosition::Bottom) => ((0, -1), Direction::STRAIGHT),
@@ -188,7 +203,7 @@ mod tests {
         board.set_square(Some(Box::new(black_queen)), position::Position(4, 8));
 
         if let Some(knight) = board.get_square(position::Position(4, 4)) {
-            if let Some(actual) = knight.moves_if_pinned(&board, position::Position(4, 1)) {
+            if let Some(actual) = knight.valid_moves_during_pin(&board, position::Position(4, 1)) {
                 let expected = vec![
                     position::Position(4, 2),
                     position::Position(4, 3),
@@ -239,7 +254,7 @@ mod tests {
 
         if let Some(knight) = board.get_square(position::Position(4, 4)) {
             assert!(knight
-                .moves_if_pinned(&board, position::Position(4, 1))
+                .valid_moves_during_pin(&board, position::Position(4, 1))
                 .is_none());
         } else {
             panic!();
@@ -281,7 +296,7 @@ mod tests {
 
         if let Some(knight) = board.get_square(position::Position(4, 4)) {
             assert!(knight
-                .moves_if_pinned(&board, position::Position(4, 1))
+                .valid_moves_during_pin(&board, position::Position(4, 1))
                 .is_none());
         } else {
             panic!();
@@ -316,7 +331,7 @@ mod tests {
         board.set_square(Some(Box::new(black_queen)), position::Position(4, 8));
 
         if let Some(knight) = board.get_square(position::Position(4, 4)) {
-            assert!(knight.moves_if_pinned(&board, king_pos).is_none());
+            assert!(knight.valid_moves_during_pin(&board, king_pos).is_none());
         } else {
             panic!();
         }
@@ -351,7 +366,7 @@ mod tests {
         board.set_square(Some(Box::new(black_bishop)), position::Position(6, 6));
 
         if let Some(knight) = board.get_square(knight_pos) {
-            if let Some(actual) = knight.moves_if_pinned(&board, king_pos) {
+            if let Some(actual) = knight.valid_moves_during_pin(&board, king_pos) {
                 let expected = vec![
                     position::Position(2, 2),
                     position::Position(3, 3),
@@ -408,7 +423,7 @@ mod tests {
         board.set_square(Some(Box::new(black_knight)), black_knight_pos);
 
         if let Some(knight) = board.get_square(knight_pos) {
-            assert!(knight.moves_if_pinned(&board, king_pos).is_none());
+            assert!(knight.valid_moves_during_pin(&board, king_pos).is_none());
         } else {
             panic!();
         }
@@ -435,10 +450,12 @@ mod tests {
 
         if let Some(knight) = board.get_square(position::Position(4, 4)) {
             assert!(knight
-                .moves_if_pinned(&board, position::Position(4, 1))
+                .valid_moves_during_pin(&board, position::Position(4, 1))
                 .is_none());
         } else {
             panic!();
         }
     }
+
+    // TODO: incorporate new moves function into these tests / write new ones
 }

@@ -13,7 +13,7 @@ impl piece::Piece for Knight {
         self.id
     }
 
-    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position> {
         let positions: [[i8; 2]; 8] = [
             [1, 2],
             [1, -2],

@@ -53,7 +53,7 @@ impl piece::Piece for Pawn {
         }
     }
 
-    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position> {
         let position = self.position();
         let mut moves = vec![];
 
@@ -240,7 +240,7 @@ mod tests {
             position::Position(4, 4),
             position::Position(5, 3),
         ];
-        let moves = white_pawn.moves(&board);
+        let moves = white_pawn.moves_ignoring_pins(&board);
         assert_eq!(3, moves.len());
         for mv in expected_moves {
             assert!(moves.contains(&mv));
@@ -263,7 +263,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(white_pawn_2)), white_pawn_2_pos);
 
-        let moves = white_pawn.moves(&board);
+        let moves = white_pawn.moves_ignoring_pins(&board);
         assert_eq!(0, moves.len());
     }
 
@@ -283,7 +283,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(white_pawn_2)), white_pawn_2_pos);
 
-        let moves = white_pawn.moves(&board);
+        let moves = white_pawn.moves_ignoring_pins(&board);
         assert_eq!(1, moves.len());
         assert_eq!(position::Position(4, 3), moves[0]);
     }
@@ -312,7 +312,7 @@ mod tests {
             position::Position(5, 5),
             position::Position(6, 6),
         ];
-        let moves = black_pawn.moves(&board);
+        let moves = black_pawn.moves_ignoring_pins(&board);
         assert_eq!(3, moves.len());
         for mv in expected_moves {
             assert!(moves.contains(&mv));
@@ -335,7 +335,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(black_pawn_2)), black_pawn_2_pos);
 
-        let moves = black_pawn.moves(&board);
+        let moves = black_pawn.moves_ignoring_pins(&board);
         assert_eq!(0, moves.len());
     }
 
@@ -355,7 +355,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(black_pawn_2)), black_pawn_2_pos);
 
-        let moves = black_pawn.moves(&board);
+        let moves = black_pawn.moves_ignoring_pins(&board);
         assert_eq!(1, moves.len());
         assert_eq!(position::Position(5, 6), moves[0]);
     }

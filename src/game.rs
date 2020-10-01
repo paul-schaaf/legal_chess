@@ -175,7 +175,7 @@ impl Game {
                 for piece in self.board.pieces_of_color(*self.side_to_move()) {
                     moves.append(
                         &mut (piece
-                            .moves(&self.board)
+                            .moves(&self.board, king_position)
                             .iter()
                             .map(|pos| chessmove::ChessMove {
                                 source_file: piece.position().0,
@@ -198,7 +198,7 @@ impl Game {
             std::vec::Vec<std::option::Option<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>>,
         >,
     ) -> Vec<chessmove::ChessMove> {
-        let moves = king.moves(self.board());
+        let moves = king.moves(self.board(), *king.position());
         moves
             .iter()
             .filter(|mv| attacked_board[mv.0 as usize - 1][mv.1 as usize - 1].is_none())

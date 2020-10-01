@@ -29,7 +29,7 @@ impl piece::Piece for Rook {
         sliding_attacks::straight_attacks(self.position, board)
     }
 
-    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position> {
         sliding_moves::straight_sliding(self, board)
     }
 }

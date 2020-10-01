@@ -25,7 +25,7 @@ impl piece::Piece for Queen {
         piece::PieceEnum::QUEEN
     }
 
-    fn moves(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position> {
         let mut straight_moves = sliding_moves::straight_sliding(self, board);
         let mut diagonal_moves = sliding_moves::diagonal_sliding(self, board);
         straight_moves.append(&mut diagonal_moves);
