@@ -55,8 +55,8 @@ pub trait Piece: fmt::Debug {
         let mut new_rank = self.position().1 as i8;
 
         loop {
-            new_file = new_file + mover.0;
-            new_rank = new_rank + mover.1;
+            new_file += mover.0;
+            new_rank += mover.1;
 
             let new_position = position::Position(new_file as u8, new_rank as u8);
 
@@ -65,12 +65,10 @@ pub trait Piece: fmt::Debug {
                 Some(piece) => {
                     if piece.piece() != PieceEnum::KING {
                         return None;
+                    } else if *piece.color() == *self.color() {
+                        break;
                     } else {
-                        if *piece.color() == *self.color() {
-                            break;
-                        } else {
-                            return None;
-                        }
+                        return None;
                     }
                 }
             }
@@ -80,8 +78,8 @@ pub trait Piece: fmt::Debug {
         let mut new_rank = self.position().1 as i8;
 
         loop {
-            new_file = new_file + mover.0 * -1;
-            new_rank = new_rank + mover.1 * -1;
+            new_file += -mover.0;
+            new_rank += -mover.1;
 
             if new_file < 1 || new_file > 8 || new_rank < 1 || new_rank > 8 {
                 return None;
@@ -94,23 +92,14 @@ pub trait Piece: fmt::Debug {
                 Some(piece) => {
                     if *piece.color() == *self.color() {
                         return None;
+                    } else if piece.piece() == PieceEnum::QUEEN
+                        || (piece.piece() == PieceEnum::ROOK && direction == Direction::STRAIGHT)
+                        || (piece.piece() == PieceEnum::BISHOP && direction == Direction::DIAGONAL)
+                    {
+                        moves.push(new_position);
+                        break;
                     } else {
-                        if piece.piece() == PieceEnum::QUEEN {
-                            moves.push(new_position);
-                            break;
-                        } else if piece.piece() == PieceEnum::ROOK
-                            && direction == Direction::STRAIGHT
-                        {
-                            moves.push(new_position);
-                            break;
-                        } else if piece.piece() == PieceEnum::BISHOP
-                            && direction == Direction::DIAGONAL
-                        {
-                            moves.push(new_position);
-                            break;
-                        } else {
-                            return None;
-                        }
+                        return None;
                     }
                 }
             }
@@ -146,12 +135,10 @@ fn get_relative_king_position(
                 } else {
                     Some(RelativeKingPosition::BottomRight)
                 }
+            } else if self_position.1 < king.1 {
+                Some(RelativeKingPosition::UpLeft)
             } else {
-                if self_position.1 < king.1 {
-                    Some(RelativeKingPosition::UpLeft)
-                } else {
-                    Some(RelativeKingPosition::BottomLeft)
-                }
+                Some(RelativeKingPosition::BottomLeft)
             }
         } else {
             None
