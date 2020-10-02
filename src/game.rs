@@ -184,12 +184,53 @@ impl Game {
                 );
             }
 
-            moves.append(&mut self.king_moves(king, &attacked_board));
-
             if king_square_attackers.len() == 0 {
+                moves.append(&mut self.king_moves(king, &attacked_board));
                 moves
             } else {
-                moves
+                let attacker = king_square_attackers[0];
+                if attacker.piece() == piece::PieceEnum::KNIGHT {
+                    moves = moves
+                        .into_iter()
+                        .filter(|mv| {
+                            mv.target_file == attacker.position().0
+                                && mv.target_rank == attacker.position().1
+                        })
+                        .collect::<Vec<_>>();
+                    moves.append(&mut self.king_moves(king, &attacked_board));
+                    moves
+                } else if attacker.piece() == piece::PieceEnum::PAWN {
+                    moves = moves
+                        .into_iter()
+                        .filter(|mv| {
+                            if let Some(en_passant) = self.en_passant {
+                                match self
+                                    .board()
+                                    .get_square(position::Position(mv.source_file, mv.source_rank))
+                                {
+                                    None => panic!(),
+                                    Some(piece) => {
+                                        if piece.piece() == piece::PieceEnum::PAWN {
+                                            mv.target_file == en_passant.0
+                                                && mv.target_rank == en_passant.1
+                                        } else {
+                                            mv.target_file == attacker.position().0
+                                                && mv.target_rank == attacker.position().1
+                                        }
+                                    }
+                                }
+                            } else {
+                                mv.target_file == attacker.position().0
+                                    && mv.target_rank == attacker.position().1
+                            }
+                        })
+                        .collect::<Vec<_>>();
+                    moves.append(&mut self.king_moves(king, &attacked_board));
+                    moves
+                } else {
+                    moves.append(&mut self.king_moves(king, &attacked_board));
+                    moves
+                }
             }
         }
     }
@@ -218,7 +259,7 @@ impl Game {
 
 #[cfg(test)]
 mod tests {
-    use super::super::pieces::{bishop, king, knight, queen, rook};
+    use super::super::pieces::{king, knight, pawn, queen, rook};
     use super::*;
 
     const INITIAL_GAME_ARR: [&str; 73] = [
@@ -369,7 +410,7 @@ mod tests {
         assert_eq!(0, moves.len());
     }
 
-    #[test]
+    /*     #[test]
     fn scholars_mate() {
         let mut game = Game::new();
 
@@ -395,7 +436,9 @@ mod tests {
 
         let moves = game.legal_moves();
         assert_eq!(0, moves.len());
-    }
+    } */
+
+    // TODO: scholar's mate
 
     #[test]
     fn initial_game_setup_legal_moves() {
@@ -434,4 +477,79 @@ mod tests {
     }
 
     // TODO test double en passant
+
+    #[test]
+    fn king_attacked_by_horse_in_initial_pos() {
+        let mut game = Game::new();
+
+        let black_knight_pos = position::Position(4, 3);
+        let black_knight = knight::Knight {
+            id: 100,
+            color: color::Color::BLACK,
+            position: black_knight_pos,
+        };
+
+        game.board
+            .set_square(Some(Box::new(black_knight)), black_knight_pos);
+
+        let actual_legal_moves = game.legal_moves();
+        let expected_legal_moves = vec![
+            chessmove::ChessMove {
+                source_file: 3,
+                source_rank: 2,
+                target_file: 4,
+                target_rank: 3,
+            },
+            chessmove::ChessMove {
+                source_file: 5,
+                source_rank: 2,
+                target_file: 4,
+                target_rank: 3,
+            },
+        ];
+        assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
+        for mv in &actual_legal_moves {
+            assert!(expected_legal_moves.contains(mv));
+        }
+    }
+
+    #[test]
+    fn check_that_can_be_removed_by_en_passant() {
+        let mut game = Game::new();
+
+        game.en_passant = Some(position::Position(5, 6));
+
+        game.board = board::Board::empty();
+
+        let white_king_pos = position::Position(6, 4);
+        let white_king = king::King {
+            id: 100,
+            color: color::Color::WHITE,
+            position: white_king_pos,
+        };
+        game.white_king = white_king_pos;
+        game.board
+            .set_square(Some(Box::new(white_king)), white_king_pos);
+
+        let white_pawn_pos = position::Position(4, 5);
+        let white_pawn = pawn::Pawn {
+            id: 101,
+            color: color::Color::WHITE,
+            position: white_pawn_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(white_pawn)), white_pawn_pos);
+
+        let black_pawn_pos = position::Position(5, 5);
+        let black_pawn = pawn::Pawn {
+            id: 102,
+            color: color::Color::BLACK,
+            position: black_pawn_pos,
+        };
+        game.board
+            .set_square(Some(Box::new(black_pawn)), black_pawn_pos);
+
+        let actual_legal_moves = game.legal_moves();
+        assert_eq!(9, actual_legal_moves.len());
+    }
 }
