@@ -546,23 +546,23 @@ mod tests {
     fn scholars_mate_with_pawn() {
         let mut game = Game::new();
 
-        let white_pawn_pos = position::Position(6, 7);
-        let white_pawn = pawn::Pawn {
-            id: 100,
-            color: color::Color::WHITE,
-            position: white_pawn_pos,
-        };
-        game.board
-            .set_square(Some(Box::new(white_pawn)), white_pawn_pos);
+        set_piece(
+            &mut game.board,
+            Box::new(pawn::Pawn {
+                id: 100,
+                color: color::Color::WHITE,
+                position: position::Position(6, 7),
+            }),
+        );
 
-        let white_bishop_pos = position::Position(3, 4);
-        let white_bishop = bishop::Bishop {
-            id: 100,
-            color: color::Color::WHITE,
-            position: white_bishop_pos,
-        };
-        game.board
-            .set_square(Some(Box::new(white_bishop)), white_bishop_pos);
+        set_piece(
+            &mut game.board,
+            Box::new(bishop::Bishop {
+                id: 100,
+                color: color::Color::WHITE,
+                position: position::Position(3, 4),
+            }),
+        );
 
         game.side_to_move = color::Color::BLACK;
 
@@ -576,47 +576,52 @@ mod tests {
         game.board = board::Board::empty();
 
         let black_king_pos = position::Position(8, 8);
-        let black_pawn_pos = position::Position(8, 7);
-        let white_knight_pos = position::Position(6, 7);
-        let white_rook_pos = position::Position(7, 2);
 
-        let black_king = king::King {
-            id: 1,
-            color: color::Color::BLACK,
-            position: black_king_pos,
-        };
+        set_piece(
+            &mut game.board,
+            Box::new(king::King {
+                id: 1,
+                color: color::Color::BLACK,
+                position: black_king_pos,
+            }),
+        );
 
-        let black_pawn = pawn::Pawn {
-            id: 2,
-            color: color::Color::BLACK,
-            position: black_pawn_pos,
-        };
+        set_piece(
+            &mut game.board,
+            Box::new(pawn::Pawn {
+                id: 2,
+                color: color::Color::BLACK,
+                position: position::Position(8, 7),
+            }),
+        );
 
-        let white_knight = knight::Knight {
-            id: 3,
-            color: color::Color::WHITE,
-            position: white_knight_pos,
-        };
+        set_piece(
+            &mut game.board,
+            Box::new(knight::Knight {
+                id: 3,
+                color: color::Color::WHITE,
+                position: position::Position(6, 7),
+            }),
+        );
 
-        let white_rook = rook::Rook {
-            id: 4,
-            color: color::Color::WHITE,
-            position: white_rook_pos,
-        };
-
-        game.board
-            .set_square(Some(Box::new(black_king)), black_king_pos);
-        game.board
-            .set_square(Some(Box::new(black_pawn)), black_pawn_pos);
-        game.board
-            .set_square(Some(Box::new(white_knight)), white_knight_pos);
-        game.board
-            .set_square(Some(Box::new(white_rook)), white_rook_pos);
+        set_piece(
+            &mut game.board,
+            Box::new(rook::Rook {
+                id: 4,
+                color: color::Color::WHITE,
+                position: position::Position(7, 2),
+            }),
+        );
 
         game.black_king = black_king_pos;
         game.side_to_move = color::Color::BLACK;
 
         let actual_legal_moves = game.legal_moves();
         assert_eq!(0, actual_legal_moves.len());
+    }
+
+    fn set_piece(board: &mut board::Board, piece: Box<dyn piece::Piece>) {
+        let position = *piece.position();
+        board.set_square(Some(piece), position);
     }
 }
