@@ -174,11 +174,11 @@ impl Game {
                     &mut (piece
                         .moves(&self.board, king_position, &self.en_passant)
                         .iter()
-                        .map(|pos| chessmove::ChessMove {
-                            source_file: piece.position().0,
-                            source_rank: piece.position().1,
-                            target_file: pos.0,
-                            target_rank: pos.1,
+                        .map(|pos| {
+                            chessmove::ChessMove(
+                                (piece.position().0, piece.position().1),
+                                (pos.0, pos.1),
+                            )
                         })
                         .collect::<Vec<_>>()),
                 );
@@ -193,8 +193,7 @@ impl Game {
                     moves = moves
                         .into_iter()
                         .filter(|mv| {
-                            mv.target_file == attacker.position().0
-                                && mv.target_rank == attacker.position().1
+                            (mv.1).0 == attacker.position().0 && (mv.1).1 == attacker.position().1
                         })
                         .collect::<Vec<_>>();
                     moves.append(&mut self.king_moves(king, &attacked_board));
@@ -206,22 +205,21 @@ impl Game {
                             if let Some(en_passant) = self.en_passant {
                                 match self
                                     .board()
-                                    .get_square(position::Position(mv.source_file, mv.source_rank))
+                                    .get_square(position::Position((mv.0).0, (mv.0).1))
                                 {
                                     None => panic!(),
                                     Some(piece) => {
                                         if piece.piece() == piece::PieceEnum::PAWN {
-                                            mv.target_file == en_passant.0
-                                                && mv.target_rank == en_passant.1
+                                            (mv.1).0 == en_passant.0 && (mv.1).1 == en_passant.1
                                         } else {
-                                            mv.target_file == attacker.position().0
-                                                && mv.target_rank == attacker.position().1
+                                            (mv.1).0 == attacker.position().0
+                                                && (mv.1).1 == attacker.position().1
                                         }
                                     }
                                 }
                             } else {
-                                mv.target_file == attacker.position().0
-                                    && mv.target_rank == attacker.position().1
+                                (mv.1).0 == attacker.position().0
+                                    && (mv.1).1 == attacker.position().1
                             }
                         })
                         .collect::<Vec<_>>();
@@ -247,12 +245,7 @@ impl Game {
         moves
             .iter()
             .filter(|mv| attacked_board[mv.0 as usize - 1][mv.1 as usize - 1].len() == 0)
-            .map(|mv| chessmove::ChessMove {
-                source_file: king.position().0,
-                source_rank: king.position().1,
-                target_file: mv.0,
-                target_rank: mv.1,
-            })
+            .map(|mv| chessmove::ChessMove((king.position().0, king.position().1), (mv.0, mv.1)))
             .collect::<Vec<_>>()
     }
 }
@@ -353,15 +346,7 @@ mod tests {
 
         let moves = game.legal_moves();
         assert_eq!(1, moves.len());
-        assert_eq!(
-            chessmove::ChessMove {
-                source_file: 1,
-                source_rank: 1,
-                target_file: 2,
-                target_rank: 2
-            },
-            moves[0]
-        );
+        assert_eq!(chessmove::ChessMove((1, 1), (2, 2)), moves[0]);
     }
 
     #[test]
@@ -494,18 +479,8 @@ mod tests {
 
         let actual_legal_moves = game.legal_moves();
         let expected_legal_moves = vec![
-            chessmove::ChessMove {
-                source_file: 3,
-                source_rank: 2,
-                target_file: 4,
-                target_rank: 3,
-            },
-            chessmove::ChessMove {
-                source_file: 5,
-                source_rank: 2,
-                target_file: 4,
-                target_rank: 3,
-            },
+            chessmove::ChessMove((3, 2), (4, 3)),
+            chessmove::ChessMove((5, 2), (4, 3)),
         ];
         assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
         for mv in &actual_legal_moves {
@@ -551,5 +526,6 @@ mod tests {
 
         let actual_legal_moves = game.legal_moves();
         assert_eq!(9, actual_legal_moves.len());
+        // todo check chess move content
     }
 }
