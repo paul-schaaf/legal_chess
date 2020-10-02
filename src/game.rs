@@ -157,37 +157,38 @@ impl Game {
         let attacked_board =
             attack::get_attacked_squares(self.board(), other_side, self.current_king_position());
         let king_position = self.current_king_position();
-        let attacked_king_square =
+        let king_square_attackers =
             &attacked_board[king_position.0 as usize - 1][king_position.1 as usize - 1];
 
-        match attacked_king_square {
-            Some(v) => {
-                let king = match self.board().get_square(king_position) {
-                    Some(king) => king,
-                    _ => panic!(),
-                };
-                if v.len() > 1 {
-                    self.king_moves(king, &attacked_board)
-                } else {
-                    self.king_moves(king, &attacked_board)
-                }
+        let king = match self.board().get_square(king_position) {
+            Some(king) => king,
+            _ => panic!(),
+        };
+
+        if king_square_attackers.len() > 1 {
+            self.king_moves(king, &attacked_board)
+        } else {
+            let mut moves: Vec<chessmove::ChessMove> = vec![];
+            for piece in self.board.pieces_of_color_except_king(*self.side_to_move()) {
+                moves.append(
+                    &mut (piece
+                        .moves(&self.board, king_position, &self.en_passant)
+                        .iter()
+                        .map(|pos| chessmove::ChessMove {
+                            source_file: piece.position().0,
+                            source_rank: piece.position().1,
+                            target_file: pos.0,
+                            target_rank: pos.1,
+                        })
+                        .collect::<Vec<_>>()),
+                );
             }
-            None => {
-                let mut moves: Vec<chessmove::ChessMove> = vec![];
-                for piece in self.board.pieces_of_color(*self.side_to_move()) {
-                    moves.append(
-                        &mut (piece
-                            .moves(&self.board, king_position, &self.en_passant)
-                            .iter()
-                            .map(|pos| chessmove::ChessMove {
-                                source_file: piece.position().0,
-                                source_rank: piece.position().1,
-                                target_file: pos.0,
-                                target_rank: pos.1,
-                            })
-                            .collect::<Vec<_>>()),
-                    );
-                }
+
+            moves.append(&mut self.king_moves(king, &attacked_board));
+
+            if king_square_attackers.len() == 0 {
+                moves
+            } else {
                 moves
             }
         }
@@ -197,14 +198,14 @@ impl Game {
         &self,
         king: &Box<dyn piece::Piece>,
         attacked_board: &std::vec::Vec<
-            std::vec::Vec<std::option::Option<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>>,
+            std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>,
         >,
     ) -> Vec<chessmove::ChessMove> {
         let moves = king.moves(self.board(), *king.position(), &None);
 
         moves
             .iter()
-            .filter(|mv| attacked_board[mv.0 as usize - 1][mv.1 as usize - 1].is_none())
+            .filter(|mv| attacked_board[mv.0 as usize - 1][mv.1 as usize - 1].len() == 0)
             .map(|mv| chessmove::ChessMove {
                 source_file: king.position().0,
                 source_rank: king.position().1,

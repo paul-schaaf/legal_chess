@@ -6,13 +6,13 @@ pub fn get_attacked_squares(
     board: &board::Board,
     color: color::Color,
     enemy_king_pos: position::Position,
-) -> Vec<Vec<Option<Vec<&Box<dyn piece::Piece>>>>> {
-    let mut attacked_board: Vec<Vec<Option<Vec<&Box<dyn piece::Piece>>>>> = vec![];
+) -> Vec<Vec<Vec<&Box<dyn piece::Piece>>>> {
+    let mut attacked_board: Vec<Vec<Vec<&Box<dyn piece::Piece>>>> = vec![];
 
     for i in 0..8 {
         attacked_board.push(vec![]);
         for _ in 0..8 {
-            attacked_board[i].push(None);
+            attacked_board[i].push(vec![]);
         }
     }
 
@@ -23,17 +23,9 @@ pub fn get_attacked_squares(
                 if *piece.color() == color {
                     let attacked_positions = piece.attacks(board, enemy_king_pos);
                     attacked_positions.iter().for_each(|position| {
-                        let square =
-                            attacked_board[position.0 as usize - 1][position.1 as usize - 1].take();
-                        let new_square = match square {
-                            None => Some(vec![piece]),
-                            Some(mut v) => {
-                                v.push(piece);
-                                Some(v)
-                            }
-                        };
-                        attacked_board[position.0 as usize - 1][position.1 as usize - 1] =
-                            new_square;
+                        let attackers =
+                            &mut attacked_board[position.0 as usize - 1][position.1 as usize - 1];
+                        attackers.push(piece);
                     })
                 }
             }
@@ -68,13 +60,9 @@ mod tests {
         assert_eq!(8, attacked_board.len());
         assert!(attacked_board.iter().all(|file| file.len() == 8));
 
-        let actual = match &attacked_board[1][2] {
-            None => panic!("Expected vector of attacking pieces, was: None"),
-            Some(v) => {
-                assert_eq!(1, v.len());
-                v[0]
-            }
-        };
+        assert_eq!(1, attacked_board[1][2].len());
+
+        let actual = attacked_board[1][2][0];
 
         assert_eq!(pawn_id, actual.get_id());
     }
@@ -94,10 +82,8 @@ mod tests {
         let attacked_squares = get_attacked_squares(&board, color, position::Position(0, 0));
 
         for i in 0..8 {
-            match (&attacked_squares[i][3], &attacked_squares[i][4]) {
-                (None, None) => (),
-                _ => panic!("Should've been: None"),
-            }
+            assert_eq!(0, attacked_squares[i][3].len());
+            assert_eq!(0, attacked_squares[i][4].len());
         }
 
         let modifier = if color == color::Color::WHITE { 0 } else { 3 };
@@ -211,29 +197,20 @@ mod tests {
     }
 
     fn assert_attacked_by(
-        square: &std::option::Option<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>,
+        actual_attackers: &Vec<&std::boxed::Box<dyn piece::Piece>>,
         attackers: Vec<(piece::PieceEnum, u8)>,
     ) {
-        match square {
-            Some(v) => {
-                let expected_sum_of_attackers =
-                    attackers.iter().fold(0, |acc, attacker| acc + attacker.1);
-                assert_eq!(expected_sum_of_attackers as usize, v.len());
-                for attacker in attackers {
-                    let attacking_pieces = v
-                        .iter()
-                        .filter(|v| v.piece() == attacker.0)
-                        .collect::<Vec<_>>();
-                    assert_eq!(attacker.1 as usize, attacking_pieces.len());
-                    for piece in attacking_pieces {
-                        assert_eq!(attacker.0, piece.piece());
-                    }
-                }
-            }
-            _ => {
-                if attackers.len() != 0 {
-                    panic!("Should have no attackers but had some.")
-                }
+        let expected_sum_of_attackers = attackers.iter().fold(0, |acc, attacker| acc + attacker.1);
+        assert_eq!(expected_sum_of_attackers as usize, actual_attackers.len());
+
+        for attacker in attackers {
+            let attacking_pieces = actual_attackers
+                .iter()
+                .filter(|v| v.piece() == attacker.0)
+                .collect::<Vec<_>>();
+            assert_eq!(attacker.1 as usize, attacking_pieces.len());
+            for piece in attacking_pieces {
+                assert_eq!(attacker.0, piece.piece());
             }
         }
     }
