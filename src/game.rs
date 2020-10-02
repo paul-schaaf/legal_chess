@@ -525,7 +525,20 @@ mod tests {
             .set_square(Some(Box::new(black_pawn)), black_pawn_pos);
 
         let actual_legal_moves = game.legal_moves();
-        assert_eq!(9, actual_legal_moves.len());
-        // todo check chess move content
+        let expected_legal_moves = vec![
+            chessmove::ChessMove((6, 4), (6, 3)),
+            chessmove::ChessMove((6, 4), (5, 3)),
+            chessmove::ChessMove((6, 4), (5, 4)),
+            chessmove::ChessMove((6, 4), (5, 5)),
+            chessmove::ChessMove((6, 4), (6, 5)),
+            chessmove::ChessMove((6, 4), (7, 5)),
+            chessmove::ChessMove((6, 4), (7, 4)),
+            chessmove::ChessMove((6, 4), (7, 3)),
+            chessmove::ChessMove((4, 5), (5, 6)),
+        ];
+        assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
+        for mv in &expected_legal_moves {
+            assert!(actual_legal_moves.contains(mv));
+        }
     }
 }
