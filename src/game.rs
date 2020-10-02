@@ -4,7 +4,7 @@ use super::{attack, board, chessmove, color};
 
 pub struct Game {
     board: board::Board,
-    en_passant: Option<chessmove::ChessMove>,
+    en_passant: Option<position::Position>,
     side_to_move: color::Color,
     castling_rights_white: (bool, bool),
     castling_rights_black: (bool, bool),
@@ -57,17 +57,25 @@ impl Game {
                 rank += 1;
             }
         }
-        let en_passant: Option<chessmove::ChessMove> = if game_arr[64] == "-" {
+        let en_passant: Option<position::Position> = if game_arr[64] == "-" {
             None
         } else {
-            Some(chessmove::ChessMove {
-                source_file: game_arr[64].as_bytes()[0],
-                source_rank: game_arr[65].as_bytes()[0],
-                target_file: game_arr[66].as_bytes()[0],
-                target_rank: game_arr[67].as_bytes()[0],
-            })
+            Some(position::Position(
+                game_arr[64].as_bytes()[0],
+                game_arr[65].as_bytes()[0],
+            ))
         };
-        let castling_rights_white = if game_arr[68] == "1" && game_arr[69] == "1" {
+        let castling_rights_white = if game_arr[66] == "1" && game_arr[67] == "1" {
+            (true, true)
+        } else if game_arr[66] == "1" {
+            (true, false)
+        } else if game_arr[67] == "1" {
+            (false, true)
+        } else {
+            (false, false)
+        };
+
+        let castling_rights_black = if game_arr[68] == "1" && game_arr[69] == "1" {
             (true, true)
         } else if game_arr[68] == "1" {
             (true, false)
@@ -77,24 +85,20 @@ impl Game {
             (false, false)
         };
 
-        let castling_rights_black = if game_arr[70] == "1" && game_arr[71] == "1" {
-            (true, true)
-        } else if game_arr[70] == "1" {
-            (true, false)
-        } else if game_arr[71] == "1" {
-            (false, true)
+        let half_moves = match game_arr[70].parse() {
+            Ok(v) => v,
+            _ => panic!(),
+        };
+
+        let full_moves = match game_arr[71].parse() {
+            Ok(v) => v,
+            _ => panic!(),
+        };
+
+        let side_to_move = if game_arr[72] == "w" {
+            color::Color::WHITE
         } else {
-            (false, false)
-        };
-
-        let half_moves = match game_arr[72].parse() {
-            Ok(v) => v,
-            _ => panic!(),
-        };
-
-        let full_moves = match game_arr[73].parse() {
-            Ok(v) => v,
-            _ => panic!(),
+            color::Color::BLACK
         };
 
         Self {
@@ -102,11 +106,7 @@ impl Game {
             en_passant,
             castling_rights_white,
             castling_rights_black,
-            side_to_move: if game_arr[74] == "w" {
-                color::Color::WHITE
-            } else {
-                color::Color::BLACK
-            },
+            side_to_move,
             half_moves,
             full_moves,
             white_king,
@@ -118,7 +118,7 @@ impl Game {
         &self.board
     }
 
-    pub fn en_passant(&self) -> &Option<chessmove::ChessMove> {
+    pub fn en_passant(&self) -> &Option<position::Position> {
         &self.en_passant
     }
 
@@ -221,12 +221,12 @@ mod tests {
     use super::super::pieces::{bishop, king, knight, queen, rook};
     use super::*;
 
-    const INITIAL_GAME_ARR: [&str; 75] = [
+    const INITIAL_GAME_ARR: [&str; 73] = [
         "R", "P", "-", "-", "-", "-", "p", "r", "N", "P", "-", "-", "-", "-", "p", "n", "B", "P",
         "-", "-", "-", "-", "p", "b", "Q", "P", "-", "-", "-", "-", "p", "q", "K", "P", "-", "-",
         "-", "-", "p", "k", "B", "P", "-", "-", "-", "-", "p", "b", "N", "P", "-", "-", "-", "-",
-        "p", "n", "R", "P", "-", "-", "-", "-", "p", "r", "-", "-", "-", "-", "1", "1", "1", "1",
-        "0", "1", "w",
+        "p", "n", "R", "P", "-", "-", "-", "-", "p", "r", "-", "-", "1", "1", "1", "1", "0", "1",
+        "w",
     ];
 
     #[test]
@@ -432,4 +432,6 @@ mod tests {
         let moves = game.legal_moves();
         assert_eq!(3, moves.len());
     }
+
+    // TODO test double en passant
 }

@@ -1,5 +1,5 @@
 use super::{piece, position, sliding_attacks, sliding_moves};
-use crate::{board, chessmove, color};
+use crate::{board, color};
 
 #[derive(Debug)]
 pub struct Queen {
@@ -28,7 +28,7 @@ impl piece::Piece for Queen {
     fn moves_ignoring_pins(
         &self,
         board: &board::Board,
-        _en_passant: &Option<chessmove::ChessMove>,
+        _en_passant: &Option<position::Position>,
     ) -> Vec<position::Position> {
         let mut straight_moves = sliding_moves::straight_sliding(self, board);
         let mut diagonal_moves = sliding_moves::diagonal_sliding(self, board);

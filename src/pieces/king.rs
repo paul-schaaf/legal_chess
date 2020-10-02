@@ -1,5 +1,5 @@
 use super::{piece, piece::Piece, position};
-use crate::{board, chessmove, color};
+use crate::{board, color};
 
 #[derive(Debug)]
 pub struct King {
@@ -65,7 +65,7 @@ impl piece::Piece for King {
     fn moves_ignoring_pins(
         &self,
         board: &board::Board,
-        _en_passant: &Option<chessmove::ChessMove>,
+        _en_passant: &Option<position::Position>,
     ) -> Vec<position::Position> {
         let position = self.position;
         let mut positions_to_move_to = vec![];

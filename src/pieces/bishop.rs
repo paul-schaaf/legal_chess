@@ -1,5 +1,5 @@
 use super::{piece, position, sliding_attacks, sliding_moves};
-use crate::{board, chessmove, color};
+use crate::{board, color};
 
 #[derive(Debug)]
 pub struct Bishop {
@@ -36,7 +36,7 @@ impl piece::Piece for Bishop {
     fn moves_ignoring_pins(
         &self,
         board: &board::Board,
-        _en_passant: &Option<chessmove::ChessMove>,
+        _en_passant: &Option<position::Position>,
     ) -> Vec<position::Position> {
         sliding_moves::diagonal_sliding(self, board)
     }

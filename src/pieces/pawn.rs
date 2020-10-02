@@ -1,6 +1,6 @@
 use super::piece;
 use super::position;
-use crate::{board, chessmove, color};
+use crate::{board, color};
 
 #[derive(Debug, PartialEq)]
 pub struct Pawn {
@@ -60,7 +60,7 @@ impl piece::Piece for Pawn {
     fn moves_ignoring_pins(
         &self,
         board: &board::Board,
-        en_passant: &Option<chessmove::ChessMove>,
+        en_passant: &Option<position::Position>,
     ) -> Vec<position::Position> {
         let position = self.position();
         let mut moves = vec![];
@@ -119,13 +119,25 @@ impl piece::Piece for Pawn {
         }
 
         if let Some(en_passant) = en_passant {
-            if en_passant.source_file == self.position.0
-                && en_passant.source_rank == self.position.1
-            {
-                moves.push(position::Position(
-                    en_passant.target_file,
-                    en_passant.target_rank,
-                ));
+            match self.color() {
+                color::Color::WHITE => {
+                    if self.position.1 == 5 && en_passant.1 == 6 {
+                        if (en_passant.0 == self.position.0 - 1)
+                            || (en_passant.0 == self.position.0 + 1)
+                        {
+                            moves.push(*en_passant);
+                        }
+                    }
+                }
+                color::Color::BLACK => {
+                    if self.position.1 == 4 && en_passant.1 == 3 {
+                        if (en_passant.0 == self.position.0 - 1)
+                            || (en_passant.0 == self.position.0 + 1)
+                        {
+                            moves.push(*en_passant);
+                        }
+                    }
+                }
             }
         }
 
@@ -408,15 +420,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(white_pawn)), white_pawn_pos);
 
-        let moves = black_pawn.moves_ignoring_pins(
-            &board,
-            &Some(chessmove::ChessMove {
-                source_file: 4,
-                source_rank: 4,
-                target_file: 5,
-                target_rank: 3,
-            }),
-        );
+        let moves = black_pawn.moves_ignoring_pins(&board, &Some(position::Position(5, 3)));
         let expected = vec![position::Position(4, 3), position::Position(5, 3)];
         assert_eq!(expected.len(), moves.len());
         for mv in expected {
