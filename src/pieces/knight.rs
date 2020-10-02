@@ -1,5 +1,5 @@
 use super::{piece, position};
-use crate::{board, color};
+use crate::{board, chessmove, color};
 
 #[derive(Debug)]
 pub struct Knight {
@@ -13,7 +13,11 @@ impl piece::Piece for Knight {
         self.id
     }
 
-    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves_ignoring_pins(
+        &self,
+        board: &board::Board,
+        _en_passant: &Option<chessmove::ChessMove>,
+    ) -> Vec<position::Position> {
         let positions: [[i8; 2]; 8] = [
             [1, 2],
             [1, -2],

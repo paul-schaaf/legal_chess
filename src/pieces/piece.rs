@@ -1,5 +1,5 @@
 use super::position;
-use crate::{board, color};
+use crate::{board, chessmove, color};
 use std::fmt;
 
 enum RelativeKingPosition {
@@ -34,10 +34,19 @@ pub trait Piece: fmt::Debug {
 
     fn piece(&self) -> PieceEnum;
 
-    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position>;
+    fn moves_ignoring_pins(
+        &self,
+        board: &board::Board,
+        en_passant: &Option<chessmove::ChessMove>,
+    ) -> Vec<position::Position>;
 
-    fn moves(&self, board: &board::Board, king: position::Position) -> Vec<position::Position> {
-        let moves_ignoring_pins = self.moves_ignoring_pins(board);
+    fn moves(
+        &self,
+        board: &board::Board,
+        king: position::Position,
+        en_passant: &Option<chessmove::ChessMove>,
+    ) -> Vec<position::Position> {
+        let moves_ignoring_pins = self.moves_ignoring_pins(board, en_passant);
         match self.valid_moves_during_pin(board, king) {
             None => moves_ignoring_pins,
             Some(valid_moves_during_pin) => moves_ignoring_pins

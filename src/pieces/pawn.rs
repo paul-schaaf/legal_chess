@@ -1,6 +1,6 @@
 use super::piece;
 use super::position;
-use crate::{board, color};
+use crate::{board, chessmove, color};
 
 #[derive(Debug, PartialEq)]
 pub struct Pawn {
@@ -57,7 +57,11 @@ impl piece::Piece for Pawn {
         }
     }
 
-    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves_ignoring_pins(
+        &self,
+        board: &board::Board,
+        en_passant: &Option<chessmove::ChessMove>,
+    ) -> Vec<position::Position> {
         let position = self.position();
         let mut moves = vec![];
 
@@ -113,6 +117,18 @@ impl piece::Piece for Pawn {
                 }
             }
         }
+
+        if let Some(en_passant) = en_passant {
+            if en_passant.source_file == self.position.0
+                && en_passant.source_rank == self.position.1
+            {
+                moves.push(position::Position(
+                    en_passant.target_file,
+                    en_passant.target_rank,
+                ));
+            }
+        }
+
         moves
     }
 
@@ -256,7 +272,7 @@ mod tests {
             position::Position(4, 4),
             position::Position(5, 3),
         ];
-        let moves = white_pawn.moves_ignoring_pins(&board);
+        let moves = white_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(3, moves.len());
         for mv in expected_moves {
             assert!(moves.contains(&mv));
@@ -279,7 +295,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(white_pawn_2)), white_pawn_2_pos);
 
-        let moves = white_pawn.moves_ignoring_pins(&board);
+        let moves = white_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(0, moves.len());
     }
 
@@ -299,7 +315,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(white_pawn_2)), white_pawn_2_pos);
 
-        let moves = white_pawn.moves_ignoring_pins(&board);
+        let moves = white_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(1, moves.len());
         assert_eq!(position::Position(4, 3), moves[0]);
     }
@@ -328,7 +344,7 @@ mod tests {
             position::Position(5, 5),
             position::Position(6, 6),
         ];
-        let moves = black_pawn.moves_ignoring_pins(&board);
+        let moves = black_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(3, moves.len());
         for mv in expected_moves {
             assert!(moves.contains(&mv));
@@ -351,7 +367,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(black_pawn_2)), black_pawn_2_pos);
 
-        let moves = black_pawn.moves_ignoring_pins(&board);
+        let moves = black_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(0, moves.len());
     }
 
@@ -371,8 +387,40 @@ mod tests {
         };
         board.set_square(Some(Box::new(black_pawn_2)), black_pawn_2_pos);
 
-        let moves = black_pawn.moves_ignoring_pins(&board);
+        let moves = black_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(1, moves.len());
         assert_eq!(position::Position(5, 6), moves[0]);
+    }
+
+    #[test]
+    fn en_passant() {
+        let mut board = board::Board::empty();
+        let black_pawn = pawn::Pawn {
+            id: 1,
+            color: color::Color::BLACK,
+            position: position::Position(4, 4),
+        };
+        let white_pawn_pos = position::Position(5, 4);
+        let white_pawn = pawn::Pawn {
+            id: 2,
+            color: color::Color::WHITE,
+            position: white_pawn_pos,
+        };
+        board.set_square(Some(Box::new(white_pawn)), white_pawn_pos);
+
+        let moves = black_pawn.moves_ignoring_pins(
+            &board,
+            &Some(chessmove::ChessMove {
+                source_file: 4,
+                source_rank: 4,
+                target_file: 5,
+                target_rank: 3,
+            }),
+        );
+        let expected = vec![position::Position(4, 3), position::Position(5, 3)];
+        assert_eq!(expected.len(), moves.len());
+        for mv in expected {
+            assert!(moves.contains(&mv));
+        }
     }
 }

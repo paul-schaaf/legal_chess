@@ -1,5 +1,5 @@
 use super::{piece, piece::Piece, position};
-use crate::{board, color};
+use crate::{board, chessmove, color};
 
 #[derive(Debug)]
 pub struct King {
@@ -62,7 +62,11 @@ impl piece::Piece for King {
         attacked_positions
     }
 
-    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves_ignoring_pins(
+        &self,
+        board: &board::Board,
+        _en_passant: &Option<chessmove::ChessMove>,
+    ) -> Vec<position::Position> {
         let position = self.position;
         let mut positions_to_move_to = vec![];
 
@@ -217,7 +221,7 @@ mod tests {
 
         board.set_square(Some(Box::new(black_pawn)), position::Position(2, 2));
 
-        let possible_moves = king.moves_ignoring_pins(&board);
+        let possible_moves = king.moves_ignoring_pins(&board, &None);
 
         let expected = vec![
             position::Position(1, 2),
@@ -248,7 +252,7 @@ mod tests {
 
         board.set_square(Some(Box::new(white_pawn)), position::Position(2, 2));
 
-        let possible_moves = king.moves_ignoring_pins(&board);
+        let possible_moves = king.moves_ignoring_pins(&board, &None);
 
         let expected = vec![position::Position(1, 2), position::Position(2, 1)];
 

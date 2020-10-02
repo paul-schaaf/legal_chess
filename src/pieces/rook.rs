@@ -1,5 +1,5 @@
 use super::{piece, position, sliding_attacks, sliding_moves};
-use crate::{board, color};
+use crate::{board, chessmove, color};
 
 #[derive(Debug)]
 pub struct Rook {
@@ -33,7 +33,11 @@ impl piece::Piece for Rook {
         sliding_attacks::straight_attacks(self.position, board, enemy_king_pos)
     }
 
-    fn moves_ignoring_pins(&self, board: &board::Board) -> Vec<position::Position> {
+    fn moves_ignoring_pins(
+        &self,
+        board: &board::Board,
+        _en_passant: &Option<chessmove::ChessMove>,
+    ) -> Vec<position::Position> {
         sliding_moves::straight_sliding(self, board)
     }
 }
