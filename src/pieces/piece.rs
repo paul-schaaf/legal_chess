@@ -1,23 +1,6 @@
-use super::position;
+use super::{position, relative_position};
 use crate::{board, color};
 use std::fmt;
-
-enum RelativeKingPosition {
-    Up,
-    UpRight,
-    Right,
-    BottomRight,
-    Bottom,
-    BottomLeft,
-    Left,
-    UpLeft,
-}
-
-#[derive(PartialEq, Debug)]
-enum Direction {
-    STRAIGHT,
-    DIAGONAL,
-}
 
 pub trait Piece: fmt::Debug {
     fn position(&self) -> &position::Position;
@@ -65,17 +48,11 @@ pub trait Piece: fmt::Debug {
             return None;
         }
 
-        let (mover, direction) = match get_relative_king_position(self.position(), king) {
-            None => return None,
-            Some(RelativeKingPosition::Bottom) => ((0, -1), Direction::STRAIGHT),
-            Some(RelativeKingPosition::Up) => ((0, 1), Direction::STRAIGHT),
-            Some(RelativeKingPosition::Left) => ((-1, 0), Direction::STRAIGHT),
-            Some(RelativeKingPosition::Right) => ((1, 0), Direction::STRAIGHT),
-            Some(RelativeKingPosition::UpRight) => ((1, 1), Direction::DIAGONAL),
-            Some(RelativeKingPosition::BottomRight) => ((1, -1), Direction::DIAGONAL),
-            Some(RelativeKingPosition::BottomLeft) => ((-1, -1), Direction::DIAGONAL),
-            Some(RelativeKingPosition::UpLeft) => ((-1, 1), Direction::DIAGONAL),
-        };
+        let (mover, direction) =
+            match relative_position::get_line_to_other_piece(self.position(), king) {
+                None => return None,
+                Some(v) => v,
+            };
 
         let mut moves = vec![];
 
@@ -120,57 +97,21 @@ pub trait Piece: fmt::Debug {
                 Some(piece) => {
                     if *piece.color() == *self.color() {
                         return None;
-                    } else if piece.piece() == PieceEnum::QUEEN
-                        || (piece.piece() == PieceEnum::ROOK && direction == Direction::STRAIGHT)
-                        || (piece.piece() == PieceEnum::BISHOP && direction == Direction::DIAGONAL)
-                    {
-                        moves.push(new_position);
-                        break;
-                    } else {
-                        return None;
+                    }
+                    match (piece.piece(), &direction) {
+                        (PieceEnum::QUEEN, _)
+                        | (PieceEnum::ROOK, relative_position::Direction::STRAIGHT(..))
+                        | (PieceEnum::BISHOP, relative_position::Direction::DIAGONAL(..)) => {
+                            moves.push(new_position);
+                            break;
+                        }
+                        (_, _) => return None,
                     }
                 }
             }
         }
 
         Some(moves)
-    }
-}
-
-fn get_relative_king_position(
-    self_position: &position::Position,
-    king: position::Position,
-) -> Option<RelativeKingPosition> {
-    if self_position.0 == king.0 {
-        if self_position.1 > king.1 {
-            Some(RelativeKingPosition::Bottom)
-        } else {
-            Some(RelativeKingPosition::Up)
-        }
-    } else if self_position.1 == king.1 {
-        if self_position.0 > king.0 {
-            Some(RelativeKingPosition::Left)
-        } else {
-            Some(RelativeKingPosition::Right)
-        }
-    } else {
-        let diff_file = self_position.0 as i8 - king.0 as i8;
-        let diff_rank = self_position.1 as i8 - king.1 as i8;
-        if diff_file.abs() == diff_rank.abs() {
-            if self_position.0 < king.0 {
-                if self_position.1 < king.1 {
-                    Some(RelativeKingPosition::UpRight)
-                } else {
-                    Some(RelativeKingPosition::BottomRight)
-                }
-            } else if self_position.1 < king.1 {
-                Some(RelativeKingPosition::UpLeft)
-            } else {
-                Some(RelativeKingPosition::BottomLeft)
-            }
-        } else {
-            None
-        }
     }
 }
 
