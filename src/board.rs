@@ -1,4 +1,6 @@
+use super::pieces::to_piece::ToPiece;
 use super::pieces::{bishop, king, knight, pawn, piece, position, queen, rook};
+
 use crate::color;
 use std::slice;
 
@@ -117,30 +119,76 @@ impl Board {
         self.board[position.0 as usize - 1][position.1 as usize - 1] = square;
     }
 
-    pub fn to_string_board(&self) -> [[&str; 8]; 8] {
-        let mut string_board = [["-"; 8]; 8];
-        for (file_index, file) in string_board.iter_mut().enumerate() {
-            for (rank_index, rank) in file.iter_mut().enumerate().take(8) {
-                match &self.board[file_index][rank_index] {
-                    None => *rank = "-",
+    pub fn to_string_board(&self) -> [&str; 64] {
+        let mut string_board = ["-"; 64];
+
+        let mut index = 0;
+
+        for file in &self.board {
+            for square in file {
+                match square {
+                    None => string_board[index] = "-",
                     Some(piece) => match (*piece.color(), piece.piece()) {
-                        (color::Color::WHITE, piece::PieceEnum::PAWN) => *rank = "P",
-                        (color::Color::BLACK, piece::PieceEnum::PAWN) => *rank = "p",
-                        (color::Color::WHITE, piece::PieceEnum::ROOK) => *rank = "R",
-                        (color::Color::BLACK, piece::PieceEnum::ROOK) => *rank = "r",
-                        (color::Color::WHITE, piece::PieceEnum::KNIGHT) => *rank = "N",
-                        (color::Color::BLACK, piece::PieceEnum::KNIGHT) => *rank = "n",
-                        (color::Color::WHITE, piece::PieceEnum::BISHOP) => *rank = "B",
-                        (color::Color::BLACK, piece::PieceEnum::BISHOP) => *rank = "b",
-                        (color::Color::WHITE, piece::PieceEnum::QUEEN) => *rank = "Q",
-                        (color::Color::BLACK, piece::PieceEnum::QUEEN) => *rank = "q",
-                        (color::Color::WHITE, piece::PieceEnum::KING) => *rank = "K",
-                        (color::Color::BLACK, piece::PieceEnum::KING) => *rank = "k",
+                        (color::Color::WHITE, piece::PieceEnum::PAWN) => string_board[index] = "P",
+                        (color::Color::BLACK, piece::PieceEnum::PAWN) => string_board[index] = "p",
+                        (color::Color::WHITE, piece::PieceEnum::ROOK) => string_board[index] = "R",
+                        (color::Color::BLACK, piece::PieceEnum::ROOK) => string_board[index] = "r",
+                        (color::Color::WHITE, piece::PieceEnum::KNIGHT) => {
+                            string_board[index] = "N"
+                        }
+                        (color::Color::BLACK, piece::PieceEnum::KNIGHT) => {
+                            string_board[index] = "n"
+                        }
+                        (color::Color::WHITE, piece::PieceEnum::BISHOP) => {
+                            string_board[index] = "B"
+                        }
+                        (color::Color::BLACK, piece::PieceEnum::BISHOP) => {
+                            string_board[index] = "b"
+                        }
+                        (color::Color::WHITE, piece::PieceEnum::QUEEN) => string_board[index] = "Q",
+                        (color::Color::BLACK, piece::PieceEnum::QUEEN) => string_board[index] = "q",
+                        (color::Color::WHITE, piece::PieceEnum::KING) => string_board[index] = "K",
+                        (color::Color::BLACK, piece::PieceEnum::KING) => string_board[index] = "k",
                     },
-                }
+                };
+                index += 1;
             }
         }
         string_board
+    }
+
+    pub fn from_string_board(
+        board_arr: &[&str; 64],
+    ) -> (Self, position::Position, position::Position) {
+        let mut board = Self::empty();
+        let mut file = 1;
+        let mut rank = 1;
+        let mut white_king = position::Position(0, 0);
+        let mut black_king = position::Position(0, 0);
+
+        for string_piece in board_arr.iter().take(64) {
+            let square = string_piece.to_piece(position::Position(file, rank));
+            if let Some(p) = &square {
+                match (p.color(), p.piece()) {
+                    (color::Color::WHITE, piece::PieceEnum::KING) => {
+                        white_king = position::Position(file, rank)
+                    }
+                    (color::Color::BLACK, piece::PieceEnum::KING) => {
+                        black_king = position::Position(file, rank)
+                    }
+                    (_, _) => (),
+                }
+            }
+            board.set_square(square, position::Position(file, rank));
+            if rank == 8 {
+                rank = 1;
+                file += 1;
+            } else {
+                rank += 1;
+            }
+        }
+
+        (board, white_king, black_king)
     }
 
     pub fn pieces_of_color_except_king(&self, color: color::Color) -> Vec<&Box<dyn piece::Piece>> {

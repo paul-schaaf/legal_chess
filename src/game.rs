@@ -1,4 +1,3 @@
-use super::pieces::to_piece::ToPiece;
 use super::pieces::{piece, position, relative_position};
 use super::{attack, board, chessmove, color};
 
@@ -164,33 +163,11 @@ impl Game {
     }
 
     pub fn from_game_arr(game_arr: &[&str]) -> Self {
-        let mut board = board::Board::empty();
-        let mut file = 1;
-        let mut rank = 1;
-        let mut white_king = position::Position(0, 0);
-        let mut black_king = position::Position(0, 0);
+        let mut board_slice: [&str; 64] = [""; 64];
+        board_slice.copy_from_slice(&game_arr[0..64]);
 
-        for string_piece in game_arr.iter().take(64) {
-            let square = string_piece.to_piece(position::Position(file, rank));
-            if let Some(p) = &square {
-                match (p.color(), p.piece()) {
-                    (color::Color::WHITE, piece::PieceEnum::KING) => {
-                        white_king = position::Position(file, rank)
-                    }
-                    (color::Color::BLACK, piece::PieceEnum::KING) => {
-                        black_king = position::Position(file, rank)
-                    }
-                    (_, _) => (),
-                }
-            }
-            board.set_square(square, position::Position(file, rank));
-            if rank == 8 {
-                rank = 1;
-                file += 1;
-            } else {
-                rank += 1;
-            }
-        }
+        let (board, white_king, black_king) = board::Board::from_string_board(&board_slice);
+
         let en_passant: Option<position::Position> = if game_arr[64] == "-" {
             None
         } else {
@@ -497,7 +474,9 @@ mod tests {
         let expected_board = board::Board::initial();
         let expected_board = expected_board.to_string_board();
 
-        assert_eq!(expected_board, actual_board);
+        for i in 0..64 {
+            assert_eq!(expected_board[i], actual_board[i]);
+        }
     }
 
     #[test]
