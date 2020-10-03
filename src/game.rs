@@ -2,6 +2,18 @@ use super::pieces::to_piece::ToPiece;
 use super::pieces::{piece, position, relative_position};
 use super::{attack, board, chessmove, color};
 
+pub struct PreviousGameState {
+    en_passant: Option<position::Position>,
+    side_to_move: color::Color,
+    castling_rights_white: (bool, bool),
+    castling_rights_black: (bool, bool),
+    half_moves: u16,
+    full_moves: u16,
+    white_king: position::Position,
+    black_king: position::Position,
+    last_move: chessmove::ChessMove,
+}
+
 pub struct Game {
     board: board::Board,
     en_passant: Option<position::Position>,
@@ -12,6 +24,7 @@ pub struct Game {
     full_moves: u16,
     white_king: position::Position,
     black_king: position::Position,
+    previous_game_state: Option<PreviousGameState>,
 }
 
 impl Game {
@@ -26,6 +39,36 @@ impl Game {
             full_moves: 1,
             white_king: position::Position(5, 1),
             black_king: position::Position(5, 8),
+            previous_game_state: None,
+        }
+    }
+
+    pub fn undo_last_move(&mut self) {
+        match &self.previous_game_state {
+            None => panic!("No previous game state recorded"),
+            Some(previous_game_state) => {
+                self.black_king = previous_game_state.black_king;
+                self.white_king = previous_game_state.white_king;
+                self.castling_rights_black = previous_game_state.castling_rights_black;
+                self.castling_rights_black = previous_game_state.castling_rights_white;
+                self.en_passant = previous_game_state.en_passant;
+                self.full_moves = previous_game_state.full_moves;
+                self.half_moves = previous_game_state.half_moves;
+                self.side_to_move = previous_game_state.side_to_move;
+
+                let mut piece = self.board.take_piece(position::Position(
+                    (previous_game_state.last_move.1).0,
+                    (previous_game_state.last_move.1).1,
+                ));
+
+                let position = position::Position(
+                    (previous_game_state.last_move.0).0,
+                    (previous_game_state.last_move.0).1,
+                );
+
+                piece.set_position(&position);
+                self.board.set_square(Some(piece), position);
+            }
         }
     }
 
@@ -36,6 +79,22 @@ impl Game {
     ) {
         if !self.legal_moves().contains(&mv) {
             panic!("Not a legal move");
+        }
+
+        match self.previous_game_state {
+            _ => {
+                self.previous_game_state = Some(PreviousGameState {
+                    black_king: self.black_king,
+                    white_king: self.white_king,
+                    castling_rights_black: self.castling_rights_black,
+                    castling_rights_white: self.castling_rights_white,
+                    en_passant: self.en_passant,
+                    full_moves: self.full_moves,
+                    half_moves: self.half_moves,
+                    side_to_move: self.side_to_move,
+                    last_move: mv.clone(),
+                })
+            }
         }
 
         let piece = self
@@ -167,6 +226,7 @@ impl Game {
             full_moves,
             white_king,
             black_king,
+            previous_game_state: None,
         }
     }
 
@@ -1053,6 +1113,31 @@ mod tests {
         match game.board.get_square(position::Position(5, 4)) {
             None => panic!(),
             Some(p) => assert_eq!(position::Position(5, 4), *p.position()),
+        }
+    }
+
+    #[test]
+    fn undo_last_move() {
+        let mut game = Game::new();
+
+        game.make_move(chessmove::ChessMove((5, 2), (5, 4)), None);
+
+        assert!(game.board.get_square(position::Position(5, 2)).is_none());
+        assert!(game.board.get_square(position::Position(5, 4)).is_some());
+        assert_eq!(color::Color::BLACK, game.side_to_move);
+        match game.en_passant {
+            None => panic!(),
+            Some(ep) => assert_eq!(position::Position(5, 3), ep),
+        }
+
+        game.undo_last_move();
+
+        assert!(game.board.get_square(position::Position(5, 2)).is_some());
+        assert!(game.board.get_square(position::Position(5, 4)).is_none());
+        assert_eq!(color::Color::WHITE, game.side_to_move);
+        match game.en_passant {
+            None => (),
+            Some(_) => panic!(),
         }
     }
 
