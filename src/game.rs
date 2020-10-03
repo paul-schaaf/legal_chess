@@ -32,7 +32,7 @@ impl Game {
     pub fn make_move(
         &mut self,
         mv: chessmove::ChessMove,
-        promotion_piece: Option<piece::PieceEnum>,
+        _promotion_piece: Option<piece::PieceEnum>,
     ) {
         if !self.legal_moves().contains(&mv) {
             panic!("Not a legal move");
@@ -240,7 +240,7 @@ impl Game {
                 );
             }
 
-            if king_square_attackers.len() == 0 {
+            if king_square_attackers.is_empty() {
                 moves.append(&mut self.king_moves(king, &attacked_board));
                 moves
             } else {
@@ -338,11 +338,12 @@ impl Game {
 
         let mut moves = moves
             .iter()
-            .filter(|mv| attacked_board[mv.0 as usize - 1][mv.1 as usize - 1].len() == 0)
+            .filter(|mv| attacked_board[mv.0 as usize - 1][mv.1 as usize - 1].is_empty())
             .map(|mv| chessmove::ChessMove((king.position().0, king.position().1), (mv.0, mv.1)))
             .collect::<Vec<_>>();
 
-        if attacked_board[king.position().0 as usize - 1][king.position().1 as usize - 1].len() != 0
+        if !attacked_board[king.position().0 as usize - 1][king.position().1 as usize - 1]
+            .is_empty()
         {
             return moves;
         }
@@ -352,49 +353,43 @@ impl Game {
             color::Color::WHITE => self.castling_rights_white,
         };
 
-        if castling_rights.0 {
-            if self
+        if castling_rights.0
+            && self
                 .board
                 .get_square(position::Position(king.position().0 + 1, king.position().1))
                 .is_none()
-                && self
-                    .board
-                    .get_square(position::Position(king.position().0 + 2, king.position().1))
-                    .is_none()
-                && attacked_board[king.position().0 as usize][king.position().1 as usize - 1].len()
-                    == 0
-                && attacked_board[king.position().0 as usize + 1][king.position().1 as usize - 1]
-                    .len()
-                    == 0
-            {
-                moves.push(chessmove::ChessMove(
-                    (king.position().0, king.position().1),
-                    (king.position().0 + 2, king.position().1),
-                ));
-            }
+            && self
+                .board
+                .get_square(position::Position(king.position().0 + 2, king.position().1))
+                .is_none()
+            && attacked_board[king.position().0 as usize][king.position().1 as usize - 1].is_empty()
+            && attacked_board[king.position().0 as usize + 1][king.position().1 as usize - 1]
+                .is_empty()
+        {
+            moves.push(chessmove::ChessMove(
+                (king.position().0, king.position().1),
+                (king.position().0 + 2, king.position().1),
+            ));
         }
 
-        if castling_rights.1 {
-            if self
+        if castling_rights.1
+            && self
                 .board
                 .get_square(position::Position(king.position().0 - 1, king.position().1))
                 .is_none()
-                && self
-                    .board
-                    .get_square(position::Position(king.position().0 - 2, king.position().1))
-                    .is_none()
-                && attacked_board[king.position().0 as usize - 2][king.position().1 as usize - 1]
-                    .len()
-                    == 0
-                && attacked_board[king.position().0 as usize - 3][king.position().1 as usize - 1]
-                    .len()
-                    == 0
-            {
-                moves.push(chessmove::ChessMove(
-                    (king.position().0, king.position().1),
-                    (king.position().0 - 2, king.position().1),
-                ));
-            }
+            && self
+                .board
+                .get_square(position::Position(king.position().0 - 2, king.position().1))
+                .is_none()
+            && attacked_board[king.position().0 as usize - 2][king.position().1 as usize - 1]
+                .is_empty()
+            && attacked_board[king.position().0 as usize - 3][king.position().1 as usize - 1]
+                .is_empty()
+        {
+            moves.push(chessmove::ChessMove(
+                (king.position().0, king.position().1),
+                (king.position().0 - 2, king.position().1),
+            ));
         }
 
         moves

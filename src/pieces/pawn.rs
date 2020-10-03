@@ -120,21 +120,21 @@ impl piece::Piece for Pawn {
         if let Some(en_passant) = en_passant {
             match self.color() {
                 color::Color::WHITE => {
-                    if self.position.1 == 5 && en_passant.1 == 6 {
-                        if (en_passant.0 == self.position.0 - 1)
-                            || (en_passant.0 == self.position.0 + 1)
-                        {
-                            moves.push(*en_passant);
-                        }
+                    if self.position.1 == 5
+                        && en_passant.1 == 6
+                        && ((en_passant.0 == self.position.0 - 1)
+                            || (en_passant.0 == self.position.0 + 1))
+                    {
+                        moves.push(*en_passant);
                     }
                 }
                 color::Color::BLACK => {
-                    if self.position.1 == 4 && en_passant.1 == 3 {
-                        if (en_passant.0 == self.position.0 - 1)
-                            || (en_passant.0 == self.position.0 + 1)
-                        {
-                            moves.push(*en_passant);
-                        }
+                    if self.position.1 == 4
+                        && en_passant.1 == 3
+                        && ((en_passant.0 == self.position.0 - 1)
+                            || (en_passant.0 == self.position.0 + 1))
+                    {
+                        moves.push(*en_passant);
                     }
                 }
             }
