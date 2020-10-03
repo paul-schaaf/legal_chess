@@ -162,7 +162,7 @@ impl Game {
 
         let king = match self.board().get_square(king_position) {
             Some(king) => king,
-            _ => panic!(),
+            _ => panic!("No King found at king position"),
         };
 
         if king_square_attackers.len() > 1 {
@@ -493,7 +493,66 @@ mod tests {
         assert_eq!(3, moves.len());
     }
 
-    // TODO test double en passant
+    #[test]
+    fn double_en_passant() {
+        let mut game = Game::new();
+        game.board = board::Board::empty();
+
+        set_piece(
+            &mut game.board,
+            Box::new(pawn::Pawn {
+                id: 1,
+                color: color::Color::WHITE,
+                position: position::Position(4, 4),
+            }),
+        );
+        set_piece(
+            &mut game.board,
+            Box::new(pawn::Pawn {
+                id: 2,
+                color: color::Color::BLACK,
+                position: position::Position(3, 4),
+            }),
+        );
+        set_piece(
+            &mut game.board,
+            Box::new(pawn::Pawn {
+                id: 3,
+                color: color::Color::BLACK,
+                position: position::Position(5, 4),
+            }),
+        );
+
+        set_piece(
+            &mut game.board,
+            Box::new(king::King {
+                id: 4,
+                color: color::Color::BLACK,
+                position: position::Position(8, 8),
+            }),
+        );
+
+        game.en_passant = Some(position::Position(4, 3));
+        game.black_king = position::Position(8, 8);
+        game.side_to_move = color::Color::BLACK;
+
+        let actual_legal_moves = game.legal_moves();
+        println!("{:?}", actual_legal_moves);
+        let expected_legal_moves = vec![
+            chessmove::ChessMove((3, 4), (3, 3)),
+            chessmove::ChessMove((3, 4), (4, 3)),
+            chessmove::ChessMove((5, 4), (4, 3)),
+            chessmove::ChessMove((5, 4), (5, 3)),
+            chessmove::ChessMove((8, 8), (7, 8)),
+            chessmove::ChessMove((8, 8), (7, 7)),
+            chessmove::ChessMove((8, 8), (8, 7)),
+        ];
+
+        assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
+        for mv in &expected_legal_moves {
+            assert!(actual_legal_moves.contains(mv));
+        }
+    }
 
     #[test]
     fn king_attacked_by_horse_in_initial_pos() {
@@ -597,6 +656,34 @@ mod tests {
         );
 
         game.side_to_move = color::Color::BLACK;
+
+        let moves = game.legal_moves();
+        assert_eq!(0, moves.len());
+    }
+
+    #[test]
+    fn scholars_mate_black() {
+        let mut game = Game::new();
+
+        set_piece(
+            &mut game.board,
+            Box::new(queen::Queen {
+                id: 100,
+                color: color::Color::BLACK,
+                position: position::Position(6, 2),
+            }),
+        );
+
+        set_piece(
+            &mut game.board,
+            Box::new(bishop::Bishop {
+                id: 100,
+                color: color::Color::BLACK,
+                position: position::Position(3, 5),
+            }),
+        );
+
+        game.side_to_move = color::Color::WHITE;
 
         let moves = game.legal_moves();
         assert_eq!(0, moves.len());
