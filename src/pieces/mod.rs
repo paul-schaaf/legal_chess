@@ -5,7 +5,7 @@ pub mod pawn;
 pub mod piece;
 pub mod position;
 pub mod queen;
-mod relative_position;
+pub mod relative_position;
 pub mod rook;
 mod sliding_attacks;
 mod sliding_moves;

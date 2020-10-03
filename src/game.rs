@@ -1,5 +1,5 @@
 use super::pieces::to_piece::ToPiece;
-use super::pieces::{piece, position};
+use super::pieces::{piece, position, relative_position};
 use super::{attack, board, chessmove, color};
 
 pub struct Game {
@@ -226,6 +226,40 @@ impl Game {
                     moves.append(&mut self.king_moves(king, &attacked_board));
                     moves
                 } else {
+                    let (mover, _) = match relative_position::get_line_to_other_piece(
+                        king.position(),
+                        attacker.position(),
+                    ) {
+                        None => panic!(),
+                        Some(v) => v,
+                    };
+                    let mut allowed_positions = vec![];
+
+                    let mut new_file = king.position().0 as i8;
+                    let mut new_rank = king.position().1 as i8;
+
+                    loop {
+                        new_file += mover.0;
+                        new_rank += mover.1;
+
+                        let new_position = position::Position(new_file as u8, new_rank as u8);
+
+                        match self.board.get_square(new_position) {
+                            None => allowed_positions.push(new_position),
+                            Some(_) => {
+                                allowed_positions.push(new_position);
+                                break;
+                            }
+                        }
+                    }
+
+                    moves = moves
+                        .into_iter()
+                        .filter(|mv| {
+                            allowed_positions.contains(&position::Position((mv.1).0, (mv.1).1))
+                        })
+                        .collect::<Vec<_>>();
+
                     moves.append(&mut self.king_moves(king, &attacked_board));
                     moves
                 }
@@ -395,7 +429,7 @@ mod tests {
         assert_eq!(0, moves.len());
     }
 
-    /*     #[test]
+    #[test]
     fn scholars_mate() {
         let mut game = Game::new();
 
@@ -421,9 +455,7 @@ mod tests {
 
         let moves = game.legal_moves();
         assert_eq!(0, moves.len());
-    } */
-
-    // TODO: scholar's mate
+    }
 
     #[test]
     fn initial_game_setup_legal_moves() {

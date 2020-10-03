@@ -20,7 +20,7 @@ pub enum Direction {
 
 pub fn get_line_to_other_piece(
     self_position: &position::Position,
-    other_position: position::Position,
+    other_position: &position::Position,
 ) -> Option<((i8, i8), Direction)> {
     if self_position.0 == other_position.0 {
         if self_position.1 > other_position.1 {

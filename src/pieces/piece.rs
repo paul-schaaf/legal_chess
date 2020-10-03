@@ -49,7 +49,7 @@ pub trait Piece: fmt::Debug {
         }
 
         let (mover, direction) =
-            match relative_position::get_line_to_other_piece(self.position(), king) {
+            match relative_position::get_line_to_other_piece(self.position(), &king) {
                 None => return None,
                 Some(v) => v,
             };
