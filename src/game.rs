@@ -1,20 +1,17 @@
 use super::pieces::{piece, position, relative_position};
 use super::{attack, board, chessmove, color};
 
-pub struct PreviousGameState {
+pub struct PreviousGameState<'a> {
     en_passant: Option<position::Position>,
     side_to_move: color::Color,
     castling_rights_white: (bool, bool),
     castling_rights_black: (bool, bool),
     half_moves: u16,
     full_moves: u16,
-    white_king: position::Position,
-    black_king: position::Position,
-    last_move: chessmove::ChessMove,
-    captured: Option<(piece::PieceEnum, color::Color)>,
+    string_board: [&'a str; 64],
 }
 
-pub struct Game {
+pub struct Game<'a> {
     board: board::Board,
     en_passant: Option<position::Position>,
     side_to_move: color::Color,
@@ -24,10 +21,10 @@ pub struct Game {
     full_moves: u16,
     white_king: position::Position,
     black_king: position::Position,
-    previous_game_states: Vec<PreviousGameState>,
+    previous_game_states: Vec<PreviousGameState<'a>>,
 }
 
-impl Game {
+impl Game<'_> {
     pub fn new() -> Self {
         Self {
             board: board::Board::initial(),
@@ -53,8 +50,6 @@ impl Game {
             Some(v) => v,
         };
 
-        self.black_king = previous_game_state.black_king;
-        self.white_king = previous_game_state.white_king;
         self.castling_rights_black = previous_game_state.castling_rights_black;
         self.castling_rights_black = previous_game_state.castling_rights_white;
         self.en_passant = previous_game_state.en_passant;
@@ -62,30 +57,11 @@ impl Game {
         self.half_moves = previous_game_state.half_moves;
         self.side_to_move = previous_game_state.side_to_move;
 
-        let mut piece = self.board.take_piece(position::Position(
-            (previous_game_state.last_move.1).0,
-            (previous_game_state.last_move.1).1,
-        ));
-
-        let position = position::Position(
-            (previous_game_state.last_move.0).0,
-            (previous_game_state.last_move.0).1,
-        );
-
-        piece.set_position(&position);
-        self.board.set_square(Some(piece), position);
-
-        match previous_game_state.captured {
-            None => (),
-            Some(v) => {
-                let position = position::Position(
-                    (previous_game_state.last_move.1).0,
-                    (previous_game_state.last_move.1).1,
-                );
-                let piece = piece::type_to_piece(v.0, v.1, position);
-                self.board.set_square(Some(piece), position);
-            }
-        }
+        let (board, white_king, black_king) =
+            board::Board::from_string_board(&previous_game_state.string_board);
+        self.board = board;
+        self.white_king = white_king;
+        self.black_king = black_king;
     }
 
     pub fn make_move(
@@ -97,22 +73,13 @@ impl Game {
             panic!("Not a legal move");
         }
         self.previous_game_states.push(PreviousGameState {
-            black_king: self.black_king,
-            white_king: self.white_king,
+            string_board: self.board.to_string_board(),
             castling_rights_black: self.castling_rights_black,
             castling_rights_white: self.castling_rights_white,
             en_passant: self.en_passant,
             full_moves: self.full_moves,
             half_moves: self.half_moves,
             side_to_move: self.side_to_move,
-            last_move: mv.clone(),
-            captured: match self
-                .board
-                .get_square(position::Position((mv.1).0, (mv.1).1))
-            {
-                None => None,
-                Some(p) => Some((p.piece(), *p.color())),
-            },
         });
 
         let piece = self
@@ -135,6 +102,22 @@ impl Game {
                     self.black_king = position::Position((mv.1).0, (mv.1).1);
                     self.castling_rights_black = (false, false);
                 }
+            }
+
+            if (mv.0).0 + 2 == (mv.1).0 {
+                let mut rook = self
+                    .board
+                    .take_piece(position::Position((mv.0).0 + 3, (mv.0).1));
+                let position = position::Position((mv.0).0 + 1, (mv.1).1);
+                rook.set_position(&position);
+                self.board.set_square(Some(rook), position);
+            } else if (mv.0).0 as i8 - 2 == (mv.1).0 as i8 {
+                let mut rook = self
+                    .board
+                    .take_piece(position::Position((mv.0).0 - 4, (mv.0).1));
+                let position = position::Position((mv.0).0 - 1, (mv.1).1);
+                rook.set_position(&position);
+                self.board.set_square(Some(rook), position);
             }
         }
 
@@ -1141,5 +1124,83 @@ mod tests {
     fn set_piece(board: &mut board::Board, piece: Box<dyn piece::Piece>) {
         let position = *piece.position();
         board.set_square(Some(piece), position);
+    }
+
+    #[test]
+    fn castling_kingside_leads_to_pieces_having_moved() {
+        let mut game = Game::new();
+        game.board = board::Board::empty();
+
+        set_piece(
+            &mut game.board,
+            Box::new(rook::Rook {
+                color: color::Color::BLACK,
+                position: position::Position(1, 8),
+            }),
+        );
+
+        set_piece(
+            &mut game.board,
+            Box::new(rook::Rook {
+                color: color::Color::BLACK,
+                position: position::Position(8, 8),
+            }),
+        );
+
+        set_piece(
+            &mut game.board,
+            Box::new(king::King {
+                color: color::Color::BLACK,
+                position: position::Position(5, 8),
+            }),
+        );
+
+        game.side_to_move = color::Color::BLACK;
+        game.castling_rights_black = (true, false);
+
+        game.make_move(chessmove::ChessMove((5, 8), (7, 8)), None);
+
+        assert!(game.board.get_square(position::Position(7, 8)).is_some());
+        assert!(game.board.get_square(position::Position(6, 8)).is_some());
+    }
+
+    #[test]
+    fn castling_queenside_leads_to_pieces_having_moved() {
+        let mut game = Game::new();
+        game.board = board::Board::empty();
+
+        set_piece(
+            &mut game.board,
+            Box::new(rook::Rook {
+                color: color::Color::BLACK,
+                position: position::Position(1, 8),
+            }),
+        );
+
+        set_piece(
+            &mut game.board,
+            Box::new(rook::Rook {
+                color: color::Color::BLACK,
+                position: position::Position(8, 8),
+            }),
+        );
+
+        set_piece(
+            &mut game.board,
+            Box::new(king::King {
+                color: color::Color::BLACK,
+                position: position::Position(5, 8),
+            }),
+        );
+
+        game.side_to_move = color::Color::BLACK;
+        game.castling_rights_black = (true, true);
+
+        game.make_move(chessmove::ChessMove((5, 8), (3, 8)), None);
+
+        assert!(game.board.get_square(position::Position(3, 8)).is_some());
+        assert!(game.board.get_square(position::Position(4, 8)).is_some());
+        assert!(game.board.get_square(position::Position(1, 8)).is_none());
+        assert!(game.board.get_square(position::Position(5, 8)).is_none());
     }
 }

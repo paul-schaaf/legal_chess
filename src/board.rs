@@ -119,7 +119,7 @@ impl Board {
         self.board[position.0 as usize - 1][position.1 as usize - 1] = square;
     }
 
-    pub fn to_string_board(&self) -> [&str; 64] {
+    pub fn to_string_board<'a, 'b>(&'a self) -> [&'b str; 64] {
         let mut string_board = ["-"; 64];
 
         let mut index = 0;
