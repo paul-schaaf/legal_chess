@@ -12,6 +12,7 @@ pub struct PreviousGameState {
     white_king: position::Position,
     black_king: position::Position,
     last_move: chessmove::ChessMove,
+    captured: Option<(piece::PieceEnum, color::Color)>,
 }
 
 pub struct Game {
@@ -24,7 +25,7 @@ pub struct Game {
     full_moves: u16,
     white_king: position::Position,
     black_king: position::Position,
-    previous_game_state: Option<PreviousGameState>,
+    previous_game_states: Vec<PreviousGameState>,
 }
 
 impl Game {
@@ -39,34 +40,50 @@ impl Game {
             full_moves: 1,
             white_king: position::Position(5, 1),
             black_king: position::Position(5, 8),
-            previous_game_state: None,
+            previous_game_states: vec![],
         }
     }
 
     pub fn undo_last_move(&mut self) {
-        match &self.previous_game_state {
-            None => panic!("No previous game state recorded"),
-            Some(previous_game_state) => {
-                self.black_king = previous_game_state.black_king;
-                self.white_king = previous_game_state.white_king;
-                self.castling_rights_black = previous_game_state.castling_rights_black;
-                self.castling_rights_black = previous_game_state.castling_rights_white;
-                self.en_passant = previous_game_state.en_passant;
-                self.full_moves = previous_game_state.full_moves;
-                self.half_moves = previous_game_state.half_moves;
-                self.side_to_move = previous_game_state.side_to_move;
+        if self.previous_game_states.is_empty() {
+            panic!("No more previous game states");
+        }
 
-                let mut piece = self.board.take_piece(position::Position(
+        let previous_game_state = match self.previous_game_states.pop() {
+            None => panic!("No more previous game states"),
+            Some(v) => v,
+        };
+
+        self.black_king = previous_game_state.black_king;
+        self.white_king = previous_game_state.white_king;
+        self.castling_rights_black = previous_game_state.castling_rights_black;
+        self.castling_rights_black = previous_game_state.castling_rights_white;
+        self.en_passant = previous_game_state.en_passant;
+        self.full_moves = previous_game_state.full_moves;
+        self.half_moves = previous_game_state.half_moves;
+        self.side_to_move = previous_game_state.side_to_move;
+
+        let mut piece = self.board.take_piece(position::Position(
+            (previous_game_state.last_move.1).0,
+            (previous_game_state.last_move.1).1,
+        ));
+
+        let position = position::Position(
+            (previous_game_state.last_move.0).0,
+            (previous_game_state.last_move.0).1,
+        );
+
+        piece.set_position(&position);
+        self.board.set_square(Some(piece), position);
+
+        match previous_game_state.captured {
+            None => (),
+            Some(v) => {
+                let position = position::Position(
                     (previous_game_state.last_move.1).0,
                     (previous_game_state.last_move.1).1,
-                ));
-
-                let position = position::Position(
-                    (previous_game_state.last_move.0).0,
-                    (previous_game_state.last_move.0).1,
                 );
-
-                piece.set_position(&position);
+                let piece = piece::type_to_piece(v.0, v.1, position);
                 self.board.set_square(Some(piece), position);
             }
         }
@@ -80,22 +97,24 @@ impl Game {
         if !self.legal_moves().contains(&mv) {
             panic!("Not a legal move");
         }
-
-        match self.previous_game_state {
-            _ => {
-                self.previous_game_state = Some(PreviousGameState {
-                    black_king: self.black_king,
-                    white_king: self.white_king,
-                    castling_rights_black: self.castling_rights_black,
-                    castling_rights_white: self.castling_rights_white,
-                    en_passant: self.en_passant,
-                    full_moves: self.full_moves,
-                    half_moves: self.half_moves,
-                    side_to_move: self.side_to_move,
-                    last_move: mv.clone(),
-                })
-            }
-        }
+        self.previous_game_states.push(PreviousGameState {
+            black_king: self.black_king,
+            white_king: self.white_king,
+            castling_rights_black: self.castling_rights_black,
+            castling_rights_white: self.castling_rights_white,
+            en_passant: self.en_passant,
+            full_moves: self.full_moves,
+            half_moves: self.half_moves,
+            side_to_move: self.side_to_move,
+            last_move: mv.clone(),
+            captured: match self
+                .board
+                .get_square(position::Position((mv.1).0, (mv.1).1))
+            {
+                None => None,
+                Some(p) => Some((p.piece(), *p.color())),
+            },
+        });
 
         let piece = self
             .board
@@ -226,7 +245,7 @@ impl Game {
             full_moves,
             white_king,
             black_king,
-            previous_game_state: None,
+            previous_game_states: vec![],
         }
     }
 
@@ -695,7 +714,6 @@ mod tests {
         game.castling_rights_black = (false, false);
 
         let actual_legal_moves = game.legal_moves();
-        println!("{:?}", actual_legal_moves);
         let expected_legal_moves = vec![
             chessmove::ChessMove((3, 4), (3, 3)),
             chessmove::ChessMove((3, 4), (4, 3)),

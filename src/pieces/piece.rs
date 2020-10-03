@@ -1,4 +1,4 @@
-use super::{position, relative_position};
+use super::{bishop, king, knight, pawn, position, queen, relative_position, rook};
 use crate::{board, color};
 use std::fmt;
 
@@ -128,6 +128,21 @@ pub enum PieceEnum {
     KNIGHT,
     QUEEN,
     KING,
+}
+
+pub fn type_to_piece(
+    piece_type: PieceEnum,
+    color: color::Color,
+    position: position::Position,
+) -> Box<dyn Piece> {
+    match piece_type {
+        PieceEnum::PAWN => Box::new(pawn::Pawn { color, position }),
+        PieceEnum::ROOK => Box::new(rook::Rook { color, position }),
+        PieceEnum::KNIGHT => Box::new(knight::Knight { color, position }),
+        PieceEnum::QUEEN => Box::new(queen::Queen { color, position }),
+        PieceEnum::KING => Box::new(king::King { color, position }),
+        PieceEnum::BISHOP => Box::new(bishop::Bishop { color, position }),
+    }
 }
 
 #[cfg(test)]
