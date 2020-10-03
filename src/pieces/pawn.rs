@@ -13,6 +13,10 @@ impl piece::Piece for Pawn {
         piece::PieceEnum::PAWN
     }
 
+    fn mut_position(&mut self) -> &mut position::Position {
+        &mut self.position
+    }
+
     fn attacks(
         &self,
         _board: &board::Board,

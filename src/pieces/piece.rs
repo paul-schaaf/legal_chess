@@ -5,6 +5,13 @@ use std::fmt;
 pub trait Piece: fmt::Debug {
     fn position(&self) -> &position::Position;
 
+    fn mut_position(&mut self) -> &mut position::Position;
+
+    fn set_position(&mut self, position: &position::Position) {
+        self.mut_position().0 = position.0;
+        self.mut_position().1 = position.1;
+    }
+
     fn attacks(
         &self,
         board: &board::Board,

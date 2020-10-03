@@ -29,6 +29,62 @@ impl Game {
         }
     }
 
+    pub fn make_move(
+        &mut self,
+        mv: chessmove::ChessMove,
+        promotion_piece: Option<piece::PieceEnum>,
+    ) {
+        if !self.legal_moves().contains(&mv) {
+            panic!("Not a legal move");
+        }
+
+        let piece = self
+            .board
+            .take_piece(position::Position((mv.0).0, (mv.0).1));
+
+        if piece.piece() == piece::PieceEnum::PAWN {
+            match ((mv.0).1, (mv.1).1) {
+                (2, 4) => self.en_passant = Some(position::Position((mv.1).0, 3)),
+                (7, 5) => self.en_passant = Some(position::Position((mv.1).0, 6)),
+                (_, _) => self.en_passant = None,
+            }
+        } else if piece.piece() == piece::PieceEnum::KING {
+            match self.side_to_move {
+                color::Color::WHITE => {
+                    self.white_king = position::Position((mv.1).0, (mv.1).1);
+                    self.castling_rights_white = (false, false);
+                }
+                color::Color::BLACK => {
+                    self.black_king = position::Position((mv.1).0, (mv.1).1);
+                    self.castling_rights_black = (false, false);
+                }
+            }
+        }
+
+        match ((mv.0).1, (mv.1).1) {
+            (1, 8) => self.castling_rights_black = (self.castling_rights_black.0, false),
+            (8, 8) => self.castling_rights_black = (false, self.castling_rights_black.1),
+            (1, 1) => self.castling_rights_white = (self.castling_rights_white.0, false),
+            (8, 1) => self.castling_rights_white = (false, self.castling_rights_white.1),
+            (_, _) => (),
+        }
+
+        match self.side_to_move {
+            color::Color::BLACK => {
+                self.full_moves += 1;
+                self.side_to_move = color::Color::WHITE;
+            }
+            color::Color::WHITE => {
+                self.side_to_move = color::Color::BLACK;
+            }
+        }
+
+        let mut piece = piece;
+        let position = position::Position((mv.1).0, (mv.1).1);
+        piece.set_position(&position);
+        self.board.set_square(Some(piece), position);
+    }
+
     pub fn from_game_arr(game_arr: &[&str]) -> Self {
         let mut board = board::Board::empty();
         let mut file = 1;
@@ -942,6 +998,66 @@ mod tests {
 
         for mv in &expected_legal_moves {
             assert!(actual_legal_moves.contains(mv));
+        }
+    }
+
+    #[test]
+    fn white_castling_rights_get_removed() {
+        let mut game = Game::new();
+        game.board = board::Board::empty();
+
+        set_piece(
+            &mut game.board,
+            Box::new(king::King {
+                position: position::Position(5, 1),
+                color: color::Color::WHITE,
+            }),
+        );
+
+        set_piece(
+            &mut game.board,
+            Box::new(rook::Rook {
+                position: position::Position(8, 1),
+                color: color::Color::WHITE,
+            }),
+        );
+
+        assert_eq!((true, true), game.castling_rights_white);
+
+        game.make_move(chessmove::ChessMove((5, 1), (5, 2)), None);
+
+        assert_eq!(position::Position(5, 2), game.white_king);
+        assert_eq!((false, false), game.castling_rights_white);
+        assert_eq!(color::Color::BLACK, game.side_to_move);
+    }
+
+    #[test]
+    fn en_passant_is_registered() {
+        let mut game = Game::new();
+
+        game.make_move(chessmove::ChessMove((5, 2), (5, 4)), None);
+
+        match game.en_passant {
+            None => panic!(),
+            Some(ep) => assert_eq!(position::Position(5, 3), ep),
+        }
+
+        assert!(game.board.get_square(position::Position(5, 2)).is_none());
+        assert!(game.board.get_square(position::Position(5, 4)).is_some());
+    }
+
+    #[test]
+    fn assert_make_move_moves_piece() {
+        let mut game = Game::new();
+
+        game.make_move(chessmove::ChessMove((5, 2), (5, 4)), None);
+
+        assert!(game.board.get_square(position::Position(5, 2)).is_none());
+        assert!(game.board.get_square(position::Position(5, 4)).is_some());
+
+        match game.board.get_square(position::Position(5, 4)) {
+            None => panic!(),
+            Some(p) => assert_eq!(position::Position(5, 4), *p.position()),
         }
     }
 

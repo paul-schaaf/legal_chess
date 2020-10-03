@@ -16,6 +16,10 @@ impl piece::Piece for Bishop {
         &self.position
     }
 
+    fn mut_position(&mut self) -> &mut position::Position {
+        &mut self.position
+    }
+
     fn attacks(
         &self,
         board: &board::Board,

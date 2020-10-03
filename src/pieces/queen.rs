@@ -16,6 +16,10 @@ impl piece::Piece for Queen {
         &self.position
     }
 
+    fn mut_position(&mut self) -> &mut position::Position {
+        &mut self.position
+    }
+
     fn piece(&self) -> piece::PieceEnum {
         piece::PieceEnum::QUEEN
     }

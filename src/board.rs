@@ -100,6 +100,15 @@ impl Board {
         &self.board[position.0 as usize - 1][position.1 as usize - 1]
     }
 
+    pub fn take_piece(&mut self, position: position::Position) -> Box<dyn piece::Piece> {
+        let piece = self.board[position.0 as usize - 1][position.1 as usize - 1].take();
+
+        match piece {
+            None => panic!("No piece at position: {:?}", position),
+            Some(piece) => piece,
+        }
+    }
+
     pub fn set_square(
         &mut self,
         square: Option<Box<dyn piece::Piece>>,

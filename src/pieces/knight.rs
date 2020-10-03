@@ -83,6 +83,10 @@ impl piece::Piece for Knight {
         &self.position
     }
 
+    fn mut_position(&mut self) -> &mut position::Position {
+        &mut self.position
+    }
+
     fn color(&self) -> &color::Color {
         &self.color
     }
