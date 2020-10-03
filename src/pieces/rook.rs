@@ -3,16 +3,11 @@ use crate::{board, color};
 
 #[derive(Debug)]
 pub struct Rook {
-    pub id: u8,
     pub color: color::Color,
     pub position: position::Position,
 }
 
 impl piece::Piece for Rook {
-    fn get_id(&self) -> u8 {
-        self.id
-    }
-
     fn color(&self) -> &color::Color {
         &self.color
     }
@@ -55,7 +50,6 @@ mod tests {
         let position = position::Position(1, 1);
 
         let rook = Rook {
-            id: 1,
             color: color::Color::WHITE,
             position,
         };
@@ -100,7 +94,6 @@ mod tests {
 
         let position = position::Position(5, 4);
         let rook = Rook {
-            id: 1,
             color: color::Color::WHITE,
             position,
         };
@@ -108,7 +101,6 @@ mod tests {
 
         let pawn_position = position::Position(5, 5);
         let pawn = pawn::Pawn {
-            id: 2,
             color: color::Color::WHITE,
             position: pawn_position,
         };
@@ -116,7 +108,6 @@ mod tests {
 
         let rook_position = position::Position(8, 4);
         let other_rook = Rook {
-            id: 3,
             color: color::Color::BLACK,
             position: rook_position,
         };
@@ -124,7 +115,6 @@ mod tests {
 
         let bishop_position = position::Position(5, 2);
         let bishop = bishop::Bishop {
-            id: 4,
             color: color::Color::BLACK,
             position: bishop_position,
         };
@@ -132,7 +122,6 @@ mod tests {
 
         let knight_position = position::Position(3, 4);
         let knight = knight::Knight {
-            id: 5,
             color: color::Color::WHITE,
             position: knight_position,
         };

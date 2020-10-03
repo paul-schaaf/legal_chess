@@ -36,8 +36,8 @@ impl Game {
         let mut white_king = position::Position(0, 0);
         let mut black_king = position::Position(0, 0);
 
-        for (i, string_piece) in game_arr.iter().enumerate().take(64) {
-            let square = string_piece.to_piece(i as u8, position::Position(file, rank));
+        for string_piece in game_arr.iter().take(64) {
+            let square = string_piece.to_piece(position::Position(file, rank));
             if let Some(p) = &square {
                 match (p.color(), p.piece()) {
                     (color::Color::WHITE, piece::PieceEnum::KING) => {
@@ -414,7 +414,6 @@ mod tests {
 
         let white_king_pos = position::Position(1, 1);
         let white_king = king::King {
-            id: 1,
             color: color::Color::WHITE,
             position: white_king_pos,
         };
@@ -423,7 +422,6 @@ mod tests {
 
         let black_rook_pos = position::Position(8, 1);
         let black_rook = rook::Rook {
-            id: 2,
             color: color::Color::BLACK,
             position: black_rook_pos,
         };
@@ -432,7 +430,6 @@ mod tests {
 
         let black_queen_pos = position::Position(2, 2);
         let black_queen = queen::Queen {
-            id: 3,
             color: color::Color::BLACK,
             position: black_queen_pos,
         };
@@ -452,7 +449,6 @@ mod tests {
 
         let white_king_pos = position::Position(1, 1);
         let white_king = king::King {
-            id: 1,
             color: color::Color::WHITE,
             position: white_king_pos,
         };
@@ -461,7 +457,6 @@ mod tests {
 
         let black_rook_pos = position::Position(8, 1);
         let black_rook = rook::Rook {
-            id: 2,
             color: color::Color::BLACK,
             position: black_rook_pos,
         };
@@ -470,7 +465,6 @@ mod tests {
 
         let black_queen_pos = position::Position(2, 2);
         let black_queen = queen::Queen {
-            id: 3,
             color: color::Color::BLACK,
             position: black_queen_pos,
         };
@@ -479,7 +473,6 @@ mod tests {
 
         let black_knight_pos = position::Position(4, 3);
         let black_knight = knight::Knight {
-            id: 4,
             color: color::Color::BLACK,
             position: black_knight_pos,
         };
@@ -496,7 +489,6 @@ mod tests {
 
         let white_queen_pos = position::Position(6, 7);
         let white_queen = queen::Queen {
-            id: 100,
             color: color::Color::WHITE,
             position: white_queen_pos,
         };
@@ -505,7 +497,6 @@ mod tests {
 
         let white_bishop_pos = position::Position(3, 4);
         let white_bishop = bishop::Bishop {
-            id: 100,
             color: color::Color::WHITE,
             position: white_bishop_pos,
         };
@@ -533,7 +524,6 @@ mod tests {
 
         let black_queen_pos = position::Position(1, 8);
         let black_queen = queen::Queen {
-            id: 1,
             color: color::Color::BLACK,
             position: black_queen_pos,
         };
@@ -542,7 +532,6 @@ mod tests {
 
         let white_king_pos = position::Position(1, 2);
         let white_king = king::King {
-            id: 2,
             color: color::Color::WHITE,
             position: white_king_pos,
         };
@@ -562,7 +551,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(pawn::Pawn {
-                id: 1,
                 color: color::Color::WHITE,
                 position: position::Position(4, 4),
             }),
@@ -570,7 +558,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(pawn::Pawn {
-                id: 2,
                 color: color::Color::BLACK,
                 position: position::Position(3, 4),
             }),
@@ -578,7 +565,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(pawn::Pawn {
-                id: 3,
                 color: color::Color::BLACK,
                 position: position::Position(5, 4),
             }),
@@ -587,7 +573,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(king::King {
-                id: 4,
                 color: color::Color::BLACK,
                 position: position::Position(8, 8),
             }),
@@ -622,7 +607,6 @@ mod tests {
 
         let black_knight_pos = position::Position(4, 3);
         let black_knight = knight::Knight {
-            id: 100,
             color: color::Color::BLACK,
             position: black_knight_pos,
         };
@@ -651,7 +635,6 @@ mod tests {
 
         let white_king_pos = position::Position(6, 4);
         let white_king = king::King {
-            id: 100,
             color: color::Color::WHITE,
             position: white_king_pos,
         };
@@ -661,7 +644,6 @@ mod tests {
 
         let white_pawn_pos = position::Position(4, 5);
         let white_pawn = pawn::Pawn {
-            id: 101,
             color: color::Color::WHITE,
             position: white_pawn_pos,
         };
@@ -670,7 +652,6 @@ mod tests {
 
         let black_pawn_pos = position::Position(5, 5);
         let black_pawn = pawn::Pawn {
-            id: 102,
             color: color::Color::BLACK,
             position: black_pawn_pos,
         };
@@ -702,7 +683,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(pawn::Pawn {
-                id: 100,
                 color: color::Color::WHITE,
                 position: position::Position(6, 7),
             }),
@@ -711,7 +691,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(bishop::Bishop {
-                id: 100,
                 color: color::Color::WHITE,
                 position: position::Position(3, 4),
             }),
@@ -730,7 +709,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(queen::Queen {
-                id: 100,
                 color: color::Color::BLACK,
                 position: position::Position(6, 2),
             }),
@@ -739,7 +717,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(bishop::Bishop {
-                id: 100,
                 color: color::Color::BLACK,
                 position: position::Position(3, 5),
             }),
@@ -761,7 +738,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(king::King {
-                id: 1,
                 color: color::Color::BLACK,
                 position: black_king_pos,
             }),
@@ -770,7 +746,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(pawn::Pawn {
-                id: 2,
                 color: color::Color::BLACK,
                 position: position::Position(8, 7),
             }),
@@ -779,7 +754,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(knight::Knight {
-                id: 3,
                 color: color::Color::WHITE,
                 position: position::Position(6, 7),
             }),
@@ -788,7 +762,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(rook::Rook {
-                id: 4,
                 color: color::Color::WHITE,
                 position: position::Position(7, 2),
             }),
@@ -809,7 +782,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(rook::Rook {
-                id: 1,
                 color: color::Color::BLACK,
                 position: position::Position(1, 8),
             }),
@@ -818,7 +790,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(rook::Rook {
-                id: 2,
                 color: color::Color::BLACK,
                 position: position::Position(8, 8),
             }),
@@ -827,7 +798,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(king::King {
-                id: 3,
                 color: color::Color::BLACK,
                 position: position::Position(5, 8),
             }),
@@ -836,7 +806,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(bishop::Bishop {
-                id: 4,
                 color: color::Color::WHITE,
                 position: position::Position(2, 5),
             }),
@@ -866,7 +835,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(rook::Rook {
-                id: 1,
                 color: color::Color::BLACK,
                 position: position::Position(1, 8),
             }),
@@ -875,7 +843,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(rook::Rook {
-                id: 2,
                 color: color::Color::BLACK,
                 position: position::Position(8, 8),
             }),
@@ -884,7 +851,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(king::King {
-                id: 3,
                 color: color::Color::BLACK,
                 position: position::Position(5, 8),
             }),
@@ -928,7 +894,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(rook::Rook {
-                id: 1,
                 color: color::Color::BLACK,
                 position: position::Position(1, 8),
             }),
@@ -937,7 +902,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(rook::Rook {
-                id: 2,
                 color: color::Color::BLACK,
                 position: position::Position(8, 8),
             }),
@@ -946,7 +910,6 @@ mod tests {
         set_piece(
             &mut game.board,
             Box::new(king::King {
-                id: 3,
                 color: color::Color::BLACK,
                 position: position::Position(5, 8),
             }),

@@ -30,8 +30,6 @@ impl Board {
             board.push(empty_file);
         }
 
-        let mut id_count = 0;
-
         for k in 0..2 {
             let (modifier, color) = if k == 0 {
                 (0, color::Color::WHITE)
@@ -40,11 +38,9 @@ impl Board {
             };
             for i in 0..8 {
                 board[i][1 + modifier] = Some(Box::new(pawn::Pawn {
-                    id: id_count,
                     color,
                     position: position::Position(i as u8 + 1, 2 + modifier as u8),
                 }));
-                id_count += 1;
             }
         }
 
@@ -59,43 +55,35 @@ impl Board {
 
             for rook in &rook_positions {
                 board[rook.0 - 1][rook.1 - 1 + modifier] = Some(Box::new(rook::Rook {
-                    id: id_count,
                     color,
                     position: position::Position(rook.0 as u8, rook.1 as u8 + modifier as u8),
                 }));
-                id_count += 1;
             }
 
             let knight_positions = [(2, 1), (7, 1)];
 
             for knight in &knight_positions {
                 board[knight.0 - 1][knight.1 - 1 + modifier] = Some(Box::new(knight::Knight {
-                    id: id_count,
                     color,
                     position: position::Position(knight.0 as u8, knight.1 as u8 + modifier as u8),
                 }));
-                id_count += 1;
             }
 
             let bishop_positions = [(3, 1), (6, 1)];
 
             for bishop in &bishop_positions {
                 board[bishop.0 - 1][bishop.1 - 1 + modifier] = Some(Box::new(bishop::Bishop {
-                    id: id_count,
                     color,
                     position: position::Position(bishop.0 as u8, bishop.1 as u8 + modifier as u8),
                 }));
-                id_count += 1;
             }
 
             board[3][modifier] = Some(Box::new(queen::Queen {
-                id: id_count,
                 color,
                 position: position::Position(4, 1 + modifier as u8),
             }));
 
             board[4][modifier] = Some(Box::new(king::King {
-                id: id_count,
                 color,
                 position: position::Position(5, 1 + modifier as u8),
             }));

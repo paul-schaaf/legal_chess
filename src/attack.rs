@@ -46,9 +46,7 @@ mod tests {
 
         let position = position::Position(1, 2);
 
-        let pawn_id = 1;
         let pawn = pawn::Pawn {
-            id: pawn_id,
             position,
             color: color::Color::WHITE,
         };
@@ -64,7 +62,7 @@ mod tests {
 
         let actual = attacked_board[1][2][0];
 
-        assert_eq!(pawn_id, actual.get_id());
+        assert_eq!(piece::PieceEnum::PAWN, actual.piece());
     }
 
     #[test]

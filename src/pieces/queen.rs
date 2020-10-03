@@ -3,16 +3,11 @@ use crate::{board, color};
 
 #[derive(Debug)]
 pub struct Queen {
-    pub id: u8,
     pub color: color::Color,
     pub position: position::Position,
 }
 
 impl piece::Piece for Queen {
-    fn get_id(&self) -> u8 {
-        self.id
-    }
-
     fn color(&self) -> &color::Color {
         &self.color
     }
@@ -62,7 +57,6 @@ mod tests {
         let position = position::Position(1, 1);
 
         let queen = Queen {
-            id: 1,
             color: color::Color::WHITE,
             position,
         };

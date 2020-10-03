@@ -3,16 +3,11 @@ use crate::{board, color};
 
 #[derive(Debug)]
 pub struct King {
-    pub id: u8,
     pub color: color::Color,
     pub position: position::Position,
 }
 
 impl piece::Piece for King {
-    fn get_id(&self) -> u8 {
-        self.id
-    }
-
     fn color(&self) -> &color::Color {
         &self.color
     }
@@ -161,7 +156,6 @@ mod tests {
     #[test]
     fn king_bottom_left_attacks() {
         let king = King {
-            id: 1,
             color: color::Color::WHITE,
             position: position::Position(1, 1),
         };
@@ -182,7 +176,6 @@ mod tests {
     #[test]
     fn king_middle_attacks() {
         let king = King {
-            id: 1,
             color: color::Color::WHITE,
             position: position::Position(5, 4),
         };
@@ -207,14 +200,12 @@ mod tests {
     #[test]
     fn king_bottom_left_moves_black_pawn() {
         let king = King {
-            id: 1,
             color: color::Color::WHITE,
             position: position::Position(1, 1),
         };
         let mut board = board::Board::empty();
 
         let black_pawn = pawn::Pawn {
-            id: 2,
             color: color::Color::BLACK,
             position: position::Position(2, 2),
         };
@@ -238,14 +229,12 @@ mod tests {
     #[test]
     fn king_bottom_left_moves_white_pawn() {
         let king = King {
-            id: 1,
             color: color::Color::WHITE,
             position: position::Position(1, 1),
         };
         let mut board = board::Board::empty();
 
         let white_pawn = pawn::Pawn {
-            id: 2,
             color: color::Color::WHITE,
             position: position::Position(2, 2),
         };

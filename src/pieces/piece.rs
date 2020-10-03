@@ -13,8 +13,6 @@ pub trait Piece: fmt::Debug {
 
     fn color(&self) -> &color::Color;
 
-    fn get_id(&self) -> u8;
-
     fn piece(&self) -> PieceEnum;
 
     fn moves_ignoring_pins(
@@ -133,19 +131,16 @@ mod tests {
     #[test]
     fn pinned_knight() {
         let knight = knight::Knight {
-            id: 1,
             position: position::Position(4, 4),
             color: color::Color::WHITE,
         };
 
         let king = king::King {
-            id: 2,
             position: position::Position(4, 1),
             color: color::Color::WHITE,
         };
 
         let black_queen = queen::Queen {
-            id: 3,
             position: position::Position(4, 8),
             color: color::Color::BLACK,
         };
@@ -183,19 +178,16 @@ mod tests {
     #[test]
     fn not_pinned_knight_1() {
         let knight = knight::Knight {
-            id: 1,
             position: position::Position(4, 4),
             color: color::Color::WHITE,
         };
 
         let king = king::King {
-            id: 2,
             position: position::Position(4, 1),
             color: color::Color::WHITE,
         };
 
         let black_knight = knight::Knight {
-            id: 3,
             position: position::Position(4, 8),
             color: color::Color::BLACK,
         };
@@ -218,25 +210,21 @@ mod tests {
     #[test]
     fn not_pinned_bishop_1() {
         let knight = knight::Knight {
-            id: 1,
             position: position::Position(4, 4),
             color: color::Color::WHITE,
         };
 
         let king = king::King {
-            id: 2,
             position: position::Position(4, 1),
             color: color::Color::WHITE,
         };
 
         let black_queen = queen::Queen {
-            id: 3,
             position: position::Position(4, 8),
             color: color::Color::BLACK,
         };
 
         let black_pawn = pawn::Pawn {
-            id: 4,
             position: position::Position(4, 7),
             color: color::Color::BLACK,
         };
@@ -260,20 +248,17 @@ mod tests {
     #[test]
     fn not_pinned_knight_2() {
         let knight = knight::Knight {
-            id: 1,
             position: position::Position(4, 4),
             color: color::Color::WHITE,
         };
 
         let king_pos = position::Position(5, 1);
         let king = king::King {
-            id: 2,
             position: king_pos,
             color: color::Color::WHITE,
         };
 
         let black_queen = queen::Queen {
-            id: 3,
             position: position::Position(4, 8),
             color: color::Color::BLACK,
         };
@@ -295,20 +280,17 @@ mod tests {
     fn knight_pinned_by_bishop() {
         let knight_pos = position::Position(4, 4);
         let knight = knight::Knight {
-            id: 1,
             position: knight_pos,
             color: color::Color::WHITE,
         };
 
         let king_pos = position::Position(1, 1);
         let king = king::King {
-            id: 2,
             position: king_pos,
             color: color::Color::WHITE,
         };
 
         let black_bishop = bishop::Bishop {
-            id: 3,
             position: position::Position(6, 6),
             color: color::Color::BLACK,
         };
@@ -344,27 +326,23 @@ mod tests {
     fn knight_not_pinned_by_bishop() {
         let knight_pos = position::Position(4, 4);
         let knight = knight::Knight {
-            id: 1,
             position: knight_pos,
             color: color::Color::WHITE,
         };
 
         let king_pos = position::Position(1, 1);
         let king = king::King {
-            id: 2,
             position: king_pos,
             color: color::Color::WHITE,
         };
 
         let black_bishop = bishop::Bishop {
-            id: 3,
             position: position::Position(6, 6),
             color: color::Color::BLACK,
         };
 
         let black_knight_pos = position::Position(5, 5);
         let black_knight = knight::Knight {
-            id: 4,
             position: black_knight_pos,
             color: color::Color::BLACK,
         };
@@ -386,13 +364,11 @@ mod tests {
     #[test]
     fn not_pinned_knight_no_attacker() {
         let knight = knight::Knight {
-            id: 1,
             position: position::Position(4, 4),
             color: color::Color::WHITE,
         };
 
         let king = king::King {
-            id: 2,
             position: position::Position(4, 1),
             color: color::Color::WHITE,
         };

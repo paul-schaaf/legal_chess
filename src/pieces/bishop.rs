@@ -3,16 +3,11 @@ use crate::{board, color};
 
 #[derive(Debug)]
 pub struct Bishop {
-    pub id: u8,
     pub position: position::Position,
     pub color: color::Color,
 }
 
 impl piece::Piece for Bishop {
-    fn get_id(&self) -> u8 {
-        self.id
-    }
-
     fn color(&self) -> &color::Color {
         &self.color
     }
@@ -55,7 +50,6 @@ mod tests {
         let position = position::Position(1, 1);
 
         let bishop = Bishop {
-            id: 1,
             color: color::Color::WHITE,
             position,
         };
@@ -90,7 +84,6 @@ mod tests {
         let bishop_position = position::Position(1, 1);
 
         let bishop = Bishop {
-            id: 1,
             color: color::Color::WHITE,
             position: bishop_position,
         };
@@ -98,7 +91,6 @@ mod tests {
         let pawn_position = position::Position(5, 5);
 
         let pawn = pawn::Pawn {
-            id: 1,
             color: color::Color::WHITE,
             position: pawn_position,
         };
@@ -133,7 +125,6 @@ mod tests {
         let bishop_position = position::Position(4, 8);
 
         let bishop = Bishop {
-            id: 1,
             color: color::Color::WHITE,
             position: bishop_position,
         };
@@ -141,7 +132,6 @@ mod tests {
         let knight_position = position::Position(2, 6);
 
         let knight = knight::Knight {
-            id: 2,
             color: color::Color::WHITE,
             position: knight_position,
         };
@@ -149,7 +139,6 @@ mod tests {
         let pawn_position = position::Position(7, 5);
 
         let pawn = pawn::Pawn {
-            id: 3,
             color: color::Color::BLACK,
             position: pawn_position,
         };
@@ -181,7 +170,6 @@ mod tests {
         let position = position::Position(1, 1);
 
         let bishop = Bishop {
-            id: 1,
             color: color::Color::WHITE,
             position,
         };
