@@ -51,7 +51,7 @@ impl Game<'_> {
         };
 
         self.castling_rights_black = previous_game_state.castling_rights_black;
-        self.castling_rights_black = previous_game_state.castling_rights_white;
+        self.castling_rights_white = previous_game_state.castling_rights_white;
         self.en_passant = previous_game_state.en_passant;
         self.full_moves = previous_game_state.full_moves;
         self.half_moves = previous_game_state.half_moves;
