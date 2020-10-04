@@ -195,13 +195,10 @@ impl Board {
         let mut pieces = vec![];
         for file in self.board.iter() {
             for square in file.iter() {
-                match square {
-                    Some(piece) => {
-                        if *piece.color() == color && piece.piece() != piece::PieceEnum::KING {
-                            pieces.push(piece);
-                        }
+                if let Some(piece) = square {
+                    if *piece.color() == color && piece.piece() != piece::PieceEnum::KING {
+                        pieces.push(piece);
                     }
-                    None => (),
                 }
             }
         }
@@ -218,9 +215,8 @@ mod tests {
         let initial_board = Board::initial();
         for i in 0..8 {
             for j in 2..6 {
-                match *initial_board.get_square(position::Position(i + 1, j + 1)) {
-                    Some(_) => panic!("Should've been: None"),
-                    _ => (),
+                if let Some(_) = initial_board.get_square(position::Position(i + 1, j + 1)) {
+                    panic!("Should've been: None");
                 }
             }
         }

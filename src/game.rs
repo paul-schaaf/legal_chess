@@ -354,12 +354,9 @@ impl Game<'_> {
 
                         let new_position = position::Position(new_file as u8, new_rank as u8);
 
-                        match self.board.get_square(new_position) {
-                            None => allowed_positions.push(new_position),
-                            Some(_) => {
-                                allowed_positions.push(new_position);
-                                break;
-                            }
+                        allowed_positions.push(new_position);
+                        if self.board.get_square(new_position).is_some() {
+                            break;
                         }
                     }
 
@@ -1145,9 +1142,8 @@ mod tests {
         assert!(game.board.get_square(position::Position(5, 2)).is_some());
         assert!(game.board.get_square(position::Position(5, 4)).is_none());
         assert_eq!(color::Color::WHITE, game.side_to_move);
-        match game.en_passant {
-            None => (),
-            Some(_) => panic!(),
+        if let Some(_) = game.en_passant() {
+            panic!();
         }
     }
 

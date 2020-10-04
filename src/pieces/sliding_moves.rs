@@ -28,7 +28,7 @@ pub fn straight_sliding(piece: &dyn piece::Piece, board: &board::Board) -> Vec<p
         } else {
             moves.push(move_position);
         }
-        return false;
+        false
     };
 
     for entry in &moves_and_bounds {
