@@ -208,6 +208,20 @@ mod tests {
 
     #[test]
     fn bishop_middle_obstacle_moves() {
-        // TODO
+        let (board, white_king, _) = board::Board::from_string_board(&[
+            "R", "P", "-", "-", "-", "b", "p", "r", "-", "P", "-", "p", "-", "n", "-", "-", "-",
+            "P", "N", "-", "-", "-", "p", "-", "-", "B", "-", "-", "P", "-", "p", "-", "K", "B",
+            "-", "P", "N", "p", "q", "k", "-", "P", "Q", "-", "-", "n", "p", "-", "-", "P", "-",
+            "-", "-", "p", "b", "-", "R", "P", "p", "-", "-", "-", "-", "r",
+        ]);
+
+        let bishop = match board.get_square(position::Position(1, 6)) {
+            None => panic!(),
+            Some(b) => b,
+        };
+
+        let moves = bishop.moves(&board, white_king, &None);
+
+        assert_eq!(6, moves.len());
     }
 }

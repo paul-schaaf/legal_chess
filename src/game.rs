@@ -104,14 +104,17 @@ impl Game<'_> {
                 }
             }
 
-            if (mv.0).0 + 2 == (mv.1).0 {
+            let castle_kingside = (mv.0).0 + 2 == (mv.1).0;
+            let castle_queenside = (mv.0).0 as i8 - 2 == (mv.1).0 as i8;
+
+            if castle_kingside {
                 let mut rook = self
                     .board
                     .take_piece(position::Position((mv.0).0 + 3, (mv.0).1));
                 let position = position::Position((mv.0).0 + 1, (mv.1).1);
                 rook.set_position(&position);
                 self.board.set_square(Some(rook), position);
-            } else if (mv.0).0 as i8 - 2 == (mv.1).0 as i8 {
+            } else if castle_queenside {
                 let mut rook = self
                     .board
                     .take_piece(position::Position((mv.0).0 - 4, (mv.0).1));
@@ -1142,11 +1145,6 @@ mod tests {
         }
     }
 
-    fn set_piece(board: &mut board::Board, piece: Box<dyn piece::Piece>) {
-        let position = *piece.position();
-        board.set_square(Some(piece), position);
-    }
-
     #[test]
     fn castling_kingside_leads_to_pieces_having_moved() {
         let mut game = Game::new();
@@ -1223,5 +1221,41 @@ mod tests {
         assert!(game.board.get_square(position::Position(4, 8)).is_some());
         assert!(game.board.get_square(position::Position(1, 8)).is_none());
         assert!(game.board.get_square(position::Position(5, 8)).is_none());
+    }
+
+    #[test]
+    fn cannot_castle_through_check() {
+        let game = Game::from_game_arr(&[
+            "R", "P", "-", "-", "-", "b", "p", "r", "-", "P", "-", "p", "-", "n", "-", "-", "-",
+            "P", "N", "-", "-", "-", "p", "-", "-", "B", "-", "-", "P", "-", "p", "-", "K", "B",
+            "-", "P", "N", "p", "q", "k", "-", "P", "Q", "-", "-", "n", "p", "-", "-", "p", "-",
+            "-", "-", "p", "b", "-", "R", "P", "-", "-", "-", "-", "-", "r", "-", "-", "1", "1",
+            "1", "1", "0", "1", "w",
+        ]);
+
+        let moves = game.legal_moves();
+
+        assert!(!moves.contains(&chessmove::ChessMove((5, 1), (7, 1))));
+        assert!(moves.contains(&chessmove::ChessMove((5, 1), (3, 1))));
+    }
+
+    #[test]
+    fn cannot_castle_through_check_2() {
+        let game = Game::from_game_arr(&[
+            "R", "P", "-", "-", "-", "-", "p", "r", "-", "P", "-", "p", "-", "n", "-", "-", "-",
+            "P", "N", "-", "-", "-", "p", "-", "-", "B", "-", "-", "P", "-", "p", "-", "K", "b",
+            "-", "P", "N", "p", "q", "k", "-", "P", "Q", "-", "-", "n", "p", "-", "-", "p", "-",
+            "-", "-", "p", "b", "-", "R", "P", "-", "-", "-", "-", "-", "r", "-", "-", "1", "1",
+            "1", "1", "0", "1", "w",
+        ]);
+
+        let moves = game.legal_moves();
+
+        assert!(!moves.contains(&chessmove::ChessMove((5, 1), (3, 1))));
+    }
+
+    fn set_piece(board: &mut board::Board, piece: Box<dyn piece::Piece>) {
+        let position = *piece.position();
+        board.set_square(Some(piece), position);
     }
 }
