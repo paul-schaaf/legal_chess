@@ -420,9 +420,11 @@ impl Game<'_> {
         if castling_rights.1 {
             let one_left_of_king = position::Position(king.position().0 - 1, king.position().1);
             let two_left_of_king = position::Position(king.position().0 - 2, king.position().1);
+            let three_left_king = position::Position(king.position().0 - 3, king.position().1);
 
             if self.is_empty_square(&one_left_of_king)
                 && self.is_empty_square(&two_left_of_king)
+                && self.is_empty_square(&three_left_king)
                 && square_safe(&one_left_of_king, attacked_board)
                 && square_safe(&two_left_of_king, attacked_board)
             {

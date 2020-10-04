@@ -14,20 +14,63 @@ const GAME_ARR: [&str; 73] = [
 #[test]
 fn depth_1() {
     let mut game = game::Game::from_game_arr(&GAME_ARR);
+    let mut capture_counter = perft::Counter(0);
+    let mut castle_counter = perft::Counter(0);
 
-    assert_eq!(48, perft::perft(&mut game, 1));
+    let moves = perft::perft(
+        &mut game,
+        1,
+        &mut perft::Counter(0),
+        &mut castle_counter,
+        &mut capture_counter,
+        &mut vec![],
+    );
+
+    assert_eq!(2, castle_counter.0);
+    assert_eq!(8, capture_counter.0);
+    assert_eq!(48, moves);
 }
 
 #[test]
 fn depth_2() {
     let mut game = game::Game::from_game_arr(&GAME_ARR);
 
-    assert_eq!(2039, perft::perft(&mut game, 2));
+    let mut castle_counter = perft::Counter(0);
+    let mut capture_counter = perft::Counter(0);
+    let mut ep_counter = perft::Counter(0);
+
+    let moves = perft::perft(
+        &mut game,
+        2,
+        &mut ep_counter,
+        &mut castle_counter,
+        &mut capture_counter,
+        &mut vec![],
+    );
+    assert_eq!(1, ep_counter.0);
+    assert_eq!(351 - 1, capture_counter.0);
+    assert_eq!(2039, moves);
+    assert_eq!(91, castle_counter.0);
 }
 
-/* #[test]
+#[test]
 fn depth_3() {
     let mut game = game::Game::from_game_arr(&GAME_ARR);
 
-    assert_eq!(97862, perft::perft(&mut game, 3));
-} */
+    let mut castle_counter = perft::Counter(0);
+    let mut ep_counter = perft::Counter(0);
+    let mut capture_counter = perft::Counter(0);
+
+    let amount_moves = perft::perft(
+        &mut game,
+        3,
+        &mut ep_counter,
+        &mut castle_counter,
+        &mut capture_counter,
+        &mut vec![],
+    );
+    assert_eq!(45, ep_counter.0);
+    assert_eq!(17102 - 45, capture_counter.0);
+    assert_eq!(3162, castle_counter.0, "Wrong castle number");
+    assert_eq!(97862, amount_moves);
+}
