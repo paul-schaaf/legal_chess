@@ -44,9 +44,14 @@ pub fn perft(
             {
                 castle_counter.0 += 1;
             } else if piece.piece() == piece::PieceEnum::PAWN {
-                if (mv.0).0 != (mv.1).0 && game.board().get_square(position::Position((mv.1).0, (mv.1).1)).is_none(){
+                if (mv.0).0 != (mv.1).0
+                    && game
+                        .board()
+                        .get_square(position::Position((mv.1).0, (mv.1).1))
+                        .is_none()
+                {
                     ep_counter.0 += 1;
-                } 
+                }
             }
         }
         return moves.len();

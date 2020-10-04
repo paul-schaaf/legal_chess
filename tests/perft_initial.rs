@@ -46,15 +46,12 @@ fn depth_3() {
         3,
         &mut perft::Counter(0),
         &mut perft::Counter(0),
-        &mut capture_counter
+        &mut capture_counter,
     );
 
     assert_eq!(34, capture_counter.0);
 
-    assert_eq!(
-        8902,
-        moves
-    );
+    assert_eq!(8902, moves);
 }
 
 #[test]
@@ -67,15 +64,12 @@ fn depth_4() {
         4,
         &mut perft::Counter(0),
         &mut perft::Counter(0),
-        &mut capture_counter
+        &mut capture_counter,
     );
 
     assert_eq!(1576, capture_counter.0);
 
-    assert_eq!(
-        197281,
-        moves
-    );
+    assert_eq!(197281, moves);
 }
 
 #[test]
@@ -90,14 +84,11 @@ fn depth_5() {
         5,
         &mut ep_counter,
         &mut perft::Counter(0),
-        &mut capture_counter
+        &mut capture_counter,
     );
 
     assert_eq!(258, ep_counter.0);
     assert_eq!(82719 - 258, capture_counter.0);
 
-    assert_eq!(
-        4865609,
-        moves
-    );
+    assert_eq!(4865609, moves);
 }
