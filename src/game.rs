@@ -385,13 +385,11 @@ impl Game<'_> {
 
         let mut moves = moves
             .iter()
-            .filter(|mv| attacked_board[mv.0 as usize - 1][mv.1 as usize - 1].is_empty())
+            .filter(|mv| square_safe(&position::Position(mv.0, mv.1), attacked_board))
             .map(|mv| chessmove::ChessMove((king.position().0, king.position().1), (mv.0, mv.1)))
             .collect::<Vec<_>>();
 
-        if !attacked_board[king.position().0 as usize - 1][king.position().1 as usize - 1]
-            .is_empty()
-        {
+        if square_under_attack(king.position(), &attacked_board) {
             return moves;
         }
 
@@ -400,47 +398,62 @@ impl Game<'_> {
             color::Color::WHITE => self.castling_rights_white,
         };
 
-        if castling_rights.0
-            && self
-                .board
-                .get_square(position::Position(king.position().0 + 1, king.position().1))
-                .is_none()
-            && self
-                .board
-                .get_square(position::Position(king.position().0 + 2, king.position().1))
-                .is_none()
-            && attacked_board[king.position().0 as usize][king.position().1 as usize - 1].is_empty()
-            && attacked_board[king.position().0 as usize + 1][king.position().1 as usize - 1]
-                .is_empty()
-        {
-            moves.push(chessmove::ChessMove(
-                (king.position().0, king.position().1),
-                (king.position().0 + 2, king.position().1),
-            ));
+        if castling_rights.0 {
+            let one_right_of_king = position::Position(king.position().0 + 1, king.position().1);
+            let two_right_of_king = position::Position(king.position().0 + 2, king.position().1);
+
+            if self.is_empty_square(&one_right_of_king)
+                && self.is_empty_square(&two_right_of_king)
+                && square_safe(&one_right_of_king, attacked_board)
+                && square_safe(&two_right_of_king, attacked_board)
+            {
+                moves.push(chessmove::ChessMove(
+                    (king.position().0, king.position().1),
+                    (king.position().0 + 2, king.position().1),
+                ));
+            }
         }
 
-        if castling_rights.1
-            && self
-                .board
-                .get_square(position::Position(king.position().0 - 1, king.position().1))
-                .is_none()
-            && self
-                .board
-                .get_square(position::Position(king.position().0 - 2, king.position().1))
-                .is_none()
-            && attacked_board[king.position().0 as usize - 2][king.position().1 as usize - 1]
-                .is_empty()
-            && attacked_board[king.position().0 as usize - 3][king.position().1 as usize - 1]
-                .is_empty()
-        {
-            moves.push(chessmove::ChessMove(
-                (king.position().0, king.position().1),
-                (king.position().0 - 2, king.position().1),
-            ));
+        if castling_rights.1 {
+            let one_left_of_king = position::Position(king.position().0 - 1, king.position().1);
+            let two_left_of_king = position::Position(king.position().0 - 2, king.position().1);
+
+            if self.is_empty_square(&one_left_of_king)
+                && self.is_empty_square(&two_left_of_king)
+                && square_safe(&one_left_of_king, attacked_board)
+                && square_safe(&two_left_of_king, attacked_board)
+            {
+                moves.push(chessmove::ChessMove(
+                    (king.position().0, king.position().1),
+                    (king.position().0 - 2, king.position().1),
+                ));
+            }
         }
 
         moves
     }
+
+    fn is_empty_square(&self, position: &position::Position) -> bool {
+        self.board.get_square(*position).is_none()
+    }
+}
+
+fn square_safe(
+    position: &position::Position,
+    attacked_board: &std::vec::Vec<
+        std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>,
+    >,
+) -> bool {
+    attacked_board[position.0 as usize - 1][position.1 as usize - 1].is_empty()
+}
+
+fn square_under_attack(
+    position: &position::Position,
+    attacked_board: &std::vec::Vec<
+        std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>,
+    >,
+) -> bool {
+    !square_safe(position, attacked_board)
 }
 
 #[cfg(test)]
