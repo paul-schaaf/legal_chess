@@ -68,27 +68,27 @@ fn depth_4() {
     );
 
     assert_eq!(1576, capture_counter.0);
-
     assert_eq!(197281, moves);
 }
 
-/* #[test]
+#[test]
 fn depth_5() {
     let mut game = game::Game::new();
 
     let mut capture_counter = perft::Counter(0);
     let mut ep_counter = perft::Counter(0);
+    let mut castle_counter = perft::Counter(0);
 
     let moves = perft::perft(
         &mut game,
         5,
         &mut ep_counter,
-        &mut perft::Counter(0),
+        &mut castle_counter,
         &mut capture_counter,
     );
 
     assert_eq!(258, ep_counter.0);
     assert_eq!(82719 - 258, capture_counter.0);
-
+    assert_eq!(128013, castle_counter.0);
     assert_eq!(4865609, moves);
-} */
+}
