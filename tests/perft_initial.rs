@@ -89,6 +89,5 @@ fn depth_5() {
 
     assert_eq!(258, ep_counter.0);
     assert_eq!(82719 - 258, capture_counter.0);
-    assert_eq!(128013, castle_counter.0);
     assert_eq!(4865609, moves);
 }

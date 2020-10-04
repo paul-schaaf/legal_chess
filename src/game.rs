@@ -92,7 +92,11 @@ impl Game<'_> {
                 (7, 5) => self.en_passant = Some(position::Position((mv.1).0, 6)),
                 (_, _) => self.en_passant = None,
             }
-        } else if piece.piece() == piece::PieceEnum::KING {
+        } else {
+            self.en_passant = None;
+        }
+
+        if piece.piece() == piece::PieceEnum::KING {
             match self.side_to_move {
                 color::Color::WHITE => {
                     self.white_king = position::Position((mv.1).0, (mv.1).1);
