@@ -121,7 +121,7 @@ impl Game<'_> {
             }
         }
 
-        match ((mv.0).0, (mv.1).0) {
+        match ((mv.0).0, (mv.0).1) {
             (1, 8) => self.castling_rights_black = (self.castling_rights_black.0, false),
             (8, 8) => self.castling_rights_black = (false, self.castling_rights_black.1),
             (1, 1) => self.castling_rights_white = (self.castling_rights_white.0, false),
