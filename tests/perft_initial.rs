@@ -5,6 +5,13 @@ mod perft;
 use legal_chess::game;
 
 #[test]
+fn depth_1() {
+    let mut game = game::Game::new();
+
+    assert_eq!(20, perft::perft(&mut game, 1));
+}
+
+#[test]
 fn depth_2() {
     let mut game = game::Game::new();
 
