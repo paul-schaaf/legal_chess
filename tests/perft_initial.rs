@@ -16,7 +16,6 @@ fn depth_1() {
             &mut perft::Counter(0),
             &mut perft::Counter(0),
             &mut perft::Counter(0),
-            &mut vec!()
         )
     );
 }
@@ -33,7 +32,6 @@ fn depth_2() {
             &mut perft::Counter(0),
             &mut perft::Counter(0),
             &mut perft::Counter(0),
-            &mut vec!()
         )
     );
 }
@@ -49,7 +47,6 @@ fn depth_3() {
         &mut perft::Counter(0),
         &mut perft::Counter(0),
         &mut capture_counter,
-        &mut vec![],
     );
 
     assert_eq!(34, capture_counter.0);
@@ -68,7 +65,6 @@ fn depth_4() {
         &mut perft::Counter(0),
         &mut perft::Counter(0),
         &mut capture_counter,
-        &mut vec![],
     );
 
     assert_eq!(1576, capture_counter.0);

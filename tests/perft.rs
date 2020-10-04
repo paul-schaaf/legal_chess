@@ -1,7 +1,7 @@
 extern crate legal_chess;
 
 use legal_chess::{
-    chessmove, game,
+    game,
     pieces::{piece, position},
 };
 
@@ -14,7 +14,6 @@ pub fn perft(
     ep_counter: &mut Counter,
     castle_counter: &mut Counter,
     capture_counter: &mut Counter,
-    moves_made: &mut Vec<chessmove::ChessMove>,
 ) -> usize {
     if depth == 0 {
         return 1;
@@ -44,9 +43,6 @@ pub fn perft(
                 && ((mv.0).0 as i8 - (mv.1).0 as i8).abs() == 2
             {
                 castle_counter.0 += 1;
-                moves_made.push(mv.clone());
-                println!("{:?}", moves_made);
-                moves_made.pop();
             } else if piece.piece() == piece::PieceEnum::PAWN {
                 if (mv.0).0 != (mv.1).0
                     && game
@@ -64,7 +60,6 @@ pub fn perft(
     let mut nodes = 0;
 
     for mv in moves {
-        moves_made.push(mv.clone());
 
         game.make_move(mv, None);
 
@@ -74,11 +69,9 @@ pub fn perft(
             ep_counter,
             castle_counter,
             capture_counter,
-            moves_made,
         );
 
         game.undo_last_move();
-        moves_made.pop();
     }
 
     nodes
