@@ -12,7 +12,7 @@ const GAME_ARR: [&str; 73] = [
 ];
 
 #[test]
-fn depth_1() {
+fn perft_kiwipete_depth_1() {
     let mut game = game::Game::from_game_arr(&GAME_ARR);
     let mut capture_counter = perft::Counter(0);
     let mut castle_counter = perft::Counter(0);
@@ -31,7 +31,7 @@ fn depth_1() {
 }
 
 #[test]
-fn depth_2() {
+fn perft_kiwipete_depth_2() {
     let mut game = game::Game::from_game_arr(&GAME_ARR);
 
     let mut castle_counter = perft::Counter(0);
@@ -52,7 +52,7 @@ fn depth_2() {
 }
 
 #[test]
-fn depth_3() {
+fn perft_kiwipete_depth_3() {
     let mut game = game::Game::from_game_arr(&GAME_ARR);
 
     let mut castle_counter = perft::Counter(0);
@@ -73,7 +73,7 @@ fn depth_3() {
 }
 
 #[test]
-fn depth_4() {
+fn perft_kiwipete_depth_4() {
     let mut game = game::Game::from_game_arr(&GAME_ARR);
 
     let mut castle_counter = perft::Counter(0);

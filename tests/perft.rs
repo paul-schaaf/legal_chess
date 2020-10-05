@@ -25,7 +25,7 @@ pub fn perft(
         for mv in &moves {
             if game
                 .board()
-                .get_square(position::Position((mv.1).0, (mv.1).1))
+                .get_square(position::Position((mv.to).0, (mv.to).1))
                 .is_some()
             {
                 capture_counter.0 += 1;
@@ -33,21 +33,21 @@ pub fn perft(
 
             let piece = match game
                 .board()
-                .get_square(position::Position((mv.0).0, (mv.0).1))
+                .get_square(position::Position((mv.from).0, (mv.from).1))
             {
                 None => panic!(),
                 Some(v) => v,
             };
 
             if piece.piece() == piece::PieceEnum::KING
-                && ((mv.0).0 as i8 - (mv.1).0 as i8).abs() == 2
+                && ((mv.from).0 as i8 - (mv.to).0 as i8).abs() == 2
             {
                 castle_counter.0 += 1;
             } else if piece.piece() == piece::PieceEnum::PAWN {
-                if (mv.0).0 != (mv.1).0
+                if (mv.from).0 != (mv.to).0
                     && game
                         .board()
-                        .get_square(position::Position((mv.1).0, (mv.1).1))
+                        .get_square(position::Position((mv.to).0, (mv.to).1))
                         .is_none()
                 {
                     ep_counter.0 += 1;

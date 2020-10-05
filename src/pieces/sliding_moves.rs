@@ -1,6 +1,6 @@
 use super::position;
-use crate::board;
 use crate::pieces::piece;
+use crate::{board, chessmove};
 
 #[derive(PartialEq)]
 enum Axis {
@@ -8,7 +8,10 @@ enum Axis {
     Vertical,
 }
 
-pub fn straight_sliding(piece: &dyn piece::Piece, board: &board::Board) -> Vec<position::Position> {
+pub fn straight_sliding(
+    piece: &dyn piece::Piece,
+    board: &board::Board,
+) -> Vec<chessmove::ChessMove> {
     let moves_and_bounds = [
         (Axis::Horizontal, 1, 8),
         (Axis::Horizontal, -1, 1),
@@ -20,13 +23,18 @@ pub fn straight_sliding(piece: &dyn piece::Piece, board: &board::Board) -> Vec<p
 
     let mut move_piece = |file: u8, rank: u8| -> bool {
         let move_position = position::Position(file, rank);
+        let mv = chessmove::ChessMove {
+            from: (piece.position().0, piece.position().1),
+            to: (move_position.0, move_position.1),
+            promotion: None,
+        };
         if let Some(p) = board.get_square(move_position) {
             if *p.color() != *piece.color() {
-                moves.push(move_position);
+                moves.push(mv);
             }
             return true;
         } else {
-            moves.push(move_position);
+            moves.push(mv);
         }
         false
     };
@@ -54,7 +62,10 @@ pub fn straight_sliding(piece: &dyn piece::Piece, board: &board::Board) -> Vec<p
     moves
 }
 
-pub fn diagonal_sliding(piece: &dyn piece::Piece, board: &board::Board) -> Vec<position::Position> {
+pub fn diagonal_sliding(
+    piece: &dyn piece::Piece,
+    board: &board::Board,
+) -> Vec<chessmove::ChessMove> {
     let moves_and_bounds = [
         ((1, 1), (8, 8)),
         ((1, -1), (8, 1)),
@@ -71,13 +82,19 @@ pub fn diagonal_sliding(piece: &dyn piece::Piece, board: &board::Board) -> Vec<p
             current_file += (entry.0).0;
             current_rank += (entry.0).1;
             let move_position = position::Position(current_file as u8, current_rank as u8);
+            let chessmove = chessmove::ChessMove {
+                from: (piece.position().0, piece.position().1),
+                to: (move_position.0, move_position.1),
+                promotion: None,
+            };
             if let Some(p) = board.get_square(move_position) {
                 if *p.color() != *piece.color() {
-                    moves.push(move_position);
+                    moves.push(chessmove);
                 }
                 break;
+            } else {
+                moves.push(chessmove);
             }
-            moves.push(move_position);
         }
     }
 

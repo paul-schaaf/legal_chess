@@ -5,7 +5,7 @@ mod perft;
 use legal_chess::game;
 
 #[test]
-fn depth_1() {
+fn perft_initial_depth_1() {
     let mut game = game::Game::new();
 
     assert_eq!(
@@ -21,7 +21,7 @@ fn depth_1() {
 }
 
 #[test]
-fn depth_2() {
+fn perft_initial_depth_2() {
     let mut game = game::Game::new();
 
     assert_eq!(
@@ -37,7 +37,7 @@ fn depth_2() {
 }
 
 #[test]
-fn depth_3() {
+fn perft_initial_depth_3() {
     let mut game = game::Game::new();
 
     let mut capture_counter = perft::Counter(0);
@@ -55,7 +55,7 @@ fn depth_3() {
 }
 
 #[test]
-fn depth_4() {
+fn perft_initial_depth_4() {
     let mut game = game::Game::new();
 
     let mut capture_counter = perft::Counter(0);
@@ -72,7 +72,7 @@ fn depth_4() {
 }
 
 #[test]
-fn depth_5() {
+fn perft_initial_depth_5() {
     let mut game = game::Game::new();
 
     let mut capture_counter = perft::Counter(0);

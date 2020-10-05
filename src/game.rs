@@ -84,12 +84,12 @@ impl Game<'_> {
 
         let piece = self
             .board
-            .take_piece(position::Position((mv.0).0, (mv.0).1));
+            .take_piece(position::Position((mv.from).0, (mv.from).1));
 
         if piece.piece() == piece::PieceEnum::PAWN {
-            match ((mv.0).1, (mv.1).1) {
-                (2, 4) => self.en_passant = Some(position::Position((mv.1).0, 3)),
-                (7, 5) => self.en_passant = Some(position::Position((mv.1).0, 6)),
+            match ((mv.from).1, (mv.to).1) {
+                (2, 4) => self.en_passant = Some(position::Position((mv.to).0, 3)),
+                (7, 5) => self.en_passant = Some(position::Position((mv.to).0, 6)),
                 (_, _) => self.en_passant = None,
             }
         } else {
@@ -99,36 +99,36 @@ impl Game<'_> {
         if piece.piece() == piece::PieceEnum::KING {
             match self.side_to_move {
                 color::Color::WHITE => {
-                    self.white_king = position::Position((mv.1).0, (mv.1).1);
+                    self.white_king = position::Position((mv.to).0, (mv.to).1);
                     self.castling_rights_white = (false, false);
                 }
                 color::Color::BLACK => {
-                    self.black_king = position::Position((mv.1).0, (mv.1).1);
+                    self.black_king = position::Position((mv.to).0, (mv.to).1);
                     self.castling_rights_black = (false, false);
                 }
             }
 
-            let castle_kingside = (mv.0).0 + 2 == (mv.1).0;
-            let castle_queenside = (mv.0).0 as i8 - 2 == (mv.1).0 as i8;
+            let castle_kingside = (mv.from).0 + 2 == (mv.to).0;
+            let castle_queenside = (mv.from).0 as i8 - 2 == (mv.to).0 as i8;
 
             if castle_kingside {
                 let mut rook = self
                     .board
-                    .take_piece(position::Position((mv.0).0 + 3, (mv.0).1));
-                let position = position::Position((mv.0).0 + 1, (mv.1).1);
+                    .take_piece(position::Position((mv.from).0 + 3, (mv.from).1));
+                let position = position::Position((mv.from).0 + 1, (mv.to).1);
                 rook.set_position(&position);
                 self.board.set_square(Some(rook), position);
             } else if castle_queenside {
                 let mut rook = self
                     .board
-                    .take_piece(position::Position((mv.0).0 - 4, (mv.0).1));
-                let position = position::Position((mv.0).0 - 1, (mv.1).1);
+                    .take_piece(position::Position((mv.from).0 - 4, (mv.from).1));
+                let position = position::Position((mv.from).0 - 1, (mv.to).1);
                 rook.set_position(&position);
                 self.board.set_square(Some(rook), position);
             }
         }
 
-        match ((mv.0).0, (mv.0).1) {
+        match ((mv.from).0, (mv.from).1) {
             (1, 8) => self.castling_rights_black = (self.castling_rights_black.0, false),
             (8, 8) => self.castling_rights_black = (false, self.castling_rights_black.1),
             (1, 1) => self.castling_rights_white = (self.castling_rights_white.0, false),
@@ -136,7 +136,7 @@ impl Game<'_> {
             (_, _) => (),
         }
 
-        match ((mv.1).0, (mv.1).1) {
+        match ((mv.to).0, (mv.to).1) {
             (1, 8) => self.castling_rights_black = (self.castling_rights_black.0, false),
             (8, 8) => self.castling_rights_black = (false, self.castling_rights_black.1),
             (1, 1) => self.castling_rights_white = (self.castling_rights_white.0, false),
@@ -155,7 +155,7 @@ impl Game<'_> {
         }
 
         let mut piece = piece;
-        let position = position::Position((mv.1).0, (mv.1).1);
+        let position = position::Position((mv.to).0, (mv.to).1);
         piece.set_position(&position);
         self.board.set_square(Some(piece), position);
     }
@@ -280,18 +280,7 @@ impl Game<'_> {
         } else {
             let mut moves: Vec<chessmove::ChessMove> = vec![];
             for piece in self.board.pieces_of_color_except_king(*self.side_to_move()) {
-                moves.append(
-                    &mut (piece
-                        .moves(&self.board, king_position, &self.en_passant)
-                        .iter()
-                        .map(|pos| {
-                            chessmove::ChessMove(
-                                (piece.position().0, piece.position().1),
-                                (pos.0, pos.1),
-                            )
-                        })
-                        .collect::<Vec<_>>()),
-                );
+                moves.append(&mut (piece.moves(&self.board, king_position, &self.en_passant)));
             }
 
             if king_square_attackers.is_empty() {
@@ -303,7 +292,7 @@ impl Game<'_> {
                     moves = moves
                         .into_iter()
                         .filter(|mv| {
-                            (mv.1).0 == attacker.position().0 && (mv.1).1 == attacker.position().1
+                            (mv.to).0 == attacker.position().0 && (mv.to).1 == attacker.position().1
                         })
                         .collect::<Vec<_>>();
                     moves.append(&mut self.king_moves(king, &attacked_board));
@@ -315,21 +304,21 @@ impl Game<'_> {
                             if let Some(en_passant) = self.en_passant {
                                 match self
                                     .board()
-                                    .get_square(position::Position((mv.0).0, (mv.0).1))
+                                    .get_square(position::Position((mv.from).0, (mv.from).1))
                                 {
                                     None => panic!(),
                                     Some(piece) => {
                                         if piece.piece() == piece::PieceEnum::PAWN {
-                                            (mv.1).0 == en_passant.0 && (mv.1).1 == en_passant.1
+                                            (mv.to).0 == en_passant.0 && (mv.to).1 == en_passant.1
                                         } else {
-                                            (mv.1).0 == attacker.position().0
-                                                && (mv.1).1 == attacker.position().1
+                                            (mv.to).0 == attacker.position().0
+                                                && (mv.to).1 == attacker.position().1
                                         }
                                     }
                                 }
                             } else {
-                                (mv.1).0 == attacker.position().0
-                                    && (mv.1).1 == attacker.position().1
+                                (mv.to).0 == attacker.position().0
+                                    && (mv.to).1 == attacker.position().1
                             }
                         })
                         .collect::<Vec<_>>();
@@ -363,7 +352,7 @@ impl Game<'_> {
                     moves = moves
                         .into_iter()
                         .filter(|mv| {
-                            allowed_positions.contains(&position::Position((mv.1).0, (mv.1).1))
+                            allowed_positions.contains(&position::Position((mv.to).0, (mv.to).1))
                         })
                         .collect::<Vec<_>>();
 
@@ -388,9 +377,8 @@ impl Game<'_> {
         let moves = king.moves(self.board(), *king.position(), &None);
 
         let mut moves = moves
-            .iter()
-            .filter(|mv| square_safe(&position::Position(mv.0, mv.1), attacked_board))
-            .map(|mv| chessmove::ChessMove((king.position().0, king.position().1), (mv.0, mv.1)))
+            .into_iter()
+            .filter(|mv| square_safe(&position::Position((mv.to).0, (mv.to).1), attacked_board))
             .collect::<Vec<_>>();
 
         if square_under_attack(king.position(), &attacked_board) {
@@ -411,10 +399,11 @@ impl Game<'_> {
                 && square_safe(&one_right_of_king, attacked_board)
                 && square_safe(&two_right_of_king, attacked_board)
             {
-                moves.push(chessmove::ChessMove(
-                    (king.position().0, king.position().1),
-                    (king.position().0 + 2, king.position().1),
-                ));
+                moves.push(chessmove::ChessMove {
+                    from: (king.position().0, king.position().1),
+                    to: (king.position().0 + 2, king.position().1),
+                    promotion: None,
+                });
             }
         }
 
@@ -429,10 +418,11 @@ impl Game<'_> {
                 && square_safe(&one_left_of_king, attacked_board)
                 && square_safe(&two_left_of_king, attacked_board)
             {
-                moves.push(chessmove::ChessMove(
-                    (king.position().0, king.position().1),
-                    (king.position().0 - 2, king.position().1),
-                ));
+                moves.push(chessmove::ChessMove {
+                    from: (king.position().0, king.position().1),
+                    to: (king.position().0 - 2, king.position().1),
+                    promotion: None,
+                });
             }
         }
 
@@ -557,7 +547,14 @@ mod tests {
 
         let moves = game.legal_moves();
         assert_eq!(1, moves.len());
-        assert_eq!(chessmove::ChessMove((1, 1), (2, 2)), moves[0]);
+        assert_eq!(
+            chessmove::ChessMove {
+                from: (1, 1),
+                to: (2, 2),
+                promotion: None,
+            },
+            moves[0]
+        );
     }
 
     #[test]
@@ -704,13 +701,41 @@ mod tests {
 
         let actual_legal_moves = game.legal_moves();
         let expected_legal_moves = vec![
-            chessmove::ChessMove((3, 4), (3, 3)),
-            chessmove::ChessMove((3, 4), (4, 3)),
-            chessmove::ChessMove((5, 4), (4, 3)),
-            chessmove::ChessMove((5, 4), (5, 3)),
-            chessmove::ChessMove((8, 8), (7, 8)),
-            chessmove::ChessMove((8, 8), (7, 7)),
-            chessmove::ChessMove((8, 8), (8, 7)),
+            chessmove::ChessMove {
+                from: (3, 4),
+                to: (3, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (3, 4),
+                to: (4, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 4),
+                to: (4, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 4),
+                to: (5, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (8, 8),
+                to: (7, 8),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (8, 8),
+                to: (7, 7),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (8, 8),
+                to: (8, 7),
+                promotion: None,
+            },
         ];
 
         assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
@@ -734,8 +759,16 @@ mod tests {
 
         let actual_legal_moves = game.legal_moves();
         let expected_legal_moves = vec![
-            chessmove::ChessMove((3, 2), (4, 3)),
-            chessmove::ChessMove((5, 2), (4, 3)),
+            chessmove::ChessMove {
+                from: (3, 2),
+                to: (4, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 2),
+                to: (4, 3),
+                promotion: None,
+            },
         ];
         assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
         for mv in &actual_legal_moves {
@@ -778,15 +811,51 @@ mod tests {
 
         let actual_legal_moves = game.legal_moves();
         let expected_legal_moves = vec![
-            chessmove::ChessMove((6, 4), (6, 3)),
-            chessmove::ChessMove((6, 4), (5, 3)),
-            chessmove::ChessMove((6, 4), (5, 4)),
-            chessmove::ChessMove((6, 4), (5, 5)),
-            chessmove::ChessMove((6, 4), (6, 5)),
-            chessmove::ChessMove((6, 4), (7, 5)),
-            chessmove::ChessMove((6, 4), (7, 4)),
-            chessmove::ChessMove((6, 4), (7, 3)),
-            chessmove::ChessMove((4, 5), (5, 6)),
+            chessmove::ChessMove {
+                from: (6, 4),
+                to: (6, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (6, 4),
+                to: (5, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (6, 4),
+                to: (5, 4),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (6, 4),
+                to: (5, 5),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (6, 4),
+                to: (6, 5),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (6, 4),
+                to: (7, 5),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (6, 4),
+                to: (7, 4),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (6, 4),
+                to: (7, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (4, 5),
+                to: (5, 6),
+                promotion: None,
+            },
         ];
         assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
         for mv in &expected_legal_moves {
@@ -933,10 +1002,26 @@ mod tests {
 
         let actual_legal_moves = game.legal_moves();
         let expected_legal_moves = vec![
-            chessmove::ChessMove((5, 8), (4, 8)),
-            chessmove::ChessMove((5, 8), (5, 7)),
-            chessmove::ChessMove((5, 8), (6, 7)),
-            chessmove::ChessMove((5, 8), (6, 8)),
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (4, 8),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (5, 7),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (6, 7),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (6, 8),
+                promotion: None,
+            },
         ];
         assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
 
@@ -979,23 +1064,67 @@ mod tests {
         let actual_legal_moves = game.legal_moves();
 
         let mut expected_legal_moves = vec![
-            chessmove::ChessMove((5, 8), (4, 8)),
-            chessmove::ChessMove((5, 8), (5, 7)),
-            chessmove::ChessMove((5, 8), (6, 7)),
-            chessmove::ChessMove((5, 8), (6, 8)),
-            chessmove::ChessMove((5, 8), (4, 7)),
-            chessmove::ChessMove((5, 8), (3, 8)),
-            chessmove::ChessMove((5, 8), (7, 8)),
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (4, 8),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (5, 7),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (6, 7),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (6, 8),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (4, 7),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (3, 8),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (7, 8),
+                promotion: None,
+            },
         ];
         for i in 1..8 {
-            expected_legal_moves.push(chessmove::ChessMove((1, 8), (1, i)));
-            expected_legal_moves.push(chessmove::ChessMove((8, 8), (8, i)));
+            expected_legal_moves.push(chessmove::ChessMove {
+                from: (1, 8),
+                to: (1, i),
+                promotion: None,
+            });
+            expected_legal_moves.push(chessmove::ChessMove {
+                from: (8, 8),
+                to: (8, i),
+                promotion: None,
+            });
         }
         for i in 2..5 {
-            expected_legal_moves.push(chessmove::ChessMove((1, 8), (i, 8)));
+            expected_legal_moves.push(chessmove::ChessMove {
+                from: (1, 8),
+                to: (i, 8),
+                promotion: None,
+            });
         }
         for i in 6..8 {
-            expected_legal_moves.push(chessmove::ChessMove((8, 8), (i, 8)));
+            expected_legal_moves.push(chessmove::ChessMove {
+                from: (8, 8),
+                to: (i, 8),
+                promotion: None,
+            });
         }
         assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
 
@@ -1039,22 +1168,62 @@ mod tests {
         let actual_legal_moves = game.legal_moves();
 
         let mut expected_legal_moves = vec![
-            chessmove::ChessMove((5, 8), (4, 8)),
-            chessmove::ChessMove((5, 8), (5, 7)),
-            chessmove::ChessMove((5, 8), (6, 7)),
-            chessmove::ChessMove((5, 8), (6, 8)),
-            chessmove::ChessMove((5, 8), (4, 7)),
-            chessmove::ChessMove((5, 8), (7, 8)),
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (4, 8),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (5, 7),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (6, 7),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (6, 8),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (4, 7),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (7, 8),
+                promotion: None,
+            },
         ];
         for i in 1..8 {
-            expected_legal_moves.push(chessmove::ChessMove((1, 8), (1, i)));
-            expected_legal_moves.push(chessmove::ChessMove((8, 8), (8, i)));
+            expected_legal_moves.push(chessmove::ChessMove {
+                from: (1, 8),
+                to: (1, i),
+                promotion: None,
+            });
+            expected_legal_moves.push(chessmove::ChessMove {
+                from: (8, 8),
+                to: (8, i),
+                promotion: None,
+            });
         }
         for i in 2..5 {
-            expected_legal_moves.push(chessmove::ChessMove((1, 8), (i, 8)));
+            expected_legal_moves.push(chessmove::ChessMove {
+                from: (1, 8),
+                to: (i, 8),
+                promotion: None,
+            });
         }
         for i in 6..8 {
-            expected_legal_moves.push(chessmove::ChessMove((8, 8), (i, 8)));
+            expected_legal_moves.push(chessmove::ChessMove {
+                from: (8, 8),
+                to: (i, 8),
+                promotion: None,
+            });
         }
         assert_eq!(expected_legal_moves.len(), actual_legal_moves.len());
 
@@ -1086,7 +1255,14 @@ mod tests {
 
         assert_eq!((true, true), game.castling_rights_white);
 
-        game.make_move(chessmove::ChessMove((5, 1), (5, 2)), None);
+        game.make_move(
+            chessmove::ChessMove {
+                from: (5, 1),
+                to: (5, 2),
+                promotion: None,
+            },
+            None,
+        );
 
         assert_eq!(position::Position(5, 2), game.white_king);
         assert_eq!((false, false), game.castling_rights_white);
@@ -1097,7 +1273,14 @@ mod tests {
     fn en_passant_is_registered() {
         let mut game = Game::new();
 
-        game.make_move(chessmove::ChessMove((5, 2), (5, 4)), None);
+        game.make_move(
+            chessmove::ChessMove {
+                from: (5, 2),
+                to: (5, 4),
+                promotion: None,
+            },
+            None,
+        );
 
         match game.en_passant {
             None => panic!(),
@@ -1112,7 +1295,14 @@ mod tests {
     fn assert_make_move_moves_piece() {
         let mut game = Game::new();
 
-        game.make_move(chessmove::ChessMove((5, 2), (5, 4)), None);
+        game.make_move(
+            chessmove::ChessMove {
+                from: (5, 2),
+                to: (5, 4),
+                promotion: None,
+            },
+            None,
+        );
 
         assert!(game.board.get_square(position::Position(5, 2)).is_none());
         assert!(game.board.get_square(position::Position(5, 4)).is_some());
@@ -1127,7 +1317,14 @@ mod tests {
     fn undo_last_move() {
         let mut game = Game::new();
 
-        game.make_move(chessmove::ChessMove((5, 2), (5, 4)), None);
+        game.make_move(
+            chessmove::ChessMove {
+                from: (5, 2),
+                to: (5, 4),
+                promotion: None,
+            },
+            None,
+        );
 
         assert!(game.board.get_square(position::Position(5, 2)).is_none());
         assert!(game.board.get_square(position::Position(5, 4)).is_some());
@@ -1179,7 +1376,14 @@ mod tests {
         game.side_to_move = color::Color::BLACK;
         game.castling_rights_black = (true, false);
 
-        game.make_move(chessmove::ChessMove((5, 8), (7, 8)), None);
+        game.make_move(
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (7, 8),
+                promotion: None,
+            },
+            None,
+        );
 
         assert!(game.board.get_square(position::Position(7, 8)).is_some());
         assert!(game.board.get_square(position::Position(6, 8)).is_some());
@@ -1217,7 +1421,14 @@ mod tests {
         game.side_to_move = color::Color::BLACK;
         game.castling_rights_black = (true, true);
 
-        game.make_move(chessmove::ChessMove((5, 8), (3, 8)), None);
+        game.make_move(
+            chessmove::ChessMove {
+                from: (5, 8),
+                to: (3, 8),
+                promotion: None,
+            },
+            None,
+        );
 
         assert!(game.board.get_square(position::Position(3, 8)).is_some());
         assert!(game.board.get_square(position::Position(4, 8)).is_some());
@@ -1237,8 +1448,16 @@ mod tests {
 
         let moves = game.legal_moves();
 
-        assert!(!moves.contains(&chessmove::ChessMove((5, 1), (7, 1))));
-        assert!(moves.contains(&chessmove::ChessMove((5, 1), (3, 1))));
+        assert!(!moves.contains(&chessmove::ChessMove {
+            from: (5, 1),
+            to: (7, 1),
+            promotion: None,
+        },));
+        assert!(moves.contains(&chessmove::ChessMove {
+            from: (5, 1),
+            to: (3, 1),
+            promotion: None,
+        },));
     }
 
     #[test]
@@ -1253,7 +1472,11 @@ mod tests {
 
         let moves = game.legal_moves();
 
-        assert!(!moves.contains(&chessmove::ChessMove((5, 1), (3, 1))));
+        assert!(!moves.contains(&chessmove::ChessMove {
+            from: (5, 1),
+            to: (3, 1),
+            promotion: None,
+        },));
     }
 
     fn set_piece(board: &mut board::Board, piece: Box<dyn piece::Piece>) {

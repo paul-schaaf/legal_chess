@@ -1,5 +1,5 @@
 use super::{piece, piece::Piece, position};
-use crate::{board, color};
+use crate::{board, chessmove, color};
 
 #[derive(Debug)]
 pub struct King {
@@ -65,26 +65,26 @@ impl piece::Piece for King {
         &self,
         board: &board::Board,
         _en_passant: &Option<position::Position>,
-    ) -> Vec<position::Position> {
+    ) -> Vec<chessmove::ChessMove> {
         let position = self.position;
-        let mut positions_to_move_to = vec![];
+        let mut chessmoves = vec![];
 
         if position.0 != 1 {
             self.move_if_empty_or_enemy(
-                &mut positions_to_move_to,
+                &mut chessmoves,
                 board,
                 position::Position(position.0 - 1, position.1),
             );
             if position.1 != 8 {
                 self.move_if_empty_or_enemy(
-                    &mut positions_to_move_to,
+                    &mut chessmoves,
                     board,
                     position::Position(position.0 - 1, position.1 + 1),
                 );
             }
             if position.1 != 1 {
                 self.move_if_empty_or_enemy(
-                    &mut positions_to_move_to,
+                    &mut chessmoves,
                     board,
                     position::Position(position.0 - 1, position.1 - 1),
                 );
@@ -93,20 +93,20 @@ impl piece::Piece for King {
 
         if position.0 != 8 {
             self.move_if_empty_or_enemy(
-                &mut positions_to_move_to,
+                &mut chessmoves,
                 board,
                 position::Position(position.0 + 1, position.1),
             );
             if position.1 != 8 {
                 self.move_if_empty_or_enemy(
-                    &mut positions_to_move_to,
+                    &mut chessmoves,
                     board,
                     position::Position(position.0 + 1, position.1 + 1),
                 );
             }
             if position.1 != 1 {
                 self.move_if_empty_or_enemy(
-                    &mut positions_to_move_to,
+                    &mut chessmoves,
                     board,
                     position::Position(position.0 + 1, position.1 - 1),
                 );
@@ -115,7 +115,7 @@ impl piece::Piece for King {
 
         if position.1 != 1 {
             self.move_if_empty_or_enemy(
-                &mut positions_to_move_to,
+                &mut chessmoves,
                 board,
                 position::Position(position.0, position.1 - 1),
             );
@@ -123,28 +123,33 @@ impl piece::Piece for King {
 
         if position.1 != 8 {
             self.move_if_empty_or_enemy(
-                &mut positions_to_move_to,
+                &mut chessmoves,
                 board,
                 position::Position(position.0, position.1 + 1),
             );
         }
 
-        positions_to_move_to
+        chessmoves
     }
 }
 
 impl King {
     fn move_if_empty_or_enemy(
         &self,
-        positions: &mut Vec<position::Position>,
+        positions: &mut Vec<chessmove::ChessMove>,
         board: &board::Board,
         position: position::Position,
     ) {
+        let chessmove = chessmove::ChessMove {
+            from: (self.position().0, self.position().1),
+            to: (position.0, position.1),
+            promotion: None,
+        };
         match board.get_square(position) {
-            None => positions.push(position),
+            None => positions.push(chessmove),
             Some(p) => {
                 if *p.color() != *self.color() {
-                    positions.push(position);
+                    positions.push(chessmove);
                 }
             }
         }
@@ -219,9 +224,21 @@ mod tests {
         let possible_moves = king.moves_ignoring_pins(&board, &None);
 
         let expected = vec![
-            position::Position(1, 2),
-            position::Position(2, 1),
-            position::Position(2, 2),
+            chessmove::ChessMove {
+                from: (1, 1),
+                to: (1, 2),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (1, 1),
+                to: (2, 1),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (1, 1),
+                to: (2, 2),
+                promotion: None,
+            },
         ];
 
         assert_eq!(3, possible_moves.len());
@@ -247,7 +264,18 @@ mod tests {
 
         let possible_moves = king.moves_ignoring_pins(&board, &None);
 
-        let expected = vec![position::Position(1, 2), position::Position(2, 1)];
+        let expected = vec![
+            chessmove::ChessMove {
+                from: (1, 1),
+                to: (1, 2),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (1, 1),
+                to: (2, 1),
+                promotion: None,
+            },
+        ];
 
         assert_eq!(2, possible_moves.len());
         for position in expected {

@@ -1,5 +1,5 @@
 use super::{bishop, king, knight, pawn, position, queen, relative_position, rook};
-use crate::{board, color};
+use crate::{board, chessmove, color};
 use std::fmt;
 
 pub trait Piece: fmt::Debug {
@@ -26,20 +26,23 @@ pub trait Piece: fmt::Debug {
         &self,
         board: &board::Board,
         en_passant: &Option<position::Position>,
-    ) -> Vec<position::Position>;
+    ) -> Vec<chessmove::ChessMove>;
 
     fn moves(
         &self,
         board: &board::Board,
         king: position::Position,
         en_passant: &Option<position::Position>,
-    ) -> Vec<position::Position> {
+    ) -> Vec<chessmove::ChessMove> {
         let moves_ignoring_pins = self.moves_ignoring_pins(board, en_passant);
         match self.valid_moves_during_pin(board, king) {
             None => moves_ignoring_pins,
             Some(valid_moves_during_pin) => moves_ignoring_pins
                 .into_iter()
-                .filter(|mv| valid_moves_during_pin.contains(mv))
+                .filter(|mv| {
+                    let pos = position::Position((mv.to).0, (mv.to).1);
+                    valid_moves_during_pin.contains(&pos)
+                })
                 .collect::<Vec<_>>(),
         }
     }
@@ -129,6 +132,21 @@ pub enum PieceEnum {
     QUEEN,
     KING,
 }
+
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+pub enum PromotionPiece {
+    Rook,
+    Knight,
+    Bishop,
+    Queen,
+}
+
+pub static PROMOTION_PIECES: [PromotionPiece; 4] = [
+    PromotionPiece::Rook,
+    PromotionPiece::Knight,
+    PromotionPiece::Bishop,
+    PromotionPiece::Queen,
+];
 
 pub fn type_to_piece(
     piece_type: PieceEnum,

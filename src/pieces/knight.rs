@@ -1,5 +1,5 @@
 use super::{piece, position};
-use crate::{board, color};
+use crate::{board, chessmove, color};
 
 #[derive(Debug)]
 pub struct Knight {
@@ -12,7 +12,7 @@ impl piece::Piece for Knight {
         &self,
         board: &board::Board,
         _en_passant: &Option<position::Position>,
-    ) -> Vec<position::Position> {
+    ) -> Vec<chessmove::ChessMove> {
         let positions: [[i8; 2]; 8] = [
             [1, 2],
             [1, -2],
@@ -29,15 +29,20 @@ impl piece::Piece for Knight {
         for position in &positions {
             let file = position[0] + self.position.0 as i8;
             let rank = position[1] + self.position.1 as i8;
-
+            let move_position = position::Position(file as u8, rank as u8);
+            let mv = chessmove::ChessMove {
+                from: (self.position().0, self.position().1),
+                to: (move_position.0, move_position.1),
+                promotion: None,
+            };
             if file >= 1 && file <= 8 && rank >= 1 && rank <= 8 {
                 match board.get_square(position::Position(file as u8, rank as u8)) {
                     Some(piece) => {
                         if *piece.color() != self.color {
-                            attacks.push(position::Position(file as u8, rank as u8))
+                            attacks.push(mv)
                         }
                     }
-                    None => attacks.push(position::Position(file as u8, rank as u8)),
+                    None => attacks.push(mv),
                 }
             }
         }

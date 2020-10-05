@@ -1,6 +1,6 @@
 use super::piece;
 use super::position;
-use crate::{board, color};
+use crate::{board, chessmove, color};
 
 #[derive(Debug, PartialEq)]
 pub struct Pawn {
@@ -60,7 +60,7 @@ impl piece::Piece for Pawn {
         &self,
         board: &board::Board,
         en_passant: &Option<position::Position>,
-    ) -> Vec<position::Position> {
+    ) -> Vec<chessmove::ChessMove> {
         let position = self.position();
         let mut moves = vec![];
 
@@ -72,6 +72,7 @@ impl piece::Piece for Pawn {
                 Some(piece) => *piece.color() != *self.color(),
             })
             .collect::<Vec<_>>();
+
         moves.append(&mut attack_moves);
 
         match self.color() {
@@ -139,8 +140,27 @@ impl piece::Piece for Pawn {
                 }
             }
         }
+        let mut chessmoves = vec![];
 
-        moves
+        for mv in &moves {
+            if mv.1 == 1 || mv.1 == 8 {
+                for pc in piece::PROMOTION_PIECES.iter().copied() {
+                    chessmoves.push(chessmove::ChessMove {
+                        from: (self.position().0, self.position().1),
+                        to: (mv.0, mv.1),
+                        promotion: Some(pc),
+                    });
+                }
+            } else {
+                chessmoves.push(chessmove::ChessMove {
+                    from: (self.position().0, self.position().1),
+                    to: (mv.0, mv.1),
+                    promotion: None,
+                })
+            }
+        }
+
+        chessmoves
     }
 
     fn position(&self) -> &position::Position {
@@ -270,9 +290,21 @@ mod tests {
         };
 
         let expected_moves = vec![
-            position::Position(4, 3),
-            position::Position(4, 4),
-            position::Position(5, 3),
+            chessmove::ChessMove {
+                from: (white_pawn.position().0, white_pawn.position().1),
+                to: (4, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (white_pawn.position().0, white_pawn.position().1),
+                to: (4, 4),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (white_pawn.position().0, white_pawn.position().1),
+                to: (5, 3),
+                promotion: None,
+            },
         ];
         let moves = white_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(3, moves.len());
@@ -315,7 +347,14 @@ mod tests {
 
         let moves = white_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(1, moves.len());
-        assert_eq!(position::Position(4, 3), moves[0]);
+        assert_eq!(
+            chessmove::ChessMove {
+                from: (white_pawn.position().0, white_pawn.position().1),
+                to: (4, 3),
+                promotion: None,
+            },
+            moves[0]
+        );
     }
 
     #[test]
@@ -336,9 +375,21 @@ mod tests {
         };
 
         let expected_moves = vec![
-            position::Position(5, 6),
-            position::Position(5, 5),
-            position::Position(6, 6),
+            chessmove::ChessMove {
+                from: (black_pawn.position().0, black_pawn.position().1),
+                to: (5, 6),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (black_pawn.position().0, black_pawn.position().1),
+                to: (5, 5),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (black_pawn.position().0, black_pawn.position().1),
+                to: (6, 6),
+                promotion: None,
+            },
         ];
         let moves = black_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(3, moves.len());
@@ -381,7 +432,14 @@ mod tests {
 
         let moves = black_pawn.moves_ignoring_pins(&board, &None);
         assert_eq!(1, moves.len());
-        assert_eq!(position::Position(5, 6), moves[0]);
+        assert_eq!(
+            chessmove::ChessMove {
+                from: (black_pawn.position().0, black_pawn.position().1),
+                to: (5, 6),
+                promotion: None,
+            },
+            moves[0]
+        );
     }
 
     #[test]
@@ -399,7 +457,18 @@ mod tests {
         board.set_square(Some(Box::new(white_pawn)), white_pawn_pos);
 
         let moves = black_pawn.moves_ignoring_pins(&board, &Some(position::Position(5, 3)));
-        let expected = vec![position::Position(4, 3), position::Position(5, 3)];
+        let expected = vec![
+            chessmove::ChessMove {
+                from: (black_pawn.position().0, black_pawn.position().1),
+                to: (4, 3),
+                promotion: None,
+            },
+            chessmove::ChessMove {
+                from: (black_pawn.position().0, black_pawn.position().1),
+                to: (5, 3),
+                promotion: None,
+            },
+        ];
         assert_eq!(expected.len(), moves.len());
         for mv in expected {
             assert!(moves.contains(&mv));

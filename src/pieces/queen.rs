@@ -1,5 +1,5 @@
 use super::{piece, position, sliding_attacks, sliding_moves};
-use crate::{board, color};
+use crate::{board, chessmove, color};
 
 #[derive(Debug)]
 pub struct Queen {
@@ -28,7 +28,7 @@ impl piece::Piece for Queen {
         &self,
         board: &board::Board,
         _en_passant: &Option<position::Position>,
-    ) -> Vec<position::Position> {
+    ) -> Vec<chessmove::ChessMove> {
         let mut straight_moves = sliding_moves::straight_sliding(self, board);
         let mut diagonal_moves = sliding_moves::diagonal_sliding(self, board);
         straight_moves.append(&mut diagonal_moves);

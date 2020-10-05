@@ -1,5 +1,5 @@
 use super::{piece, position, sliding_attacks, sliding_moves};
-use crate::{board, color};
+use crate::{board, chessmove, color};
 
 #[derive(Debug)]
 pub struct Bishop {
@@ -36,7 +36,7 @@ impl piece::Piece for Bishop {
         &self,
         board: &board::Board,
         _en_passant: &Option<position::Position>,
-    ) -> Vec<position::Position> {
+    ) -> Vec<chessmove::ChessMove> {
         sliding_moves::diagonal_sliding(self, board)
     }
 }
@@ -185,20 +185,24 @@ mod tests {
             Some(b) => b,
         };
 
-        let attacked_positions = bishop.moves_ignoring_pins(&empty_board, &None);
+        let actual_moves = bishop.moves_ignoring_pins(&empty_board, &None);
 
         let mut count = 1;
-        let expected_attacked_positions = iter::from_fn(|| {
+        let expected_moves = iter::from_fn(|| {
             count += 1;
             if count < 9 {
-                Some(position::Position(count, count))
+                Some(chessmove::ChessMove {
+                    from: (bishop.position().0, bishop.position().1),
+                    to: (count, count),
+                    promotion: None,
+                })
             } else {
                 None
             }
         })
         .collect::<Vec<_>>();
 
-        assert_eq!(expected_attacked_positions, attacked_positions);
+        assert_eq!(expected_moves, actual_moves);
     }
 
     #[test]

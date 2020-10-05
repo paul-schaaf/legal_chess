@@ -39,3 +39,26 @@ fn perft_5_depth_1() {
 
     assert_eq!(44, moves);
 }
+
+#[test]
+fn perft_5_depth_2() {
+    let mut game = game::Game::from_game_arr(&GAME_ARR);
+    assert_eq!(false, game.castling_rights_black().0);
+    assert_eq!(false, game.castling_rights_black().1);
+    assert_eq!(true, game.castling_rights_white().0);
+    assert_eq!(true, game.castling_rights_white().1);
+    assert_eq!(None, *game.en_passant());
+
+    let mut capture_counter = perft::Counter(0);
+    let mut castle_counter = perft::Counter(0);
+
+    let moves = perft::perft(
+        &mut game,
+        2,
+        &mut perft::Counter(0),
+        &mut castle_counter,
+        &mut capture_counter,
+    );
+
+    assert_eq!(1486, moves);
+}
