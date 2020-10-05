@@ -188,6 +188,12 @@ impl Board {
             }
         }
 
+        match (white_king, black_king) {
+            (position::Position(0, 0), _) => panic!("No white king in given board string"),
+            (_, position::Position(0, 0)) => panic!("No black king in given board string"),
+            (_, _) => (),
+        };
+
         (board, white_king, black_king)
     }
 
