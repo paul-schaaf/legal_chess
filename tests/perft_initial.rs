@@ -1,4 +1,4 @@
-extern crate legal_chess;
+/* extern crate legal_chess;
 
 mod perft;
 
@@ -91,3 +91,4 @@ fn perft_initial_depth_5() {
     assert_eq!(82719 - 258, capture_counter.0);
     assert_eq!(4865609, moves);
 }
+ */

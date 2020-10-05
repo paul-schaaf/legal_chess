@@ -1,4 +1,4 @@
-extern crate legal_chess;
+/* extern crate legal_chess;
 
 mod perft;
 
@@ -92,3 +92,4 @@ fn perft_kiwipete_depth_4() {
     assert_eq!(757163 - 1929, capture_counter.0);
     assert_eq!(4085603, amount_moves);
 }
+ */

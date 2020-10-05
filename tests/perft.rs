@@ -3,6 +3,7 @@ extern crate legal_chess;
 use legal_chess::{
     game,
     pieces::{piece, position},
+    chessmove
 };
 
 #[derive(Debug, PartialEq)]
@@ -14,6 +15,8 @@ pub fn perft(
     ep_counter: &mut Counter,
     castle_counter: &mut Counter,
     capture_counter: &mut Counter,
+    move_stack: &mut Vec<chessmove::ChessMove>,
+    moves_by_origin: &mut Vec<Vec<Vec<Vec<chessmove::ChessMove>>>>
 ) -> usize {
     if depth == 0 {
         return 1;
@@ -23,6 +26,19 @@ pub fn perft(
 
     if depth == 1 {
         for mv in &moves {
+
+            let mut move_sequence = vec!();
+
+            for past_move in move_stack.iter() {
+                move_sequence.push(past_move.clone());
+            }
+
+            move_sequence.push(mv.clone());
+
+            let first_move = move_sequence[0];
+
+            moves_by_origin[(first_move.from).0 as usize][(first_move.from).1 as usize].push(move_sequence);
+
             if game
                 .board()
                 .get_square(position::Position((mv.to).0, (mv.to).1))
@@ -60,10 +76,12 @@ pub fn perft(
     let mut nodes = 0;
 
     for mv in moves {
+        move_stack.push(mv);
         game.make_move(mv);
 
-        nodes += perft(game, depth - 1, ep_counter, castle_counter, capture_counter);
+        nodes += perft(game, depth - 1, ep_counter, castle_counter, capture_counter, move_stack, moves_by_origin);
 
+        move_stack.pop();
         game.undo_last_move();
     }
 
