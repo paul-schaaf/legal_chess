@@ -87,8 +87,8 @@ fn depth_4() {
         &mut castle_counter,
         &mut capture_counter,
     );
-    //assert_eq!(45, ep_counter.0);
-    //assert_eq!(17102 - 45, capture_counter.0);
-    //assert_eq!(3162, castle_counter.0, "Wrong castle number");
+    assert_eq!(1929, ep_counter.0);
+    assert_eq!(128013, castle_counter.0);
+    assert_eq!(757163 - 1929, capture_counter.0);
     assert_eq!(4085603, amount_moves);
 }
