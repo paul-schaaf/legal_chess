@@ -60,7 +60,7 @@ pub fn perft(
     let mut nodes = 0;
 
     for mv in moves {
-        game.make_move(mv, None);
+        game.make_move(mv);
 
         nodes += perft(game, depth - 1, ep_counter, castle_counter, capture_counter);
 

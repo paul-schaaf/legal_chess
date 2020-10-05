@@ -148,6 +148,19 @@ pub static PROMOTION_PIECES: [PromotionPiece; 4] = [
     PromotionPiece::Queen,
 ];
 
+pub fn promotion_piece_to_piece(
+    promotion_piece: PromotionPiece,
+    color: color::Color,
+    position: position::Position,
+) -> Box<dyn Piece> {
+    match promotion_piece {
+        PromotionPiece::Rook => Box::new(rook::Rook { color, position }),
+        PromotionPiece::Knight => Box::new(knight::Knight { color, position }),
+        PromotionPiece::Bishop => Box::new(bishop::Bishop { color, position }),
+        PromotionPiece::Queen => Box::new(queen::Queen { color, position }),
+    }
+}
+
 pub fn type_to_piece(
     piece_type: PieceEnum,
     color: color::Color,

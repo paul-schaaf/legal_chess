@@ -64,11 +64,7 @@ impl Game<'_> {
         self.black_king = black_king;
     }
 
-    pub fn make_move(
-        &mut self,
-        mv: chessmove::ChessMove,
-        _promotion_piece: Option<piece::PieceEnum>,
-    ) {
+    pub fn make_move(&mut self, mv: chessmove::ChessMove) {
         if !self.legal_moves().contains(&mv) {
             panic!("Not a legal move");
         }
@@ -144,6 +140,17 @@ impl Game<'_> {
             (_, _) => (),
         }
 
+        let position = position::Position((mv.to).0, (mv.to).1);
+
+        let mut piece = match mv.promotion {
+            None => piece,
+            Some(promotion_piece) => {
+                piece::promotion_piece_to_piece(promotion_piece, self.side_to_move, position)
+            }
+        };
+        piece.set_position(&position);
+        self.board.set_square(Some(piece), position);
+
         match self.side_to_move {
             color::Color::BLACK => {
                 self.full_moves += 1;
@@ -153,11 +160,6 @@ impl Game<'_> {
                 self.side_to_move = color::Color::BLACK;
             }
         }
-
-        let mut piece = piece;
-        let position = position::Position((mv.to).0, (mv.to).1);
-        piece.set_position(&position);
-        self.board.set_square(Some(piece), position);
     }
 
     pub fn from_game_arr(game_arr: &[&str]) -> Self {
@@ -170,8 +172,8 @@ impl Game<'_> {
             None
         } else {
             Some(position::Position(
-                game_arr[64].as_bytes()[0],
-                game_arr[65].as_bytes()[0],
+                game_arr[64].parse().unwrap(),
+                game_arr[65].parse().unwrap(),
             ))
         };
         let castling_rights_white = if game_arr[66] == "1" && game_arr[67] == "1" {
@@ -309,7 +311,9 @@ impl Game<'_> {
                                     None => panic!(),
                                     Some(piece) => {
                                         if piece.piece() == piece::PieceEnum::PAWN {
-                                            (mv.to).0 == en_passant.0 && (mv.to).1 == en_passant.1
+                                            ((mv.to).0 == en_passant.0 && (mv.to).1 == en_passant.1)
+                                                || ((mv.to).0 == attacker.position().0
+                                                    && (mv.to).1 == attacker.position().1)
                                         } else {
                                             (mv.to).0 == attacker.position().0
                                                 && (mv.to).1 == attacker.position().1
@@ -1255,14 +1259,11 @@ mod tests {
 
         assert_eq!((true, true), game.castling_rights_white);
 
-        game.make_move(
-            chessmove::ChessMove {
-                from: (5, 1),
-                to: (5, 2),
-                promotion: None,
-            },
-            None,
-        );
+        game.make_move(chessmove::ChessMove {
+            from: (5, 1),
+            to: (5, 2),
+            promotion: None,
+        });
 
         assert_eq!(position::Position(5, 2), game.white_king);
         assert_eq!((false, false), game.castling_rights_white);
@@ -1273,14 +1274,11 @@ mod tests {
     fn en_passant_is_registered() {
         let mut game = Game::new();
 
-        game.make_move(
-            chessmove::ChessMove {
-                from: (5, 2),
-                to: (5, 4),
-                promotion: None,
-            },
-            None,
-        );
+        game.make_move(chessmove::ChessMove {
+            from: (5, 2),
+            to: (5, 4),
+            promotion: None,
+        });
 
         match game.en_passant {
             None => panic!(),
@@ -1295,14 +1293,11 @@ mod tests {
     fn assert_make_move_moves_piece() {
         let mut game = Game::new();
 
-        game.make_move(
-            chessmove::ChessMove {
-                from: (5, 2),
-                to: (5, 4),
-                promotion: None,
-            },
-            None,
-        );
+        game.make_move(chessmove::ChessMove {
+            from: (5, 2),
+            to: (5, 4),
+            promotion: None,
+        });
 
         assert!(game.board.get_square(position::Position(5, 2)).is_none());
         assert!(game.board.get_square(position::Position(5, 4)).is_some());
@@ -1317,14 +1312,11 @@ mod tests {
     fn undo_last_move() {
         let mut game = Game::new();
 
-        game.make_move(
-            chessmove::ChessMove {
-                from: (5, 2),
-                to: (5, 4),
-                promotion: None,
-            },
-            None,
-        );
+        game.make_move(chessmove::ChessMove {
+            from: (5, 2),
+            to: (5, 4),
+            promotion: None,
+        });
 
         assert!(game.board.get_square(position::Position(5, 2)).is_none());
         assert!(game.board.get_square(position::Position(5, 4)).is_some());
@@ -1376,14 +1368,11 @@ mod tests {
         game.side_to_move = color::Color::BLACK;
         game.castling_rights_black = (true, false);
 
-        game.make_move(
-            chessmove::ChessMove {
-                from: (5, 8),
-                to: (7, 8),
-                promotion: None,
-            },
-            None,
-        );
+        game.make_move(chessmove::ChessMove {
+            from: (5, 8),
+            to: (7, 8),
+            promotion: None,
+        });
 
         assert!(game.board.get_square(position::Position(7, 8)).is_some());
         assert!(game.board.get_square(position::Position(6, 8)).is_some());
@@ -1421,14 +1410,11 @@ mod tests {
         game.side_to_move = color::Color::BLACK;
         game.castling_rights_black = (true, true);
 
-        game.make_move(
-            chessmove::ChessMove {
-                from: (5, 8),
-                to: (3, 8),
-                promotion: None,
-            },
-            None,
-        );
+        game.make_move(chessmove::ChessMove {
+            from: (5, 8),
+            to: (3, 8),
+            promotion: None,
+        });
 
         assert!(game.board.get_square(position::Position(3, 8)).is_some());
         assert!(game.board.get_square(position::Position(4, 8)).is_some());
@@ -1477,6 +1463,41 @@ mod tests {
             to: (3, 1),
             promotion: None,
         },));
+    }
+
+    #[test]
+    fn en_passant_anti_check_and_pawn_capture_anti_check() {
+        #[rustfmt::skip]
+        let game = Game::from_game_arr(&[
+            "-", "-", "-", "-", "-", "-", "-", "-", 
+            "-", "-", "-", "-", "-", "-", "-", "-",
+            "-", "-", "-", "-", "k", "-", "-", "-",
+            "-", "-", "-", "P", "-", "-", "-", "-",
+            "-", "-", "-", "p", "p", "-", "-", "-", 
+            "-", "-", "-", "-", "-", "-", "-", "-",
+            "-", "-", "-", "-", "-", "-", "-", "-",
+            "K", "-", "-", "-", "-", "-", "-", "-",
+            "4", "3", "0", "0", "0", "0", "0", "1", "b",
+        ]);
+
+        match game.en_passant {
+            None => panic!("there should be en passant"),
+            Some(ep) => assert_eq!(position::Position(4, 3), ep),
+        }
+
+        let moves = game.legal_moves();
+
+        assert!(moves.contains(&chessmove::ChessMove {
+            from: (5, 4),
+            to: (4, 3),
+            promotion: None
+        }));
+
+        assert!(moves.contains(&chessmove::ChessMove {
+            from: (5, 5),
+            to: (4, 4),
+            promotion: None
+        }));
     }
 
     fn set_piece(board: &mut board::Board, piece: Box<dyn piece::Piece>) {
