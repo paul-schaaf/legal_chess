@@ -1,8 +1,9 @@
-/* extern crate legal_chess;
+extern crate legal_chess;
 
 mod perft;
 
 use legal_chess::game;
+use std::collections::HashMap;
 
 const GAME_ARR: [&str; 73] = [
     "R", "-", "P", "-", "-", "p", "-", "r", "-", "P", "-", "-", "-", "-", "p", "-", "-", "P", "N",
@@ -23,6 +24,8 @@ fn perft_6_depth_1() {
         &mut perft::Counter(0),
         &mut castle_counter,
         &mut capture_counter,
+        &mut vec![],
+        &mut HashMap::new(),
     );
 
     assert_eq!(46, moves);
@@ -40,6 +43,8 @@ fn perft_6_depth_2() {
         &mut perft::Counter(0),
         &mut castle_counter,
         &mut capture_counter,
+        &mut vec![],
+        &mut HashMap::new(),
     );
 
     assert_eq!(2079, moves);
@@ -57,6 +62,8 @@ fn perft_6_depth_3() {
         &mut perft::Counter(0),
         &mut castle_counter,
         &mut capture_counter,
+        &mut vec![],
+        &mut HashMap::new(),
     );
 
     assert_eq!(89890, moves);
@@ -74,8 +81,9 @@ fn perft_6_depth_4() {
         &mut perft::Counter(0),
         &mut castle_counter,
         &mut capture_counter,
+        &mut vec![],
+        &mut HashMap::new(),
     );
 
     assert_eq!(3894594, moves);
 }
- */

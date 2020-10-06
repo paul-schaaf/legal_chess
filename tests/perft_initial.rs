@@ -1,8 +1,9 @@
-/* extern crate legal_chess;
+extern crate legal_chess;
 
 mod perft;
 
 use legal_chess::game;
+use std::collections::HashMap;
 
 #[test]
 fn perft_initial_depth_1() {
@@ -16,6 +17,8 @@ fn perft_initial_depth_1() {
             &mut perft::Counter(0),
             &mut perft::Counter(0),
             &mut perft::Counter(0),
+            &mut vec![],
+            &mut HashMap::new()
         )
     );
 }
@@ -32,6 +35,8 @@ fn perft_initial_depth_2() {
             &mut perft::Counter(0),
             &mut perft::Counter(0),
             &mut perft::Counter(0),
+            &mut vec![],
+            &mut HashMap::new()
         )
     );
 }
@@ -47,6 +52,8 @@ fn perft_initial_depth_3() {
         &mut perft::Counter(0),
         &mut perft::Counter(0),
         &mut capture_counter,
+        &mut vec![],
+        &mut HashMap::new(),
     );
 
     assert_eq!(34, capture_counter.0);
@@ -65,6 +72,8 @@ fn perft_initial_depth_4() {
         &mut perft::Counter(0),
         &mut perft::Counter(0),
         &mut capture_counter,
+        &mut vec![],
+        &mut HashMap::new(),
     );
 
     assert_eq!(1576, capture_counter.0);
@@ -85,10 +94,11 @@ fn perft_initial_depth_5() {
         &mut ep_counter,
         &mut castle_counter,
         &mut capture_counter,
+        &mut vec![],
+        &mut HashMap::new(),
     );
 
     assert_eq!(258, ep_counter.0);
     assert_eq!(82719 - 258, capture_counter.0);
     assert_eq!(4865609, moves);
 }
- */

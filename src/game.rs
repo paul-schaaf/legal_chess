@@ -90,13 +90,17 @@ impl Game<'_> {
                     if let Some(ep) = self.en_passant {
                         if ep == position::Position((mv.to).0, (mv.to).1) {
                             match self.side_to_move {
-                                color::Color::WHITE => self.board.take_piece(position::Position((mv.to).0, 5)),
-                                color::Color::BLACK => self.board.take_piece(position::Position((mv.to).0, 4)),
+                                color::Color::WHITE => {
+                                    self.board.take_piece(position::Position((mv.to).0, 5))
+                                }
+                                color::Color::BLACK => {
+                                    self.board.take_piece(position::Position((mv.to).0, 4))
+                                }
                             };
                         }
                     }
                     self.en_passant = None
-                },
+                }
             }
         } else {
             self.en_passant = None;

@@ -1,10 +1,10 @@
 extern crate legal_chess;
 
 use legal_chess::{
-    game,
+    chessmove, game,
     pieces::{piece, position},
-    chessmove
 };
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 pub struct Counter(pub u128);
@@ -16,7 +16,10 @@ pub fn perft(
     castle_counter: &mut Counter,
     capture_counter: &mut Counter,
     move_stack: &mut Vec<chessmove::ChessMove>,
-    moves_by_origin: &mut Vec<Vec<Vec<Vec<chessmove::ChessMove>>>>
+    moves_by_origin: &mut HashMap<
+        (chessmove::ChessMove, chessmove::ChessMove),
+        Vec<Vec<chessmove::ChessMove>>,
+    >,
 ) -> usize {
     if depth == 0 {
         return 1;
@@ -26,8 +29,7 @@ pub fn perft(
 
     if depth == 1 {
         for mv in &moves {
-
-            let mut move_sequence = vec!();
+            let mut move_sequence = vec![];
 
             for past_move in move_stack.iter() {
                 move_sequence.push(past_move.clone());
@@ -36,8 +38,19 @@ pub fn perft(
             move_sequence.push(mv.clone());
 
             let first_move = move_sequence[0];
+            let second_move = if move_sequence.len() > 1 {
+                move_sequence[1]
+            } else {
+                move_sequence[0]
+            };
 
-            moves_by_origin[(first_move.from).0 as usize][(first_move.from).1 as usize].push(move_sequence);
+            match moves_by_origin.get_mut(&(first_move, second_move)) {
+                None => moves_by_origin.insert((first_move, second_move), vec![move_sequence]),
+                Some(v) => {
+                    v.push(move_sequence);
+                    None
+                }
+            };
 
             if game
                 .board()
@@ -79,7 +92,15 @@ pub fn perft(
         move_stack.push(mv);
         game.make_move(mv);
 
-        nodes += perft(game, depth - 1, ep_counter, castle_counter, capture_counter, move_stack, moves_by_origin);
+        nodes += perft(
+            game,
+            depth - 1,
+            ep_counter,
+            castle_counter,
+            capture_counter,
+            move_stack,
+            moves_by_origin,
+        );
 
         move_stack.pop();
         game.undo_last_move();
