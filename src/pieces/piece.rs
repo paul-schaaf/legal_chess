@@ -133,7 +133,7 @@ pub enum PieceEnum {
     KING,
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Hash)]
 pub enum PromotionPiece {
     Rook,
     Knight,
