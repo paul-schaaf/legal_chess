@@ -38,8 +38,8 @@ impl Board {
             } else {
                 (5, color::Color::BLACK)
             };
-            for i in 0..8 {
-                board[i][1 + modifier] = Some(Box::new(pawn::Pawn {
+            for (i, file) in board.iter_mut().enumerate().take(8) {
+                file[1 + modifier] = Some(Box::new(pawn::Pawn {
                     color,
                     position: position::Position(i as u8 + 1, 2 + modifier as u8),
                 }));

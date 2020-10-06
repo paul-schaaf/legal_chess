@@ -384,9 +384,7 @@ impl Game<'_> {
     fn king_moves(
         &self,
         king: &Box<dyn piece::Piece>,
-        attacked_board: &std::vec::Vec<
-            std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>,
-        >,
+        attacked_board: &[std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>],
     ) -> Vec<chessmove::ChessMove> {
         if king.piece() != piece::PieceEnum::KING {
             panic!("Given piece is not a king");
@@ -454,18 +452,14 @@ impl Game<'_> {
 
 fn square_safe(
     position: &position::Position,
-    attacked_board: &std::vec::Vec<
-        std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>,
-    >,
+    attacked_board: &[std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>],
 ) -> bool {
     attacked_board[position.0 as usize - 1][position.1 as usize - 1].is_empty()
 }
 
 fn square_under_attack(
     position: &position::Position,
-    attacked_board: &std::vec::Vec<
-        std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>,
-    >,
+    attacked_board: &[std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>],
 ) -> bool {
     !square_safe(position, attacked_board)
 }
