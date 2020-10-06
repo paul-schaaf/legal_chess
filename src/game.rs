@@ -86,7 +86,17 @@ impl Game<'_> {
             match ((mv.from).1, (mv.to).1) {
                 (2, 4) => self.en_passant = Some(position::Position((mv.to).0, 3)),
                 (7, 5) => self.en_passant = Some(position::Position((mv.to).0, 6)),
-                (_, _) => self.en_passant = None,
+                (_, _) => {
+                    if let Some(ep) = self.en_passant {
+                        if ep == position::Position((mv.to).0, (mv.to).1) {
+                            match self.side_to_move {
+                                color::Color::WHITE => self.board.take_piece(position::Position((mv.to).0, 5)),
+                                color::Color::BLACK => self.board.take_piece(position::Position((mv.to).0, 4)),
+                            };
+                        }
+                    }
+                    self.en_passant = None
+                },
             }
         } else {
             self.en_passant = None;
@@ -642,25 +652,32 @@ mod tests {
         let mut game = Game::new();
         game.board = board::Board::empty();
 
-        let black_queen_pos = position::Position(1, 8);
-        let black_queen = queen::Queen {
-            color: color::Color::BLACK,
-            position: black_queen_pos,
-        };
-        game.board
-            .set_square(Some(Box::new(black_queen)), black_queen_pos);
+        set_piece(
+            &mut game.board,
+            Box::new(queen::Queen {
+                color: color::Color::BLACK,
+                position: position::Position(1, 8),
+            }),
+        );
 
         let white_king_pos = position::Position(1, 2);
-        let white_king = king::King {
-            color: color::Color::WHITE,
-            position: white_king_pos,
-        };
-        game.board
-            .set_square(Some(Box::new(white_king)), white_king_pos);
+
+        set_piece(
+            &mut game.board,
+            Box::new(king::King {
+                color: color::Color::WHITE,
+                position: white_king_pos,
+            }),
+        );
         game.white_king = position::Position(1, 2);
 
         let moves = game.legal_moves();
         assert_eq!(3, moves.len());
+        assert!(!moves.contains(&chessmove::ChessMove {
+            from: (1, 2),
+            to: (1, 1),
+            promotion: None
+        }));
     }
 
     #[test]
@@ -1469,11 +1486,11 @@ mod tests {
     fn en_passant_anti_check_and_pawn_capture_anti_check() {
         #[rustfmt::skip]
         let game = Game::from_game_arr(&[
-            "-", "-", "-", "-", "-", "-", "-", "-", 
+            "-", "-", "-", "-", "-", "-", "-", "-",
             "-", "-", "-", "-", "-", "-", "-", "-",
             "-", "-", "-", "-", "k", "-", "-", "-",
             "-", "-", "-", "P", "-", "-", "-", "-",
-            "-", "-", "-", "p", "p", "-", "-", "-", 
+            "-", "-", "-", "p", "p", "-", "-", "-",
             "-", "-", "-", "-", "-", "-", "-", "-",
             "-", "-", "-", "-", "-", "-", "-", "-",
             "K", "-", "-", "-", "-", "-", "-", "-",
