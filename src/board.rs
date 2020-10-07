@@ -111,6 +111,10 @@ impl Board {
         }
     }
 
+    pub fn is_empty(&self, pos: position::Position) -> bool {
+        self.get_square(pos).is_none()
+    }
+
     pub fn set_square(
         &mut self,
         square: Option<Box<dyn piece::Piece>>,

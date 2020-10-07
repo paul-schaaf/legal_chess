@@ -62,77 +62,12 @@ impl piece::Piece for Pawn {
         en_passant: &Option<position::Position>,
         king_pos: position::Position,
     ) -> Vec<chessmove::ChessMove> {
-        let position = self.position();
         let mut moves = vec![];
 
-        let attacked_squares = self.attacks(board, position::Position(0, 0));
-        let mut attack_moves = attacked_squares
-            .into_iter()
-            .filter(|pos| match board.get_square(*pos) {
-                None => false,
-                Some(piece) => *piece.color() != *self.color(),
-            })
-            .collect::<Vec<_>>();
+        self.add_attack_moves(board, &mut moves);
+        self.add_forward_moves(board, &mut moves);
+        self.add_en_passant_moves(&mut moves, en_passant, king_pos, board);
 
-        moves.append(&mut attack_moves);
-
-        match self.color() {
-            color::Color::WHITE => {
-                if position.1 == 2
-                    && board
-                        .get_square(position::Position(position.0, 3))
-                        .is_none()
-                    && board
-                        .get_square(position::Position(position.0, 4))
-                        .is_none()
-                {
-                    moves.push(position::Position(position.0, 4));
-                }
-
-                if position.1 != 8
-                    && board
-                        .get_square(position::Position(position.0, position.1 + 1))
-                        .is_none()
-                {
-                    moves.push(position::Position(position.0, position.1 + 1));
-                }
-            }
-            color::Color::BLACK => {
-                if position.1 == 7
-                    && board
-                        .get_square(position::Position(position.0, 6))
-                        .is_none()
-                    && board
-                        .get_square(position::Position(position.0, 5))
-                        .is_none()
-                {
-                    moves.push(position::Position(position.0, 5));
-                }
-
-                if position.1 != 1
-                    && board
-                        .get_square(position::Position(position.0, position.1 - 1))
-                        .is_none()
-                {
-                    moves.push(position::Position(position.0, position.1 - 1));
-                }
-            }
-        }
-
-        if let Some(en_passant) = en_passant {
-            let (ep_capture_rank, ep_capturer_rank) = match self.color() {
-                color::Color::WHITE => (6, 5),
-                color::Color::BLACK => (3, 4),
-            };
-            if en_passant.1 == ep_capture_rank
-                && self.position.1 == ep_capturer_rank
-                && ((en_passant.0 == self.position.0 - 1) || (en_passant.0 == self.position.0 + 1))
-            {
-                if !self.cannot_en_passant_due_to_discovered_check(king_pos, *en_passant, &board) {
-                    moves.push(*en_passant);
-                }
-            }
-        }
         let mut chessmoves = vec![];
 
         for mv in &moves {
@@ -166,6 +101,68 @@ impl piece::Piece for Pawn {
 }
 
 impl Pawn {
+    fn add_en_passant_moves(
+        &self,
+        moves: &mut Vec<position::Position>,
+        en_passant: &Option<position::Position>,
+        king_pos: position::Position,
+        board: &board::Board,
+    ) {
+        if let Some(en_passant) = en_passant {
+            let (ep_capture_rank, ep_capturer_rank) = match self.color() {
+                color::Color::WHITE => (6, 5),
+                color::Color::BLACK => (3, 4),
+            };
+            if en_passant.1 == ep_capture_rank
+                && self.position.1 == ep_capturer_rank
+                && ((en_passant.0 == self.position.0 - 1) || (en_passant.0 == self.position.0 + 1))
+            {
+                if !self.cannot_en_passant_due_to_discovered_check(king_pos, *en_passant, &board) {
+                    moves.push(*en_passant);
+                }
+            }
+        }
+    }
+
+    fn add_attack_moves(&self, board: &board::Board, moves: &mut Vec<position::Position>) {
+        moves.append(
+            &mut self
+                .attacks(board, position::Position(0, 0))
+                .into_iter()
+                .filter(|pos| match board.get_square(*pos) {
+                    None => false,
+                    Some(piece) => *piece.color() != *self.color(),
+                })
+                .collect::<Vec<_>>(),
+        );
+    }
+
+    fn add_forward_moves(&self, board: &board::Board, moves: &mut Vec<position::Position>) {
+        let (initial, initial_one, initial_two, last, moving) = match self.color() {
+            color::Color::WHITE => (2, 3, 4, 8, 1),
+            color::Color::BLACK => (7, 6, 5, 1, -1),
+        };
+
+        if self.position().1 == initial
+            && board.is_empty(position::Position(self.position().0, initial_one))
+            && board.is_empty(position::Position(self.position().0, initial_two))
+        {
+            moves.push(position::Position(self.position().0, initial_two));
+        }
+
+        if self.position().1 != last
+            && board.is_empty(position::Position(
+                self.position().0,
+                (self.position().1 as i8 + moving) as u8,
+            ))
+        {
+            moves.push(position::Position(
+                self.position().0,
+                (self.position().1 as i8 + moving) as u8,
+            ));
+        }
+    }
+
     fn cannot_en_passant_due_to_discovered_check(
         &self,
         king_pos: position::Position,
