@@ -23,36 +23,26 @@ impl piece::Piece for Pawn {
         _enemy_king_pos: position::Position,
     ) -> Vec<position::Position> {
         let position = self.position();
-        if *self.color() == color::Color::WHITE {
-            if position.1 == 8 {
-                panic!("White pawn cannot stand on rank 8");
-            }
+        let modifier = match *self.color() {
+            color::Color::WHITE => 1,
+            color::Color::BLACK => -1,
+        };
 
-            if position.0 == 1 {
-                return vec![position::Position(position.0 + 1, position.1 + 1)];
-            } else if position.0 == 8 {
-                return vec![position::Position(position.0 - 1, position.1 + 1)];
-            } else {
-                return vec![
-                    position::Position(position.0 - 1, position.1 + 1),
-                    position::Position(position.0 + 1, position.1 + 1),
-                ];
-            }
+        if position.0 == 1 {
+            return vec![position::Position(
+                position.0 + 1,
+                (position.1 as i8 + modifier) as u8,
+            )];
+        } else if position.0 == 8 {
+            return vec![position::Position(
+                position.0 - 1,
+                (position.1 as i8 + modifier) as u8,
+            )];
         } else {
-            if position.1 == 1 {
-                panic!("Black pawn cannot stand on rank 1");
-            }
-
-            if position.0 == 1 {
-                return vec![position::Position(position.0 + 1, position.1 - 1)];
-            } else if position.0 == 8 {
-                return vec![position::Position(position.0 - 1, position.1 - 1)];
-            } else {
-                return vec![
-                    position::Position(position.0 - 1, position.1 - 1),
-                    position::Position(position.0 + 1, position.1 - 1),
-                ];
-            }
+            return vec![
+                position::Position(position.0 - 1, (position.1 as i8 + modifier) as u8),
+                position::Position(position.0 + 1, (position.1 as i8 + modifier) as u8),
+            ];
         }
     }
 
@@ -63,14 +53,29 @@ impl piece::Piece for Pawn {
         king_pos: position::Position,
     ) -> Vec<chessmove::ChessMove> {
         let mut moves = vec![];
-
         self.add_attack_moves(board, &mut moves);
         self.add_forward_moves(board, &mut moves);
         self.add_en_passant_moves(&mut moves, en_passant, king_pos, board);
+        self.transform_mvs_to_chessmoves(&moves)
+    }
 
+    fn position(&self) -> &position::Position {
+        &(self.position)
+    }
+
+    fn color(&self) -> &color::Color {
+        &(self.color)
+    }
+}
+
+impl Pawn {
+    fn transform_mvs_to_chessmoves(
+        &self,
+        moves: &Vec<position::Position>,
+    ) -> Vec<chessmove::ChessMove> {
         let mut chessmoves = vec![];
 
-        for mv in &moves {
+        for mv in moves {
             if mv.1 == 1 || mv.1 == 8 {
                 for pc in piece::PROMOTION_PIECES.iter().copied() {
                     chessmoves.push(chessmove::ChessMove {
@@ -91,16 +96,6 @@ impl piece::Piece for Pawn {
         chessmoves
     }
 
-    fn position(&self) -> &position::Position {
-        &(self.position)
-    }
-
-    fn color(&self) -> &color::Color {
-        &(self.color)
-    }
-}
-
-impl Pawn {
     fn add_en_passant_moves(
         &self,
         moves: &mut Vec<position::Position>,
