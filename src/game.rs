@@ -1,5 +1,5 @@
 use super::pieces::{piece, position, relative_position};
-use super::{attack, board, chessmove, color};
+use super::{attack, attack::AttackedBoard, board, chessmove, color};
 
 pub struct PreviousGameState<'a> {
     en_passant: Option<position::Position>,
@@ -384,7 +384,7 @@ impl Game<'_> {
     fn king_moves(
         &self,
         king: &Box<dyn piece::Piece>,
-        attacked_board: &[std::vec::Vec<std::vec::Vec<&std::boxed::Box<dyn piece::Piece>>>],
+        attacked_board: &AttackedBoard,
     ) -> Vec<chessmove::ChessMove> {
         if king.piece() != piece::PieceEnum::KING {
             panic!("Given piece is not a king");

@@ -2,12 +2,14 @@ use crate::board;
 use crate::color;
 use crate::pieces::{piece, position};
 
+pub type AttackedBoard<'a> = Vec<Vec<Vec<&'a Box<dyn piece::Piece>>>>;
+
 pub fn get_attacked_squares(
     board: &board::Board,
     color: color::Color,
     enemy_king_pos: position::Position,
-) -> Vec<Vec<Vec<&Box<dyn piece::Piece>>>> {
-    let mut attacked_board: Vec<Vec<Vec<&Box<dyn piece::Piece>>>> = vec![];
+) -> AttackedBoard {
+    let mut attacked_board: AttackedBoard = vec![];
 
     for i in 0..8 {
         attacked_board.push(vec![]);
