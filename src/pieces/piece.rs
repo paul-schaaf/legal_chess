@@ -1,4 +1,4 @@
-use super::{bishop, king, knight, pawn, piece, position, queen, relative_position, rook};
+use super::{bishop, king, knight, pawn, position, queen, relative_position, rook};
 use crate::{board, chessmove, color};
 use std::fmt;
 
@@ -26,6 +26,7 @@ pub trait Piece: fmt::Debug {
         &self,
         board: &board::Board,
         en_passant: &Option<position::Position>,
+        king_pos: position::Position,
     ) -> Vec<chessmove::ChessMove>;
 
     fn moves(
@@ -34,45 +35,7 @@ pub trait Piece: fmt::Debug {
         king: position::Position,
         en_passant: &Option<position::Position>,
     ) -> Vec<chessmove::ChessMove> {
-        let mut moves_ignoring_pins = self.moves_ignoring_pins(board, en_passant);
-        if self.piece() == piece::PieceEnum::PAWN {
-            if let Some(ep) = en_passant {
-                if moves_ignoring_pins
-                    .iter()
-                    .any(|mv| position::Position((mv.to).0, (mv.to).1) == *ep)
-                {
-                    if king.1 == self.position().1 {
-                        let modifier = if king.0 > self.position().0 { -1 } else { 1 };
-                        let mut pos = position::Position((king.0 as i8) as u8, king.1);
-                        loop {
-                            pos = position::Position((pos.0 as i8 + modifier) as u8, pos.1);
-                            if pos.0 == 0 || pos.0 == 9 {
-                                break;
-                            }
-                            if !(pos == *self.position()
-                                || pos == position::Position(ep.0, self.position().1))
-                            {
-                                if let Some(p) = board.get_square(pos) {
-                                    if p.color() != self.color() {
-                                        if [PieceEnum::QUEEN, PieceEnum::ROOK].contains(&p.piece())
-                                        {
-                                            moves_ignoring_pins = moves_ignoring_pins
-                                                .into_iter()
-                                                .filter(|mv| (mv.to).0 != ep.0)
-                                                .collect::<Vec<_>>();
-                                        } else {
-                                            break;
-                                        }
-                                    } else {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        let moves_ignoring_pins = self.moves_ignoring_pins(board, en_passant, king);
 
         match self.valid_moves_during_pin(board, king) {
             None => moves_ignoring_pins,
@@ -480,194 +443,4 @@ mod tests {
     }
 
     // TODO: incorporate new moves function into these tests / write new ones
-
-    // 8/8/8/K1Pp3q/8/8/8/8 w - - 0 1 invalid en passant because of discovered check
-    #[test]
-    fn invalid_en_passant_because_of_discovered_check_white() {
-        let mut board = board::Board::empty();
-
-        let pawn = pawn::Pawn {
-            position: position::Position(3, 5),
-            color: color::Color::WHITE,
-        };
-
-        let king = king::King {
-            position: position::Position(1, 5),
-            color: color::Color::WHITE,
-        };
-
-        let queen = queen::Queen {
-            position: position::Position(8, 5),
-            color: color::Color::BLACK,
-        };
-
-        let black_pawn = pawn::Pawn {
-            position: position::Position(4, 5),
-            color: color::Color::BLACK,
-        };
-
-        board.set_square(Some(Box::new(pawn)), position::Position(3, 5));
-        board.set_square(Some(Box::new(king)), position::Position(1, 5));
-        board.set_square(Some(Box::new(queen)), position::Position(8, 5));
-        board.set_square(Some(Box::new(black_pawn)), position::Position(4, 5));
-
-        if let Some(pawn) = board.get_square(position::Position(3, 5)) {
-            assert_eq!(
-                1,
-                pawn.moves(
-                    &board,
-                    position::Position(1, 5),
-                    &Some(position::Position(4, 6))
-                )
-                .len()
-            );
-        } else {
-            panic!();
-        }
-    }
-
-    // 8/8/8/8/Q2Pp2k/8/8/8 w - - 0 1 invalid en passant because of discovered check
-    #[test]
-    fn invalid_en_passant_because_of_discovered_check_black() {
-        let mut board = board::Board::empty();
-
-        let pawn = pawn::Pawn {
-            position: position::Position(4, 4),
-            color: color::Color::WHITE,
-        };
-
-        let king = king::King {
-            position: position::Position(8, 4),
-            color: color::Color::BLACK,
-        };
-
-        let queen = queen::Queen {
-            position: position::Position(1, 4),
-            color: color::Color::WHITE,
-        };
-
-        let black_pawn = pawn::Pawn {
-            position: position::Position(5, 4),
-            color: color::Color::BLACK,
-        };
-
-        board.set_square(Some(Box::new(pawn)), position::Position(4, 4));
-        board.set_square(Some(Box::new(king)), position::Position(8, 4));
-        board.set_square(Some(Box::new(queen)), position::Position(1, 4));
-        board.set_square(Some(Box::new(black_pawn)), position::Position(5, 4));
-
-        if let Some(pawn) = board.get_square(position::Position(5, 4)) {
-            assert_eq!(
-                1,
-                pawn.moves(
-                    &board,
-                    position::Position(8, 4),
-                    &Some(position::Position(4, 3))
-                )
-                .len()
-            );
-        } else {
-            panic!();
-        }
-    }
-
-    #[test]
-    fn invalid_en_passant_because_of_discovered_check_black_blocked_queenside() {
-        let mut board = board::Board::empty();
-
-        let pawn = pawn::Pawn {
-            position: position::Position(4, 4),
-            color: color::Color::WHITE,
-        };
-
-        let king = king::King {
-            position: position::Position(8, 4),
-            color: color::Color::BLACK,
-        };
-
-        let queen = queen::Queen {
-            position: position::Position(1, 4),
-            color: color::Color::WHITE,
-        };
-
-        let black_pawn = pawn::Pawn {
-            position: position::Position(5, 4),
-            color: color::Color::BLACK,
-        };
-
-        let black_rook = rook::Rook {
-            position: position::Position(3, 4),
-            color: color::Color::BLACK,
-        };
-
-        board.set_square(Some(Box::new(pawn)), position::Position(4, 4));
-        board.set_square(Some(Box::new(king)), position::Position(8, 4));
-        board.set_square(Some(Box::new(queen)), position::Position(1, 4));
-        board.set_square(Some(Box::new(black_pawn)), position::Position(5, 4));
-        board.set_square(Some(Box::new(black_rook)), position::Position(3, 4));
-
-        if let Some(pawn) = board.get_square(position::Position(5, 4)) {
-            assert_eq!(
-                2,
-                pawn.moves(
-                    &board,
-                    position::Position(8, 4),
-                    &Some(position::Position(4, 3))
-                )
-                .len()
-            );
-        } else {
-            panic!();
-        }
-    }
-
-    #[test]
-    fn invalid_en_passant_because_of_discovered_check_black_blocked_kingside() {
-        let mut board = board::Board::empty();
-
-        let pawn = pawn::Pawn {
-            position: position::Position(4, 4),
-            color: color::Color::WHITE,
-        };
-
-        let king = king::King {
-            position: position::Position(8, 4),
-            color: color::Color::BLACK,
-        };
-
-        let queen = queen::Queen {
-            position: position::Position(1, 4),
-            color: color::Color::WHITE,
-        };
-
-        let black_pawn = pawn::Pawn {
-            position: position::Position(5, 4),
-            color: color::Color::BLACK,
-        };
-
-        let white_bishop = bishop::Bishop {
-            position: position::Position(6, 4),
-            color: color::Color::WHITE,
-        };
-
-        board.set_square(Some(Box::new(pawn)), position::Position(4, 4));
-        board.set_square(Some(Box::new(king)), position::Position(8, 4));
-        board.set_square(Some(Box::new(queen)), position::Position(1, 4));
-        board.set_square(Some(Box::new(black_pawn)), position::Position(5, 4));
-        board.set_square(Some(Box::new(white_bishop)), position::Position(6, 4));
-
-        if let Some(pawn) = board.get_square(position::Position(5, 4)) {
-            assert_eq!(
-                2,
-                pawn.moves(
-                    &board,
-                    position::Position(8, 4),
-                    &Some(position::Position(4, 3))
-                )
-                .len()
-            );
-        } else {
-            panic!();
-        }
-    }
 }

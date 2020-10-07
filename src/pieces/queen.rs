@@ -28,6 +28,7 @@ impl piece::Piece for Queen {
         &self,
         board: &board::Board,
         _en_passant: &Option<position::Position>,
+        _king_pos: position::Position,
     ) -> Vec<chessmove::ChessMove> {
         let mut straight_moves = sliding_moves::straight_sliding(self, board);
         let mut diagonal_moves = sliding_moves::diagonal_sliding(self, board);

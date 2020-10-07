@@ -12,6 +12,7 @@ impl piece::Piece for Knight {
         &self,
         board: &board::Board,
         _en_passant: &Option<position::Position>,
+        _king_pos: position::Position,
     ) -> Vec<chessmove::ChessMove> {
         let positions: [[i8; 2]; 8] = [
             [1, 2],

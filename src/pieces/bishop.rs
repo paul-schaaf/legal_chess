@@ -36,6 +36,7 @@ impl piece::Piece for Bishop {
         &self,
         board: &board::Board,
         _en_passant: &Option<position::Position>,
+        _king_pos: position::Position,
     ) -> Vec<chessmove::ChessMove> {
         sliding_moves::diagonal_sliding(self, board)
     }
@@ -185,7 +186,8 @@ mod tests {
             Some(b) => b,
         };
 
-        let actual_moves = bishop.moves_ignoring_pins(&empty_board, &None);
+        let actual_moves =
+            bishop.moves_ignoring_pins(&empty_board, &None, position::Position(0, 0));
 
         let mut count = 1;
         let expected_moves = iter::from_fn(|| {

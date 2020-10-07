@@ -65,6 +65,7 @@ impl piece::Piece for King {
         &self,
         board: &board::Board,
         _en_passant: &Option<position::Position>,
+        _king_pos: position::Position,
     ) -> Vec<chessmove::ChessMove> {
         let position = self.position;
         let mut chessmoves = vec![];
@@ -221,7 +222,7 @@ mod tests {
 
         board.set_square(Some(Box::new(black_pawn)), position::Position(2, 2));
 
-        let possible_moves = king.moves_ignoring_pins(&board, &None);
+        let possible_moves = king.moves_ignoring_pins(&board, &None, position::Position(1, 1));
 
         let expected = vec![
             chessmove::ChessMove {
@@ -262,7 +263,7 @@ mod tests {
 
         board.set_square(Some(Box::new(white_pawn)), position::Position(2, 2));
 
-        let possible_moves = king.moves_ignoring_pins(&board, &None);
+        let possible_moves = king.moves_ignoring_pins(&board, &None, position::Position(1, 1));
 
         let expected = vec![
             chessmove::ChessMove {

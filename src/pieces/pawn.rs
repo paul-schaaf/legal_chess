@@ -1,5 +1,5 @@
-use super::piece;
 use super::position;
+use super::{piece, piece::Piece, piece::PieceEnum};
 use crate::{board, chessmove, color};
 
 #[derive(Debug, PartialEq)]
@@ -60,6 +60,7 @@ impl piece::Piece for Pawn {
         &self,
         board: &board::Board,
         en_passant: &Option<position::Position>,
+        king_pos: position::Position,
     ) -> Vec<chessmove::ChessMove> {
         let position = self.position();
         let mut moves = vec![];
@@ -119,24 +120,16 @@ impl piece::Piece for Pawn {
         }
 
         if let Some(en_passant) = en_passant {
-            match self.color() {
-                color::Color::WHITE => {
-                    if self.position.1 == 5
-                        && en_passant.1 == 6
-                        && ((en_passant.0 == self.position.0 - 1)
-                            || (en_passant.0 == self.position.0 + 1))
-                    {
-                        moves.push(*en_passant);
-                    }
-                }
-                color::Color::BLACK => {
-                    if self.position.1 == 4
-                        && en_passant.1 == 3
-                        && ((en_passant.0 == self.position.0 - 1)
-                            || (en_passant.0 == self.position.0 + 1))
-                    {
-                        moves.push(*en_passant);
-                    }
+            let (ep_capture_rank, ep_capturer_rank) = match self.color() {
+                color::Color::WHITE => (6, 5),
+                color::Color::BLACK => (3, 4),
+            };
+            if en_passant.1 == ep_capture_rank
+                && self.position.1 == ep_capturer_rank
+                && ((en_passant.0 == self.position.0 - 1) || (en_passant.0 == self.position.0 + 1))
+            {
+                if !self.cannot_en_passant_due_to_discovered_check(king_pos, *en_passant, &board) {
+                    moves.push(*en_passant);
                 }
             }
         }
@@ -172,11 +165,49 @@ impl piece::Piece for Pawn {
     }
 }
 
+impl Pawn {
+    fn cannot_en_passant_due_to_discovered_check(
+        &self,
+        king_pos: position::Position,
+        ep: position::Position,
+        board: &board::Board,
+    ) -> bool {
+        if king_pos.1 == self.position().1 {
+            let modifier = if king_pos.0 > self.position().0 {
+                -1
+            } else {
+                1
+            };
+            let mut pos = position::Position((king_pos.0 as i8) as u8, king_pos.1);
+            loop {
+                pos = position::Position((pos.0 as i8 + modifier) as u8, pos.1);
+                if pos.0 == 0 || pos.0 == 9 {
+                    break;
+                }
+                if !(pos == *self.position() || pos == position::Position(ep.0, self.position().1))
+                {
+                    if let Some(p) = board.get_square(pos) {
+                        if p.color() != self.color() {
+                            if [PieceEnum::QUEEN, PieceEnum::ROOK].contains(&p.piece()) {
+                                return true;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        false
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::super::pawn;
+    use super::super::{bishop, king, pawn, piece::Piece, queen, rook};
     use super::*;
-    use piece::Piece;
 
     #[test]
     fn attrs() {
@@ -306,7 +337,7 @@ mod tests {
                 promotion: None,
             },
         ];
-        let moves = white_pawn.moves_ignoring_pins(&board, &None);
+        let moves = white_pawn.moves_ignoring_pins(&board, &None, position::Position(0, 0));
         assert_eq!(3, moves.len());
         for mv in expected_moves {
             assert!(moves.contains(&mv));
@@ -327,7 +358,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(white_pawn_2)), white_pawn_2_pos);
 
-        let moves = white_pawn.moves_ignoring_pins(&board, &None);
+        let moves = white_pawn.moves_ignoring_pins(&board, &None, position::Position(0, 0));
         assert_eq!(0, moves.len());
     }
 
@@ -345,7 +376,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(white_pawn_2)), white_pawn_2_pos);
 
-        let moves = white_pawn.moves_ignoring_pins(&board, &None);
+        let moves = white_pawn.moves_ignoring_pins(&board, &None, position::Position(0, 0));
         assert_eq!(1, moves.len());
         assert_eq!(
             chessmove::ChessMove {
@@ -391,7 +422,7 @@ mod tests {
                 promotion: None,
             },
         ];
-        let moves = black_pawn.moves_ignoring_pins(&board, &None);
+        let moves = black_pawn.moves_ignoring_pins(&board, &None, position::Position(0, 0));
         assert_eq!(3, moves.len());
         for mv in expected_moves {
             assert!(moves.contains(&mv));
@@ -412,7 +443,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(black_pawn_2)), black_pawn_2_pos);
 
-        let moves = black_pawn.moves_ignoring_pins(&board, &None);
+        let moves = black_pawn.moves_ignoring_pins(&board, &None, position::Position(0, 0));
         assert_eq!(0, moves.len());
     }
 
@@ -430,7 +461,7 @@ mod tests {
         };
         board.set_square(Some(Box::new(black_pawn_2)), black_pawn_2_pos);
 
-        let moves = black_pawn.moves_ignoring_pins(&board, &None);
+        let moves = black_pawn.moves_ignoring_pins(&board, &None, position::Position(0, 0));
         assert_eq!(1, moves.len());
         assert_eq!(
             chessmove::ChessMove {
@@ -456,7 +487,11 @@ mod tests {
         };
         board.set_square(Some(Box::new(white_pawn)), white_pawn_pos);
 
-        let moves = black_pawn.moves_ignoring_pins(&board, &Some(position::Position(5, 3)));
+        let moves = black_pawn.moves_ignoring_pins(
+            &board,
+            &Some(position::Position(5, 3)),
+            position::Position(0, 0),
+        );
         let expected = vec![
             chessmove::ChessMove {
                 from: (black_pawn.position().0, black_pawn.position().1),
@@ -472,6 +507,196 @@ mod tests {
         assert_eq!(expected.len(), moves.len());
         for mv in expected {
             assert!(moves.contains(&mv));
+        }
+    }
+
+    // 8/8/8/K1Pp3q/8/8/8/8 w - - 0 1 invalid en passant because of discovered check
+    #[test]
+    fn invalid_en_passant_because_of_discovered_check_white() {
+        let mut board = board::Board::empty();
+
+        let pawn = pawn::Pawn {
+            position: position::Position(3, 5),
+            color: color::Color::WHITE,
+        };
+
+        let king = king::King {
+            position: position::Position(1, 5),
+            color: color::Color::WHITE,
+        };
+
+        let queen = queen::Queen {
+            position: position::Position(8, 5),
+            color: color::Color::BLACK,
+        };
+
+        let black_pawn = pawn::Pawn {
+            position: position::Position(4, 5),
+            color: color::Color::BLACK,
+        };
+
+        board.set_square(Some(Box::new(pawn)), position::Position(3, 5));
+        board.set_square(Some(Box::new(king)), position::Position(1, 5));
+        board.set_square(Some(Box::new(queen)), position::Position(8, 5));
+        board.set_square(Some(Box::new(black_pawn)), position::Position(4, 5));
+
+        if let Some(pawn) = board.get_square(position::Position(3, 5)) {
+            assert_eq!(
+                1,
+                pawn.moves(
+                    &board,
+                    position::Position(1, 5),
+                    &Some(position::Position(4, 6))
+                )
+                .len()
+            );
+        } else {
+            panic!();
+        }
+    }
+
+    // 8/8/8/8/Q2Pp2k/8/8/8 w - - 0 1 invalid en passant because of discovered check
+    #[test]
+    fn invalid_en_passant_because_of_discovered_check_black() {
+        let mut board = board::Board::empty();
+
+        let pawn = pawn::Pawn {
+            position: position::Position(4, 4),
+            color: color::Color::WHITE,
+        };
+
+        let king = king::King {
+            position: position::Position(8, 4),
+            color: color::Color::BLACK,
+        };
+
+        let queen = queen::Queen {
+            position: position::Position(1, 4),
+            color: color::Color::WHITE,
+        };
+
+        let black_pawn = pawn::Pawn {
+            position: position::Position(5, 4),
+            color: color::Color::BLACK,
+        };
+
+        board.set_square(Some(Box::new(pawn)), position::Position(4, 4));
+        board.set_square(Some(Box::new(king)), position::Position(8, 4));
+        board.set_square(Some(Box::new(queen)), position::Position(1, 4));
+        board.set_square(Some(Box::new(black_pawn)), position::Position(5, 4));
+
+        if let Some(pawn) = board.get_square(position::Position(5, 4)) {
+            assert_eq!(
+                1,
+                pawn.moves(
+                    &board,
+                    position::Position(8, 4),
+                    &Some(position::Position(4, 3))
+                )
+                .len()
+            );
+        } else {
+            panic!();
+        }
+    }
+
+    #[test]
+    fn invalid_en_passant_because_of_discovered_check_black_blocked_queenside() {
+        let mut board = board::Board::empty();
+
+        let pawn = pawn::Pawn {
+            position: position::Position(4, 4),
+            color: color::Color::WHITE,
+        };
+
+        let king = king::King {
+            position: position::Position(8, 4),
+            color: color::Color::BLACK,
+        };
+
+        let queen = queen::Queen {
+            position: position::Position(1, 4),
+            color: color::Color::WHITE,
+        };
+
+        let black_pawn = pawn::Pawn {
+            position: position::Position(5, 4),
+            color: color::Color::BLACK,
+        };
+
+        let black_rook = rook::Rook {
+            position: position::Position(3, 4),
+            color: color::Color::BLACK,
+        };
+
+        board.set_square(Some(Box::new(pawn)), position::Position(4, 4));
+        board.set_square(Some(Box::new(king)), position::Position(8, 4));
+        board.set_square(Some(Box::new(queen)), position::Position(1, 4));
+        board.set_square(Some(Box::new(black_pawn)), position::Position(5, 4));
+        board.set_square(Some(Box::new(black_rook)), position::Position(3, 4));
+
+        if let Some(pawn) = board.get_square(position::Position(5, 4)) {
+            assert_eq!(
+                2,
+                pawn.moves(
+                    &board,
+                    position::Position(8, 4),
+                    &Some(position::Position(4, 3))
+                )
+                .len()
+            );
+        } else {
+            panic!();
+        }
+    }
+
+    #[test]
+    fn invalid_en_passant_because_of_discovered_check_black_blocked_kingside() {
+        let mut board = board::Board::empty();
+
+        let pawn = pawn::Pawn {
+            position: position::Position(4, 4),
+            color: color::Color::WHITE,
+        };
+
+        let king = king::King {
+            position: position::Position(8, 4),
+            color: color::Color::BLACK,
+        };
+
+        let queen = queen::Queen {
+            position: position::Position(1, 4),
+            color: color::Color::WHITE,
+        };
+
+        let black_pawn = pawn::Pawn {
+            position: position::Position(5, 4),
+            color: color::Color::BLACK,
+        };
+
+        let white_bishop = bishop::Bishop {
+            position: position::Position(6, 4),
+            color: color::Color::WHITE,
+        };
+
+        board.set_square(Some(Box::new(pawn)), position::Position(4, 4));
+        board.set_square(Some(Box::new(king)), position::Position(8, 4));
+        board.set_square(Some(Box::new(queen)), position::Position(1, 4));
+        board.set_square(Some(Box::new(black_pawn)), position::Position(5, 4));
+        board.set_square(Some(Box::new(white_bishop)), position::Position(6, 4));
+
+        if let Some(pawn) = board.get_square(position::Position(5, 4)) {
+            assert_eq!(
+                2,
+                pawn.moves(
+                    &board,
+                    position::Position(8, 4),
+                    &Some(position::Position(4, 3))
+                )
+                .len()
+            );
+        } else {
+            panic!();
         }
     }
 }

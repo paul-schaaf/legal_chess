@@ -36,6 +36,7 @@ impl piece::Piece for Rook {
         &self,
         board: &board::Board,
         _en_passant: &Option<position::Position>,
+        _king_pos: position::Position,
     ) -> Vec<chessmove::ChessMove> {
         sliding_moves::straight_sliding(self, board)
     }
