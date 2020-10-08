@@ -111,10 +111,9 @@ impl Pawn {
             if en_passant.1 == ep_capture_rank
                 && self.position.1 == ep_capturer_rank
                 && ((en_passant.0 == self.position.0 - 1) || (en_passant.0 == self.position.0 + 1))
+                && !self.cannot_en_passant_due_to_discovered_check(king_pos, *en_passant, &board)
             {
-                if !self.cannot_en_passant_due_to_discovered_check(king_pos, *en_passant, &board) {
-                    moves.push(*en_passant);
-                }
+                moves.push(*en_passant);
             }
         }
     }

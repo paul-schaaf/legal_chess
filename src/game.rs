@@ -68,15 +68,8 @@ impl Game<'_> {
         if !self.legal_moves().contains(&mv) {
             panic!("Not a legal move");
         }
-        self.previous_game_states.push(PreviousGameState {
-            string_board: self.board.to_string_board(),
-            castling_rights_black: self.castling_rights_black,
-            castling_rights_white: self.castling_rights_white,
-            en_passant: self.en_passant,
-            full_moves: self.full_moves,
-            half_moves: self.half_moves,
-            side_to_move: self.side_to_move,
-        });
+
+        self.add_previous_game_state();
 
         let piece = self
             .board
@@ -91,10 +84,10 @@ impl Game<'_> {
                         if ep == position::Position((mv.to).0, (mv.to).1) {
                             match self.side_to_move {
                                 color::Color::WHITE => {
-                                    self.board.take_piece(position::Position((mv.to).0, 5))
+                                    self.remove_piece(position::Position((mv.to).0, 5))
                                 }
                                 color::Color::BLACK => {
-                                    self.board.take_piece(position::Position((mv.to).0, 4))
+                                    self.remove_piece(position::Position((mv.to).0, 4))
                                 }
                             };
                         }
@@ -122,19 +115,15 @@ impl Game<'_> {
             let castle_queenside = (mv.from).0 as i8 - 2 == (mv.to).0 as i8;
 
             if castle_kingside {
-                let mut rook = self
-                    .board
-                    .take_piece(position::Position((mv.from).0 + 3, (mv.from).1));
-                let position = position::Position((mv.from).0 + 1, (mv.to).1);
-                rook.set_position(&position);
-                self.board.set_square(Some(rook), position);
+                self.move_piece(
+                    position::Position((mv.from).0 + 3, (mv.from).1),
+                    position::Position((mv.from).0 + 1, (mv.to).1),
+                );
             } else if castle_queenside {
-                let mut rook = self
-                    .board
-                    .take_piece(position::Position((mv.from).0 - 4, (mv.from).1));
-                let position = position::Position((mv.from).0 - 1, (mv.to).1);
-                rook.set_position(&position);
-                self.board.set_square(Some(rook), position);
+                self.move_piece(
+                    position::Position((mv.from).0 - 4, (mv.from).1),
+                    position::Position((mv.from).0 - 1, (mv.to).1),
+                );
             }
         }
 
@@ -174,6 +163,29 @@ impl Game<'_> {
                 self.side_to_move = color::Color::BLACK;
             }
         }
+    }
+
+    fn add_previous_game_state(&mut self) {
+        self.previous_game_states.push(PreviousGameState {
+            string_board: self.board.to_string_board(),
+            castling_rights_black: self.castling_rights_black,
+            castling_rights_white: self.castling_rights_white,
+            en_passant: self.en_passant,
+            full_moves: self.full_moves,
+            half_moves: self.half_moves,
+            side_to_move: self.side_to_move,
+        });
+    }
+
+    fn move_piece(&mut self, from: position::Position, to: position::Position) {
+        let mut pc = self.board.take_piece(from);
+        let position = to;
+        pc.set_position(&position);
+        self.board.set_square(Some(pc), position);
+    }
+
+    fn remove_piece(&mut self, sqr: position::Position) {
+        self.board.take_piece(sqr);
     }
 
     pub fn from_game_arr(game_arr: &[&str]) -> Self {
@@ -406,40 +418,20 @@ impl Game<'_> {
             color::Color::WHITE => self.castling_rights_white,
         };
 
-        if castling_rights.0 {
-            let one_right_of_king = position::Position(king.position().0 + 1, king.position().1);
-            let two_right_of_king = position::Position(king.position().0 + 2, king.position().1);
-
-            if self.is_empty_square(&one_right_of_king)
-                && self.is_empty_square(&two_right_of_king)
-                && square_safe(&one_right_of_king, attacked_board)
-                && square_safe(&two_right_of_king, attacked_board)
-            {
-                moves.push(chessmove::ChessMove {
-                    from: (king.position().0, king.position().1),
-                    to: (king.position().0 + 2, king.position().1),
-                    promotion: None,
-                });
-            }
+        if castling_rights.0 && self.can_castle_kingside(king, attacked_board) {
+            moves.push(chessmove::ChessMove {
+                from: (king.position().0, king.position().1),
+                to: (king.position().0 + 2, king.position().1),
+                promotion: None,
+            });
         }
 
-        if castling_rights.1 {
-            let one_left_of_king = position::Position(king.position().0 - 1, king.position().1);
-            let two_left_of_king = position::Position(king.position().0 - 2, king.position().1);
-            let three_left_king = position::Position(king.position().0 - 3, king.position().1);
-
-            if self.is_empty_square(&one_left_of_king)
-                && self.is_empty_square(&two_left_of_king)
-                && self.is_empty_square(&three_left_king)
-                && square_safe(&one_left_of_king, attacked_board)
-                && square_safe(&two_left_of_king, attacked_board)
-            {
-                moves.push(chessmove::ChessMove {
-                    from: (king.position().0, king.position().1),
-                    to: (king.position().0 - 2, king.position().1),
-                    promotion: None,
-                });
-            }
+        if castling_rights.1 && self.can_castle_queenside(king, attacked_board) {
+            moves.push(chessmove::ChessMove {
+                from: (king.position().0, king.position().1),
+                to: (king.position().0 - 2, king.position().1),
+                promotion: None,
+            });
         }
 
         moves
@@ -447,6 +439,36 @@ impl Game<'_> {
 
     fn is_empty_square(&self, position: &position::Position) -> bool {
         self.board.get_square(*position).is_none()
+    }
+
+    fn can_castle_kingside(
+        &self,
+        king: &Box<dyn piece::Piece>,
+        attacked_board: &AttackedBoard,
+    ) -> bool {
+        let one_right_of_king = position::Position(king.position().0 + 1, king.position().1);
+        let two_right_of_king = position::Position(king.position().0 + 2, king.position().1);
+
+        self.is_empty_square(&one_right_of_king)
+            && self.is_empty_square(&two_right_of_king)
+            && square_safe(&one_right_of_king, attacked_board)
+            && square_safe(&two_right_of_king, attacked_board)
+    }
+
+    fn can_castle_queenside(
+        &self,
+        king: &Box<dyn piece::Piece>,
+        attacked_board: &AttackedBoard,
+    ) -> bool {
+        let one_left_of_king = position::Position(king.position().0 - 1, king.position().1);
+        let two_left_of_king = position::Position(king.position().0 - 2, king.position().1);
+        let three_left_king = position::Position(king.position().0 - 3, king.position().1);
+
+        self.is_empty_square(&one_left_of_king)
+            && self.is_empty_square(&two_left_of_king)
+            && self.is_empty_square(&three_left_king)
+            && square_safe(&one_left_of_king, attacked_board)
+            && square_safe(&two_left_of_king, attacked_board)
     }
 }
 
