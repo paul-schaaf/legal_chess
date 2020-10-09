@@ -534,7 +534,9 @@ mod tests {
     fn to_game_arr_initial_board() {
         let game = Game::new();
         let game_arr = game.to_game_arr();
-        assert_eq!(INITIAL_GAME_ARR, game_arr);
+        for i in 0..73 {
+            assert_eq!(INITIAL_GAME_ARR[i], game_arr[i]);
+        }
     }
 
     #[test]
