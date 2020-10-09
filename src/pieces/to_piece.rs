@@ -5,59 +5,59 @@ pub trait ToPiece {
     fn to_piece(&self, position: position::Position) -> Option<Box<dyn piece::Piece>>;
 }
 
-impl ToPiece for &str {
+impl ToPiece for u8 {
     fn to_piece(&self, position: position::Position) -> Option<Box<dyn piece::Piece>> {
         match *self {
-            "-" => None,
-            "p" => Some(Box::new(pawn::Pawn {
+            0 => None,
+            11 => Some(Box::new(pawn::Pawn {
                 color: color::Color::BLACK,
                 position,
             })),
-            "P" => Some(Box::new(pawn::Pawn {
+            1 => Some(Box::new(pawn::Pawn {
                 color: color::Color::WHITE,
                 position,
             })),
-            "r" => Some(Box::new(rook::Rook {
+            12 => Some(Box::new(rook::Rook {
                 color: color::Color::BLACK,
                 position,
             })),
-            "R" => Some(Box::new(rook::Rook {
+            2 => Some(Box::new(rook::Rook {
                 color: color::Color::WHITE,
                 position,
             })),
-            "n" => Some(Box::new(knight::Knight {
+            13 => Some(Box::new(knight::Knight {
                 color: color::Color::BLACK,
                 position,
             })),
-            "N" => Some(Box::new(knight::Knight {
+            3 => Some(Box::new(knight::Knight {
                 color: color::Color::WHITE,
                 position,
             })),
-            "b" => Some(Box::new(bishop::Bishop {
+            14 => Some(Box::new(bishop::Bishop {
                 color: color::Color::BLACK,
                 position,
             })),
-            "B" => Some(Box::new(bishop::Bishop {
+            4 => Some(Box::new(bishop::Bishop {
                 color: color::Color::WHITE,
                 position,
             })),
-            "q" => Some(Box::new(queen::Queen {
+            15 => Some(Box::new(queen::Queen {
                 color: color::Color::BLACK,
                 position,
             })),
-            "Q" => Some(Box::new(queen::Queen {
+            5 => Some(Box::new(queen::Queen {
                 color: color::Color::WHITE,
                 position,
             })),
-            "k" => Some(Box::new(king::King {
+            16 => Some(Box::new(king::King {
                 color: color::Color::BLACK,
                 position,
             })),
-            "K" => Some(Box::new(king::King {
+            6 => Some(Box::new(king::King {
                 color: color::Color::WHITE,
                 position,
             })),
-            _ => panic!("Invalid piece string"),
+            _ => panic!("Invalid piece number"),
         }
     }
 }

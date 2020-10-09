@@ -123,47 +123,37 @@ impl Board {
         self.board[position.0 as usize - 1][position.1 as usize - 1] = square;
     }
 
-    pub fn to_string_board<'a, 'b>(&'a self) -> [&'b str; 64] {
-        let mut string_board = ["-"; 64];
+    pub fn to_u8_board(&self) -> [u8; 64] {
+        let mut u8_board = [0; 64];
 
         let mut index = 0;
 
         for file in &self.board {
             for square in file {
                 match square {
-                    None => string_board[index] = "-",
+                    None => u8_board[index] = 0,
                     Some(piece) => match (*piece.color(), piece.piece()) {
-                        (color::Color::WHITE, piece::PieceEnum::PAWN) => string_board[index] = "P",
-                        (color::Color::BLACK, piece::PieceEnum::PAWN) => string_board[index] = "p",
-                        (color::Color::WHITE, piece::PieceEnum::ROOK) => string_board[index] = "R",
-                        (color::Color::BLACK, piece::PieceEnum::ROOK) => string_board[index] = "r",
-                        (color::Color::WHITE, piece::PieceEnum::KNIGHT) => {
-                            string_board[index] = "N"
-                        }
-                        (color::Color::BLACK, piece::PieceEnum::KNIGHT) => {
-                            string_board[index] = "n"
-                        }
-                        (color::Color::WHITE, piece::PieceEnum::BISHOP) => {
-                            string_board[index] = "B"
-                        }
-                        (color::Color::BLACK, piece::PieceEnum::BISHOP) => {
-                            string_board[index] = "b"
-                        }
-                        (color::Color::WHITE, piece::PieceEnum::QUEEN) => string_board[index] = "Q",
-                        (color::Color::BLACK, piece::PieceEnum::QUEEN) => string_board[index] = "q",
-                        (color::Color::WHITE, piece::PieceEnum::KING) => string_board[index] = "K",
-                        (color::Color::BLACK, piece::PieceEnum::KING) => string_board[index] = "k",
+                        (color::Color::WHITE, piece::PieceEnum::PAWN) => u8_board[index] = 1,
+                        (color::Color::BLACK, piece::PieceEnum::PAWN) => u8_board[index] = 11,
+                        (color::Color::WHITE, piece::PieceEnum::ROOK) => u8_board[index] = 2,
+                        (color::Color::BLACK, piece::PieceEnum::ROOK) => u8_board[index] = 12,
+                        (color::Color::WHITE, piece::PieceEnum::KNIGHT) => u8_board[index] = 3,
+                        (color::Color::BLACK, piece::PieceEnum::KNIGHT) => u8_board[index] = 13,
+                        (color::Color::WHITE, piece::PieceEnum::BISHOP) => u8_board[index] = 4,
+                        (color::Color::BLACK, piece::PieceEnum::BISHOP) => u8_board[index] = 14,
+                        (color::Color::WHITE, piece::PieceEnum::QUEEN) => u8_board[index] = 5,
+                        (color::Color::BLACK, piece::PieceEnum::QUEEN) => u8_board[index] = 15,
+                        (color::Color::WHITE, piece::PieceEnum::KING) => u8_board[index] = 6,
+                        (color::Color::BLACK, piece::PieceEnum::KING) => u8_board[index] = 16,
                     },
                 };
                 index += 1;
             }
         }
-        string_board
+        u8_board
     }
 
-    pub fn from_string_board(
-        board_arr: &[&str; 64],
-    ) -> (Self, position::Position, position::Position) {
+    pub fn from_u8_board(board_arr: &[u8; 64]) -> (Self, position::Position, position::Position) {
         let mut board = Self::empty();
         let mut file = 1;
         let mut rank = 1;

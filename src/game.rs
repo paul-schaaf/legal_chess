@@ -1,17 +1,17 @@
 use super::pieces::{piece, position, relative_position};
 use super::{attack, attack::AttackedBoard, board, chessmove, color};
 
-pub struct PreviousGameState<'a> {
+pub struct PreviousGameState {
     en_passant: Option<position::Position>,
     side_to_move: color::Color,
     castling_rights_white: (bool, bool),
     castling_rights_black: (bool, bool),
     half_moves: u16,
     full_moves: u16,
-    string_board: [&'a str; 64],
+    u8_board: [u8; 64],
 }
 
-pub struct Game<'a> {
+pub struct Game {
     board: board::Board,
     en_passant: Option<position::Position>,
     side_to_move: color::Color,
@@ -21,10 +21,10 @@ pub struct Game<'a> {
     full_moves: u16,
     white_king: position::Position,
     black_king: position::Position,
-    previous_game_states: Vec<PreviousGameState<'a>>,
+    previous_game_states: Vec<PreviousGameState>,
 }
 
-impl Game<'_> {
+impl Game {
     pub fn new() -> Self {
         Self {
             board: board::Board::initial(),
@@ -58,7 +58,7 @@ impl Game<'_> {
         self.side_to_move = previous_game_state.side_to_move;
 
         let (board, white_king, black_king) =
-            board::Board::from_string_board(&previous_game_state.string_board);
+            board::Board::from_u8_board(&previous_game_state.u8_board);
         self.board = board;
         self.white_king = white_king;
         self.black_king = black_king;
@@ -167,7 +167,7 @@ impl Game<'_> {
 
     fn add_previous_game_state(&mut self) {
         self.previous_game_states.push(PreviousGameState {
-            string_board: self.board.to_string_board(),
+            u8_board: self.board.to_u8_board(),
             castling_rights_black: self.castling_rights_black,
             castling_rights_white: self.castling_rights_white,
             en_passant: self.en_passant,
@@ -188,51 +188,41 @@ impl Game<'_> {
         self.board.take_piece(sqr);
     }
 
-    pub fn from_game_arr(game_arr: &[&str]) -> Self {
-        let mut board_slice: [&str; 64] = [""; 64];
+    pub fn from_game_arr(game_arr: &[u8]) -> Self {
+        let mut board_slice: [u8; 64] = [0; 64];
         board_slice.copy_from_slice(&game_arr[0..64]);
 
-        let (board, white_king, black_king) = board::Board::from_string_board(&board_slice);
+        let (board, white_king, black_king) = board::Board::from_u8_board(&board_slice);
 
-        let en_passant: Option<position::Position> = if game_arr[64] == "-" {
+        let en_passant: Option<position::Position> = if game_arr[64] == 0 {
             None
         } else {
-            Some(position::Position(
-                game_arr[64].parse().unwrap(),
-                game_arr[65].parse().unwrap(),
-            ))
+            Some(position::Position(game_arr[64], game_arr[65]))
         };
-        let castling_rights_white = if game_arr[66] == "1" && game_arr[67] == "1" {
+        let castling_rights_white = if game_arr[66] == 1 && game_arr[67] == 1 {
             (true, true)
-        } else if game_arr[66] == "1" {
+        } else if game_arr[66] == 1 {
             (true, false)
-        } else if game_arr[67] == "1" {
+        } else if game_arr[67] == 1 {
             (false, true)
         } else {
             (false, false)
         };
 
-        let castling_rights_black = if game_arr[68] == "1" && game_arr[69] == "1" {
+        let castling_rights_black = if game_arr[68] == 1 && game_arr[69] == 1 {
             (true, true)
-        } else if game_arr[68] == "1" {
+        } else if game_arr[68] == 1 {
             (true, false)
-        } else if game_arr[69] == "1" {
+        } else if game_arr[69] == 1 {
             (false, true)
         } else {
             (false, false)
         };
 
-        let half_moves = match game_arr[70].parse() {
-            Ok(v) => v,
-            _ => panic!(),
-        };
+        let half_moves = game_arr[70];
+        let full_moves = game_arr[71];
 
-        let full_moves = match game_arr[71].parse() {
-            Ok(v) => v,
-            _ => panic!(),
-        };
-
-        let side_to_move = if game_arr[72] == "w" {
+        let side_to_move = if game_arr[72] == 30 {
             color::Color::WHITE
         } else {
             color::Color::BLACK
@@ -244,8 +234,8 @@ impl Game<'_> {
             castling_rights_white,
             castling_rights_black,
             side_to_move,
-            half_moves,
-            full_moves,
+            half_moves: half_moves as u16,
+            full_moves: full_moves as u16,
             white_king,
             black_king,
             previous_game_states: vec![],
@@ -491,22 +481,20 @@ mod tests {
     use super::super::pieces::{bishop, king, knight, pawn, queen, rook};
     use super::*;
 
-    const INITIAL_GAME_ARR: [&str; 73] = [
-        "R", "P", "-", "-", "-", "-", "p", "r", "N", "P", "-", "-", "-", "-", "p", "n", "B", "P",
-        "-", "-", "-", "-", "p", "b", "Q", "P", "-", "-", "-", "-", "p", "q", "K", "P", "-", "-",
-        "-", "-", "p", "k", "B", "P", "-", "-", "-", "-", "p", "b", "N", "P", "-", "-", "-", "-",
-        "p", "n", "R", "P", "-", "-", "-", "-", "p", "r", "-", "-", "1", "1", "1", "1", "0", "1",
-        "w",
+    const INITIAL_GAME_ARR: [u8; 73] = [
+        2, 1, 0, 0, 0, 0, 11, 12, 3, 1, 0, 0, 0, 0, 11, 13, 4, 1, 0, 0, 0, 0, 11, 14, 5, 1, 0, 0,
+        0, 0, 11, 15, 6, 1, 0, 0, 0, 0, 11, 16, 4, 1, 0, 0, 0, 0, 11, 14, 3, 1, 0, 0, 0, 0, 11, 13,
+        2, 1, 0, 0, 0, 0, 11, 12, 0, 0, 1, 1, 1, 1, 0, 1, 30,
     ];
 
     #[test]
     fn from_game_arr_initial_board() {
         let actual_game = Game::from_game_arr(&INITIAL_GAME_ARR);
         let actual_board = actual_game.board();
-        let actual_board = actual_board.to_string_board();
+        let actual_board = actual_board.to_u8_board();
 
         let expected_board = board::Board::initial();
-        let expected_board = expected_board.to_string_board();
+        let expected_board = expected_board.to_u8_board();
 
         for i in 0..64 {
             assert_eq!(expected_board[i], actual_board[i]);
@@ -1462,11 +1450,9 @@ mod tests {
     #[test]
     fn cannot_castle_through_check() {
         let game = Game::from_game_arr(&[
-            "R", "P", "-", "-", "-", "b", "p", "r", "-", "P", "-", "p", "-", "n", "-", "-", "-",
-            "P", "N", "-", "-", "-", "p", "-", "-", "B", "-", "-", "P", "-", "p", "-", "K", "B",
-            "-", "P", "N", "p", "q", "k", "-", "P", "Q", "-", "-", "n", "p", "-", "-", "p", "-",
-            "-", "-", "p", "b", "-", "R", "P", "-", "-", "-", "-", "-", "r", "-", "-", "1", "1",
-            "1", "1", "0", "1", "w",
+            2, 1, 0, 0, 0, 14, 11, 12, 0, 1, 0, 11, 0, 13, 0, 0, 0, 1, 3, 0, 0, 0, 11, 0, 0, 4, 0,
+            0, 1, 0, 11, 0, 6, 4, 0, 1, 3, 11, 15, 16, 0, 1, 5, 0, 0, 13, 11, 0, 0, 11, 0, 0, 0,
+            11, 14, 0, 2, 1, 0, 0, 0, 0, 0, 12, 0, 0, 1, 1, 1, 1, 0, 1, 30,
         ]);
 
         let moves = game.legal_moves();
@@ -1486,11 +1472,9 @@ mod tests {
     #[test]
     fn cannot_castle_through_check_2() {
         let game = Game::from_game_arr(&[
-            "R", "P", "-", "-", "-", "-", "p", "r", "-", "P", "-", "p", "-", "n", "-", "-", "-",
-            "P", "N", "-", "-", "-", "p", "-", "-", "B", "-", "-", "P", "-", "p", "-", "K", "b",
-            "-", "P", "N", "p", "q", "k", "-", "P", "Q", "-", "-", "n", "p", "-", "-", "p", "-",
-            "-", "-", "p", "b", "-", "R", "P", "-", "-", "-", "-", "-", "r", "-", "-", "1", "1",
-            "1", "1", "0", "1", "w",
+            2, 1, 0, 0, 0, 0, 11, 12, 0, 1, 0, 11, 0, 13, 0, 0, 0, 1, 3, 0, 0, 0, 11, 0, 0, 4, 0,
+            0, 1, 0, 11, 0, 6, 14, 0, 1, 3, 11, 15, 16, 0, 1, 5, 0, 0, 13, 11, 0, 0, 11, 0, 0, 0,
+            11, 14, 0, 2, 1, 0, 0, 0, 0, 0, 12, 0, 0, 1, 1, 1, 1, 0, 1, 30,
         ]);
 
         let moves = game.legal_moves();
@@ -1506,15 +1490,15 @@ mod tests {
     fn en_passant_anti_check_and_pawn_capture_anti_check() {
         #[rustfmt::skip]
         let game = Game::from_game_arr(&[
-            "-", "-", "-", "-", "-", "-", "-", "-",
-            "-", "-", "-", "-", "-", "-", "-", "-",
-            "-", "-", "-", "-", "k", "-", "-", "-",
-            "-", "-", "-", "P", "-", "-", "-", "-",
-            "-", "-", "-", "p", "p", "-", "-", "-",
-            "-", "-", "-", "-", "-", "-", "-", "-",
-            "-", "-", "-", "-", "-", "-", "-", "-",
-            "K", "-", "-", "-", "-", "-", "-", "-",
-            "4", "3", "0", "0", "0", "0", "0", "1", "b",
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 16, 0, 0, 0,
+            0, 0, 0, 1, 0, 0, 0, 0,
+            0, 0, 0, 11, 11, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            6, 0, 0, 0, 0, 0, 0, 0,
+            4, 3, 0, 0, 0, 0, 0, 1, 14,
         ]);
 
         match game.en_passant {
