@@ -242,6 +242,35 @@ impl Game {
         }
     }
 
+    pub fn to_game_arr(&self) -> [u8; 73] {
+        let mut game_arr = [0; 73];
+
+        game_arr[..64].copy_from_slice(&self.board.to_u8_board());
+
+        match self.en_passant {
+            None => (),
+            Some(ep) => {
+                game_arr[64] = ep.0;
+                game_arr[65] = ep.1;
+            }
+        };
+
+        game_arr[66] = self.castling_rights_white.0 as u8;
+        game_arr[67] = self.castling_rights_white.1 as u8;
+        game_arr[68] = self.castling_rights_black.0 as u8;
+        game_arr[69] = self.castling_rights_black.1 as u8;
+
+        game_arr[70] = self.half_moves as u8;
+        game_arr[71] = self.full_moves as u8;
+
+        game_arr[72] = match self.side_to_move {
+            color::Color::WHITE => 30,
+            color::Color::BLACK => 31,
+        };
+
+        game_arr
+    }
+
     pub fn board(&self) -> &board::Board {
         &self.board
     }
@@ -499,6 +528,13 @@ mod tests {
         for i in 0..64 {
             assert_eq!(expected_board[i], actual_board[i]);
         }
+    }
+
+    #[test]
+    fn to_game_arr_initial_board() {
+        let game = Game::new();
+        let game_arr = game.to_game_arr();
+        assert_eq!(INITIAL_GAME_ARR, game_arr);
     }
 
     #[test]
