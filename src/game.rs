@@ -222,7 +222,7 @@ impl Game {
         let half_moves = game_arr[70];
         let full_moves = game_arr[71];
 
-        let side_to_move = if game_arr[72] == 30 {
+        let side_to_move = if game_arr[72] == 0 {
             color::Color::WHITE
         } else {
             color::Color::BLACK
@@ -264,8 +264,8 @@ impl Game {
         game_arr[71] = self.full_moves as u8;
 
         game_arr[72] = match self.side_to_move {
-            color::Color::WHITE => 30,
-            color::Color::BLACK => 31,
+            color::Color::WHITE => 0,
+            color::Color::BLACK => 1,
         };
 
         game_arr
@@ -513,7 +513,7 @@ mod tests {
     const INITIAL_GAME_ARR: [u8; 73] = [
         2, 1, 0, 0, 0, 0, 11, 12, 3, 1, 0, 0, 0, 0, 11, 13, 4, 1, 0, 0, 0, 0, 11, 14, 5, 1, 0, 0,
         0, 0, 11, 15, 6, 1, 0, 0, 0, 0, 11, 16, 4, 1, 0, 0, 0, 0, 11, 14, 3, 1, 0, 0, 0, 0, 11, 13,
-        2, 1, 0, 0, 0, 0, 11, 12, 0, 0, 1, 1, 1, 1, 0, 1, 30,
+        2, 1, 0, 0, 0, 0, 11, 12, 0, 0, 1, 1, 1, 1, 0, 1, 0,
     ];
 
     #[test]
@@ -1490,7 +1490,7 @@ mod tests {
         let game = Game::from_game_arr(&[
             2, 1, 0, 0, 0, 14, 11, 12, 0, 1, 0, 11, 0, 13, 0, 0, 0, 1, 3, 0, 0, 0, 11, 0, 0, 4, 0,
             0, 1, 0, 11, 0, 6, 4, 0, 1, 3, 11, 15, 16, 0, 1, 5, 0, 0, 13, 11, 0, 0, 11, 0, 0, 0,
-            11, 14, 0, 2, 1, 0, 0, 0, 0, 0, 12, 0, 0, 1, 1, 1, 1, 0, 1, 30,
+            11, 14, 0, 2, 1, 0, 0, 0, 0, 0, 12, 0, 0, 1, 1, 1, 1, 0, 1, 0,
         ]);
 
         let moves = game.legal_moves();
@@ -1512,7 +1512,7 @@ mod tests {
         let game = Game::from_game_arr(&[
             2, 1, 0, 0, 0, 0, 11, 12, 0, 1, 0, 11, 0, 13, 0, 0, 0, 1, 3, 0, 0, 0, 11, 0, 0, 4, 0,
             0, 1, 0, 11, 0, 6, 14, 0, 1, 3, 11, 15, 16, 0, 1, 5, 0, 0, 13, 11, 0, 0, 11, 0, 0, 0,
-            11, 14, 0, 2, 1, 0, 0, 0, 0, 0, 12, 0, 0, 1, 1, 1, 1, 0, 1, 30,
+            11, 14, 0, 2, 1, 0, 0, 0, 0, 0, 12, 0, 0, 1, 1, 1, 1, 0, 1, 0,
         ]);
 
         let moves = game.legal_moves();
